@@ -2735,8 +2735,7 @@ if __name__ == "__main__":
             break
 
         if player_name in extractedMovesetNames:
-            print("%x: Character %s already just extracted, not extracting twice." % (
-                playerAddr, player_name))
+            print("%x: Character %s already just extracted, not extracting twice." % (playerAddr, player_name))
             playerAddr += playerOffset
             continue
 

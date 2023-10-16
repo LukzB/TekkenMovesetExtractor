@@ -510,11 +510,10 @@ def getCharacterList():
 
 def exportCharacter(parent, tekkenVersion, playerid, name=''):
     game_addresses.reloadValues()
-    TekkenExporter = exportLib.Exporter(
-        tekkenVersion, folder_destination=charactersPath)
-    playerAddr = TekkenExporter.getP1Addr(
-    ) + (playerid * game_addresses[tekkenVersion + '_playerstruct_size'])
-    TekkenExporter.exportMoveset(playerAddr, name)
+    TekkenExporter = exportLib.Exporter(tekkenVersion, folder_destination=charactersPath)
+    playerAddr = TekkenExporter.getP1Addr() + (playerid * game_addresses[tekkenVersion + '_playerstruct_size'])
+    player_name = TekkenExporter.getPlayerMovesetName(playerAddr)
+    TekkenExporter.exportMoveset(playerAddr, name if tekkenVersion != 't8' else player_name)
 
     parent.updateCharacterlist()
 
@@ -787,11 +786,14 @@ class GUI_TekkenMovesetExtractor(Tk):
         ), GUI_TekkenMovesetExtractor.updateCharacterlist, side='bottom', expand='0')
 
     def initExportArea(self):
+        self.t8_exportFrame = Frame(self.exportFrame, bg='#aaaaaa')
         self.t7_exportFrame = Frame(self.exportFrame, bg='#aaaaaa')
         self.tag2_exportFrame = Frame(self.exportFrame, bg='#aaaaaa')
 
-        self.t7_exportFrame.grid(
+        self.t8_exportFrame.grid(
             padx=18, pady=5, row=0, column=0, sticky="nsew")
+        # self.t7_exportFrame.grid(
+        #     padx=18, pady=5, row=0, column=0, sticky="nsew")
         self.tag2_exportFrame.grid(
             padx=18, pady=5, row=0, column=1, sticky="nsew")
 
@@ -906,24 +908,18 @@ class GUI_TekkenMovesetExtractor(Tk):
 
     def createExportButtons(self):
         for playerid in range(2):
-            self.createButton(self.t7_exportFrame, "Export: Tekken 7: Player %d" % (
-                playerid + 1), ("t7", playerid), exportCharacter)
+            self.createButton(self.t8_exportFrame, "Export: Tekken 8: Player %d" % (playerid + 1), ("t8", playerid), exportCharacter)
 
-        self.createButton(self.t7_exportFrame,
-                          "Export: Tekken 7: Both Players", ("t7",), exportAll)
+        self.createButton(self.t8_exportFrame, "Export: Tekken 8: Both Players", ("t8",), exportAll)
 
-        self.createButton(
-            self.tag2_exportFrame, "Export: Tag2 (CEMU): All players", ("tag2",), exportAll)
-        self.createButton(
-            self.tag2_exportFrame, "Export: Tag2 (RPCS3): All players", ("rpcs3_tag2",), exportAll)
-        self.createButton(
-            self.tag2_exportFrame, "Export: Tekken Rev: Both players", ("rev",), exportAll)
-        self.createButton(self.tag2_exportFrame,
-                          "Export: Tekken 6: Both players", ("t6",), exportAll)
-        self.createButton(self.tag2_exportFrame,
-                          "Export: Tekken 5: Both players", ("t5",), exportAll)
-        self.createButton(
-            self.tag2_exportFrame, "Export: Tekken 5 DR: Both players", ("t5dr",), exportAll)
+        # self.createButton(self.t7_exportFrame, "Export: Tekken 7: Both Players", ("t7",), exportAll)
+
+        self.createButton(self.tag2_exportFrame, "Export: Tag2 (CEMU): All players", ("tag2",), exportAll)
+        self.createButton(self.tag2_exportFrame, "Export: Tag2 (RPCS3): All players", ("rpcs3_tag2",), exportAll)
+        self.createButton(self.tag2_exportFrame, "Export: Tekken Rev: Both players", ("rev",), exportAll)
+        self.createButton(self.tag2_exportFrame, "Export: Tekken 6: Both players", ("t6",), exportAll)
+        self.createButton(self.tag2_exportFrame, "Export: Tekken 5: Both players", ("t5",), exportAll)
+        self.createButton(self.tag2_exportFrame, "Export: Tekken 5 DR: Both players", ("t5dr",), exportAll)
 
     def createButton(self, frame, text, const_args, callback, side='top', expand=1):
         exportButton = Button(frame)
