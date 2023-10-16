@@ -1,3 +1,5 @@
 extracted_chars*/
 *.pyc
 .vscode
+dist
+build

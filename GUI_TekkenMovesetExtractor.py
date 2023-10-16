@@ -521,9 +521,9 @@ def exportCharacter(parent, tekkenVersion, playerid, name=''):
 def exportAll(parent, TekkenVersion):
     game_addresses.reloadValues()
 
-    TekkenExporter = exportLib.Exporter(
-        TekkenVersion, folder_destination=charactersPath)
+    TekkenExporter = exportLib.Exporter(TekkenVersion, folder_destination=charactersPath)
     playerAddr = TekkenExporter.getP1Addr()
+    player_name = TekkenExporter.getPlayerMovesetName(playerAddr)
 
     exportedMovesets = []
     playerSize = game_addresses[TekkenVersion + '_playerstruct_size']
@@ -536,7 +536,7 @@ def exportAll(parent, TekkenVersion):
         moveset_name = TekkenExporter.getPlayerMovesetName(playerAddr)
         if moveset_name not in exportedMovesets:
             print("Requesting export for %s..." % (moveset_name))
-            moveset = TekkenExporter.exportMoveset(playerAddr)
+            moveset = TekkenExporter.exportMoveset(playerAddr, '' if TekkenVersion != 't8' else player_name)
             exportedMovesets.append(moveset_name)
             print()
         else:
