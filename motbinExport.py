@@ -35,6 +35,7 @@ def GetLittleEndianAnimEnd(data, searchStart):
 
 
 ptrSizes = {
+    't8': 8,
     't7': 8,
     'tag2': 4,
     'rpcs3_tag2': 4,
@@ -47,6 +48,7 @@ ptrSizes = {
 }
 
 endians = {
+    't8': 'little',
     't7': 'little',
     'tag2': 'big',
     'rpcs3_tag2': 'big',
@@ -59,6 +61,7 @@ endians = {
 }
 
 swapGameAnimBytes = {
+    't8': False,
     't7': False,
     'tag2': True,
     'rpcs3_tag2': True,
@@ -75,6 +78,7 @@ charaIdSize = {
 }
 
 animEndPosFunc = {
+    't8': GetLittleEndianAnimEnd,
     't7': GetBigEndianAnimEnd,
     'tag2': GetLittleEndianAnimEnd,
     'rpcs3_tag2': GetLittleEndianAnimEnd,
@@ -87,6 +91,7 @@ animEndPosFunc = {
 }
 
 versionLabels = {
+    't8': 'Tekken8',
     't7': 'Tekken7',
     'tag2': 'Tag2',
     'rpcs3_tag2': 'Tag2',
@@ -96,6 +101,27 @@ versionLabels = {
     't5dr': 'Tekken5DR',
     't4': 'Tekken4',
     '3d': 'Tekken3D',
+}
+
+t8StructSizes = {
+    'Pushback_size': 0x10,
+    'PushbackExtradata_size': 0x2,
+    'Requirement_size': 0x14,
+    'CancelExtradata_size': 0x4,
+    'Cancel_size': 0x28,
+    'ReactionList_size': 0x70,
+    'HitCondition_size': 0x18,
+    'ExtraMoveProperty_size': 0x28,
+    'OtherMoveProperty_size': 0x20,
+    'Move_size': 0x3A0,
+    'Voiceclip_size': 0x4,
+    'InputExtradata_size': 0x8,
+    'InputSequence_size': 0x10,
+    'Projectile_size': 0xa8,
+    'ThrowExtra_size': 0xC,
+    'Throw_size': 0x10,
+    'UnknownParryRelated_size': 0x4,
+    'Unknown298_size': 0x18
 }
 
 tag2StructSizes = {
@@ -156,6 +182,7 @@ t5StructSizes = {
 }
 
 structSizes = {
+    't8': t8StructSizes,
     't7': {
         'Pushback_size': 0x10,
         'PushbackExtradata_size': 0x2,
@@ -199,6 +226,206 @@ structSizes = {
         'Throw_size': 0x8,
         'UnknownParryRelated_size': 0x4
     },
+}
+
+t8_offsetTable = {
+    'character_name': {'offset': None, 'size': 'stringPtr'},
+    'creator_name': {'offset': None, 'size': 'stringPtr'},
+    'date': {'offset': None, 'size': 'stringPtr'},
+    'fulldate': {'offset': None, 'size': 'stringPtr'},
+
+    'reaction_list_ptr': {'offset': 0x168, 'size': 8},
+    'reaction_list_size': {'offset': 0x178, 'size': 8},
+    'requirements_ptr': {'offset': 0x180, 'size': 8},
+    'requirement_count': {'offset': 0x188, 'size': 8},
+    'hit_conditions_ptr': {'offset': 0x190, 'size': 8},
+    'hit_conditions_size': {'offset': 0x198, 'size': 8},
+    'projectile_ptr': {'offset': 0x1A0, 'size': 8},
+    'projectile_size': {'offset': 0x1A8, 'size': 8},
+    'pushback_ptr': {'offset': 0x1B0, 'size': 8},
+    'pushback_list_size': {'offset': 0x1B8, 'size': 8},
+    'pushback_extradata_ptr': {'offset': 0x1C0, 'size': 8},
+    'pushback_extradata_size': {'offset': 0x1C8, 'size': 8},
+    'cancel_head_ptr': {'offset': 0x1D0, 'size': 8},
+    'cancel_list_size': {'offset': 0x1D8, 'size': 8},
+    'group_cancel_head_ptr': {'offset': 0x1E0, 'size': 8},
+    'group_cancel_list_size': {'offset': 0x1E8, 'size': 8},
+    'cancel_extradata_head_ptr': {'offset': 0x1F0, 'size': 8},
+    'cancel_extradata_list_size': {'offset': 0x1F8, 'size': 8},
+    'extra_move_properties_ptr': {'offset': 0x200, 'size': 8},
+    'extra_move_properties_size': {'offset': 0x208, 'size': 8},
+    'move_start_props_ptr': {'offset': 0x210, 'size': 8},
+    'move_start_props_size': {'offset': 0x218, 'size': 8},
+    'move_end_props_ptr': {'offset': 0x220, 'size': 8},
+    'move_end_props_size': {'offset': 0x228, 'size': 8},
+    'movelist_head_ptr': {'offset': 0x230, 'size': 8},
+    'movelist_size': {'offset': 0x238, 'size': 8},
+    'voiceclip_list_ptr': {'offset': 0x240, 'size': 8},
+    'voiceclip_list_size': {'offset': 0x248, 'size': 8},
+    'input_sequence_ptr': {'offset': 0x250, 'size': 8},
+    'input_sequence_size': {'offset': 0x258, 'size': 8},
+    'input_extradata_ptr': {'offset': 0x260, 'size': 8},
+    'input_extradata_size': {'offset': 0x268, 'size': 8},
+    'unknown_parryrelated_list_ptr': {'offset': 0x270, 'size': 8},
+    'unknown_parryrelated_list_size': {'offset': 0x278, 'size': 8},
+    'throw_extras_ptr': {'offset': 0x280, 'size': 8},
+    'throw_extras_size': {'offset': 0x288, 'size': 8},
+    'throws_ptr': {'offset': 0x290, 'size': 8},
+    'throws_size': {'offset': 0x298, 'size': 8},
+    '_0x298_ptr': {'offset': 0x2A0, 'size': 8},
+    '_0x298_size': {'offset': 0x2A8, 'size': 8},
+
+    'mota_start': {'offset': None, 'size': 8},
+    # 114 aliases
+    'original_aliases': {'offset': 0x30, 'size': (60, 2)},
+    'current_aliases': {'offset': 0xA8, 'size': (60, 2)},
+    # 38 aliases
+    'unknown_aliases': {'offset': 0x120, 'size': (38, 2)},
+
+    'pushback:val1': {'offset': 0x0, 'size': 2},
+    'pushback:val2': {'offset': 0x2, 'size': 2},
+    'pushback:val3': {'offset': 0x4, 'size': 2},
+    'pushback:extra_addr': {'offset': 0x8, 'size': 8},
+
+    'pushbackextradata:value': {'offset': 0x0, 'size': 2},
+
+    'requirement:req': {'offset': 0x0, 'size': 4},
+    'requirement:param': {'offset': 0x4, 'size': 4},
+    'requirement:param2': {'offset': 0x8, 'size': 4},
+    'requirement:param3': {'offset': 0xC, 'size': 4},
+    'requirement:param4': {'offset': 0x10, 'size': 4},
+
+    'cancelextradata:value': {'offset': 0x0, 'size': 4},
+
+    'cancel:command': {'offset': 0x0, 'size': 8},
+    'cancel:requirement_addr': {'offset': 0x8, 'size': 8},
+    'cancel:extradata_addr': {'offset': 0x10, 'size': 8},
+    'cancel:frame_window_start': {'offset': 0x18, 'size': 4},
+    'cancel:frame_window_end': {'offset': 0x1c, 'size': 4},
+    'cancel:starting_frame': {'offset': 0x20, 'size': 4},
+    'cancel:move_id': {'offset': 0x24, 'size': 2},
+    'cancel:cancel_option': {'offset': 0x26, 'size': 2},
+
+    # array of 7 variables, each 8 bytes long
+    'reactionlist:ptr_list': {'offset': 0x0, 'size': (7, 8)},
+    # directions
+    'reactionlist:front_direction': {'offset': 0x38, 'size': 2},
+    'reactionlist:back_direction': {'offset': 0x3A, 'size': 2},
+    'reactionlist:left_side_direction': {'offset': 0x3C, 'size': 2},
+    'reactionlist:right_side_direction': {'offset': 0x3E, 'size': 2},
+    'reactionlist:front_counterhit_direction': {'offset': 0x40, 'size': 2},
+    'reactionlist:downed_direction': {'offset': 0x42, 'size': 2},
+    # rotations
+    'reactionlist:front_rotation': {'offset': 0x44, 'size': 2},
+    'reactionlist:back_rotation': {'offset': 0x46, 'size': 2},
+    'reactionlist:left_side_rotation': {'offset': 0x48, 'size': 2},
+    'reactionlist:right_side_rotation': {'offset': 0x4A, 'size': 2},
+    'reactionlist:front_counterhit_rotation': {'offset': 0x4C, 'size': 2},
+    'reactionlist:downed_rotation': {'offset': 0x4E, 'size': 2},
+    # move ids
+    'reactionlist:standing': {'offset': 0x50, 'size': 2},
+    'reactionlist:crouch': {'offset': 0x52, 'size': 2},
+    'reactionlist:ch': {'offset': 0x54, 'size': 2},
+    'reactionlist:crouch_ch': {'offset': 0x56, 'size': 2},
+    'reactionlist:left_side': {'offset': 0x58, 'size': 2},
+    'reactionlist:left_side_crouch': {'offset': 0x5a, 'size': 2},
+    'reactionlist:right_side': {'offset': 0x5c, 'size': 2},
+    'reactionlist:right_side_crouch': {'offset': 0x5e, 'size': 2},
+    'reactionlist:back': {'offset': 0x60, 'size': 2},
+    'reactionlist:back_crouch': {'offset': 0x62, 'size': 2},
+    'reactionlist:block': {'offset': 0x64, 'size': 2},
+    'reactionlist:crouch_block': {'offset': 0x66, 'size': 2},
+    'reactionlist:wallslump': {'offset': 0x68, 'size': 2},
+    'reactionlist:downed': {'offset': 0x6a, 'size': 2},
+
+    'hitcondition:requirement_addr': {'offset': 0x0, 'size': 8},
+    'hitcondition:damage': {'offset': 0x8, 'size': 4},
+    'hitcondition:reaction_list_addr': {'offset': 0x10, 'size': 8},
+
+    'extramoveprop:type': {'offset': 0x0, 'size': 4},
+    'extramoveprop:_0x4': {'offset': 0x4, 'size': 4},
+    'extramoveprop:requirement_addr': {'offset': 0x8, 'size': 8},
+    'extramoveprop:id': {'offset': 0x10, 'size': 4},
+    'extramoveprop:value': {'offset': 0x14, 'size': 4},
+    'extramoveprop:value2': {'offset': 0x18, 'size': 4},
+    'extramoveprop:value3': {'offset': 0x1C, 'size': 4},
+    'extramoveprop:value4': {'offset': 0x20, 'size': 4},
+    'extramoveprop:value5': {'offset': 0x24, 'size': 4},
+
+    'move:name': {'offset': None, 'size': 'stringPtr'},
+    'move:anim_name': {'offset': None, 'size': 'stringPtr'},
+    'move:anim_addr': {'offset': None, 'size': 8},
+    'move:vuln': {'offset': 0x20, 'size': 4},
+    'move:hitlevel': {'offset': 0x24, 'size': 4},
+    'move:cancel_addr': {'offset': 0x28, 'size': 8},
+    'move:transition': {'offset': 0x5C, 'size': 2},
+    'move:anim_max_len': {'offset': 0x78, 'size': 4},
+    'move:startup': {'offset': 0xb0, 'size': 4},
+    'move:recovery': {'offset': 0xb4, 'size': 4},
+    'move:hitbox_location': {'offset': 0xc0, 'size': 4},
+    'move:hit_condition_addr': {'offset': 0x68, 'size': 8},
+    'move:voiceclip_ptr': {'offset': 0x88, 'size': 8},
+    'move:extra_properties_ptr': {'offset': 0x90, 'size': 8},
+    'move:move_start_properties_ptr': {'offset': 0x98, 'size': 8},
+    'move:move_end_properties_ptr': {'offset': 0xA0, 'size': 8},
+    # 'move:u1': { 'offset': 0x10, 'size': 8 },
+    'move:u2': {'offset': 0x40, 'size': 8},
+    'move:u3': {'offset': 0x48, 'size': 8},
+    'move:u4': {'offset': 0x50, 'size': 8},
+    # 'move:u5': { 'offset': 0x10, 'size': 8 },
+    'move:u6': {'offset': 0x58, 'size': 4},
+    'move:u7': {'offset': 0x5E, 'size': 2},
+    'move:u8': {'offset': 0x68, 'size': 2},
+    'move:u8_2': {'offset': 0x5a, 'size': 2},
+    'move:u9': {'offset': 0x5c, 'size': 2},
+    'move:u10': {'offset': 0x7c, 'size': 4},
+    'move:u11': {'offset': 0x80, 'size': 4},
+    'move:u12': {'offset': 0x84, 'size': 4},
+    # 'move:u13': { 'offset': 0x10, 'size': 8 },
+    # 'move:u14': { 'offset': 0x10, 'size': 8 },
+    'move:u15': {'offset': 0xA8, 'size': 4},
+    'move:u16': {'offset': 0x214, 'size': 2},
+    'move:u17': {'offset': 0x216, 'size': 2},
+    'move:u18': {'offset': 0x37C, 'size': 4},
+
+    'voiceclip:value': {'offset': 0x0, 'size': 4},
+
+    'inputextradata:u1': {'offset': 0x0, 'size': 4},
+    'inputextradata:u2': {'offset': 0x4, 'size': 4},
+
+    'inputsequence:u1': {'offset': 0x0, 'size': 2},
+    'inputsequence:u2': {'offset': 0x2, 'size': 2},
+    'inputsequence:u3': {'offset': 0x4, 'size': 4},
+    'inputsequence:extradata_addr': {'offset': 0x8, 'size': 8},
+
+
+    'throw:u1': {'offset': 0x0, 'size': 8},
+    'throw:throwextra_addr': {'offset': 0x8, 'size': 8},
+
+    'unknownparryrelated:value': {'offset': 0x0, 'size': 4},
+
+    'projectile:u1': {'offset': 0x0, 'size': (48, 2)},
+    'projectile:hit_condition_addr': {'offset': 0x60, 'size': 8},
+    'projectile:cancel_addr': {'offset': 0x68, 'size': 8},
+    'projectile:u2': {'offset': 0x70, 'size': (28, 2)},
+
+    'throwextra:u1': {'offset': 0x0, 'size': 4},
+    'throwextra:u2': {'offset': 4, 'size': (4, 2)},
+
+    'othermoveprop:requirement_addr': {'offset': 0x0, 'size': 8},
+    'othermoveprop:id': {'offset': 0x8, 'size': 4},
+    'othermoveprop:value': {'offset': 0xC, 'size': 4},
+    'othermoveprop:value2': {'offset': 0x10, 'size': 4},
+    'othermoveprop:value3': {'offset': 0x14, 'size': 4},
+    'othermoveprop:value4': {'offset': 0x18, 'size': 4},
+    'othermoveprop:value5': {'offset': 0x1C, 'size': 4},
+
+    '_unk_0x298:_0x0': { 'offset': 0x0, 'size': 4 },
+    '_unk_0x298:_0x4': { 'offset': 0x4, 'size': 2 },
+    '_unk_0x298:_0x6': { 'offset': 0x6, 'size': 2 },
+    '_unk_0x298:requirement_addr': { 'offset': 0x8, 'size': 8 },
+    '_unk_0x298:_0xC': { 'offset': 0xC, 'size': 4 },
+    '_unk_0x298:_0x10': { 'offset': 0x10, 'size': 4 },
 }
 
 t7_offsetTable = {
@@ -1118,6 +1345,7 @@ t4_offsetTable = {
 }
 
 offsetTables = {
+    't8': t8_offsetTable,
     't7': t7_offsetTable,
     'tag2': tag2_offsetTable,
     'rpcs3_tag2': tag2_offsetTable,
@@ -1132,6 +1360,42 @@ offsetTables = {
 animHeaders = {
     't5dr': b'\x00\x64\x00\x17\x00\x0B\x00\x0B\x00\x05\x00\x07\x00\x07\x00\x07\x00\x0B\x00\x07\x00\x07\x00\x07\x00\x07\x00\x06\x00\x07\x00\x07\x00\x07\x00\x06\x00\x07\x00\x07\x00\x06\x00\x07\x00\x07\x00\x06\x00\x07',
     't5':   b'\x64\x00\x17\x00\x0B\x00\x0B\x00\x05\x00\x07\x00\x07\x00\x07\x00\x0B\x00\x07\x00\x07\x00\x07\x00\x07\x00\x06\x00\x07\x00\x07\x00\x07\x00\x06\x00\x07\x00\x07\x00\x06\x00\x07\x00\x07\x00\x06\x00\x07\x00',
+}
+
+t8_character_name_mappping = {
+    0: '[PAUL]',
+    1: '[LAW]',
+    2: '[KING]',
+    3: '[YOSHIMITSU]',
+    4: '[HWOARANG]',
+    5: '[XIAYOU]',
+    6: '[JIN]',
+    7: '[BRYAN]',
+    8: '[KAZUYA]',
+    9: '[STEVE]',
+    10: '[JACK8]',
+    11: '[ASUKA]',
+    12: '[DEVIL_JIN]',
+    13: '[FENG]',
+    14: '[LILI]',
+    15: '[DRAGUNOV]',
+    16: '[LEO]',
+    17: '[LARS]',
+    18: '[ALISA]',
+    19: '[CLAUDIO]',
+    20: '[SHAHEEN]',
+    21: '[NINA]',
+    22: '[LEE]',
+    23: '[KUMA]',
+    24: '[PANDA]',
+    25: '[ZAFINA]',
+    26: '[LEROY]',
+    27: '[JUN]',
+    28: '[REINA]',
+    29: '[AZUCENA]',
+    30: '[VICTOR]',
+    31: '[RAVEN]',
+    116: '[DUMMY]',
 }
 
 t5_character_name_mappping = {
@@ -1360,7 +1624,11 @@ class Exporter:
             return self.readStringPtr(self.base + motbin_ptr + offset)
         except:
             if self.TekkenVersion not in characterNameMapping:
-                return 'UNKNOWN'
+                if self.TekkenVersion != 't8':
+                    return 'UNKNOWN'
+                key = self.TekkenVersion + '_chara_id_offset'
+                chara_id = self.readInt(self.base + playerAddress + game_addresses[key], 4)
+                return t8_character_name_mappping.get(chara_id, '[UNKNOWN]')
             val = self.readInvalidStrPtr(self.base + motbin_ptr + offset)
             for name in characterNameMapping[self.TekkenVersion]:
                 # Try seeing if we know the first part of the name (So that things like [LAW]_STORY_ may work)
@@ -1555,9 +1823,12 @@ class Requirement:
 
     def dict(self):
         return {
-            'req': self.req,
-            'param': self.param
-        }
+                'req': self.req,
+                'param': self.param,
+                **({'param2': self.param2 } if hasattr(self, 'param2') else {}),
+                **({'param3': self.param2 } if hasattr(self, 'param3') else {}),
+                **({'param4': self.param2 } if hasattr(self, 'param4') else {}),
+            }
 
 
 class CancelExtradata:
@@ -1576,6 +1847,15 @@ class Cancel:
         data = initTekkenStructure(self, parent, addr, parent.Cancel_size)
 
         readOffsetTable(self, 'cancel')
+
+        if self.TekkenVersion == 't8':
+            if self.command == 0x800d:
+                self.command = 0x800b
+            elif self.command == 0x800e:
+                self.command = 0x800c
+            # Adjusting input sequences. Looks like they start from 0x800e instead of 0x800d
+            elif self.command >= 0x800e and self.command <= 0x82FF:
+                self.command -= 1
 
         if self.endian == 'big' and self.TekkenVersion != 't5dr':  # swapping first two ints
             t = self.bToInt(data, 0, 4)
@@ -1643,6 +1923,37 @@ class ReactionList:
             self.pushback_indexes[i] = (ptr - pushback_ptr) // pushback_size
 
     def dict(self):
+        if self.TekkenVersion == 't8':
+            return {
+                'pushback_indexes': self.pushback_indexes,
+                'vertical_pushback': 0,
+                'front_direction': self.front_direction,
+                'back_direction': self.back_direction,
+                'left_side_direction': self.left_side_direction,
+                'right_side_direction': self.right_side_direction,
+                'front_counterhit_direction': self.front_counterhit_direction,
+                'downed_direction': self.downed_direction,
+                'front_rotation': self.front_rotation,
+                'back_rotation': self.back_rotation,
+                'left_side_rotation': self.left_side_rotation,
+                'right_side_rotation': self.right_side_rotation,
+                'front_counterhit_rotation': self.front_counterhit_rotation,
+                'downed_rotation': self.downed_rotation,
+                'standing': self.standing,
+                'ch': self.ch,
+                'crouch': self.crouch,
+                'crouch_ch': self.crouch_ch,
+                'left_side': self.left_side,
+                'left_side_crouch': self.left_side_crouch,
+                'right_side': self.right_side,
+                'right_side_crouch': self.right_side_crouch,
+                'back': self.back,
+                'back_crouch': self.back_crouch,
+                'block': self.block,
+                'crouch_block': self.crouch_block,
+                'wallslump': self.wallslump,
+                'downed': self.downed,
+            }
         return {
             'pushback_indexes': self.pushback_indexes,
             'u1list': self.u1list,
@@ -1693,15 +2004,52 @@ class ExtraMoveProperty:
         data = initTekkenStructure(
             self, parent, addr, parent.ExtraMoveProperty_size)
 
+        self.requirement_idx = -1
+
         readOffsetTable(self, 'extramoveprop')
 
+    def setRequirementId(self, requirement_idx):
+        self.requirement_idx = requirement_idx
+
     def dict(self):
-        return {
+        _dict = {
             'id': self.id,
             'type': self.type,
             'value': self.value
         }
+        if self.TekkenVersion == 't8':
+            _dict['_0x4'] = self._0x4
+            _dict['requirement_idx'] = self.requirement_idx
+            _dict['value2'] = self.value2
+            _dict['value3'] = self.value3
+            _dict['value4'] = self.value4
+            _dict['value5'] = self.value5
+        return _dict
 
+
+class OtherMoveProperty:
+    def __init__(self, addr, parent):
+        data = initTekkenStructure(
+            self, parent, addr, parent.OtherMoveProperty_size)
+
+        self.requirement_idx = -1
+
+        readOffsetTable(self, 'othermoveprop')
+
+    def setRequirementId(self, requirement_idx):
+        self.requirement_idx = requirement_idx
+
+    def dict(self):
+        _dict = {}
+        if self.TekkenVersion == 't8':
+            _dict['id'] = self.id
+            _dict['requirement_idx'] = self.requirement_idx
+            _dict['value'] = self.value
+            _dict['value2'] = self.value2
+            _dict['value3'] = self.value3
+            _dict['value4'] = self.value4
+            _dict['value5'] = self.value5
+        return _dict
 
 class Move:
     def __init__(self, addr, parent, moveId=None):
@@ -1710,13 +2058,15 @@ class Move:
         readOffsetTable(self, 'move')
 
         if self.name == 0:
-            self.name = str(addr) if moveId == None else str(moveId)
+            self.name = str(addr) if moveId == None else 'move_%d' % moveId
             self.anim_name = self.name
 
-        self.anim = AnimData(self.anim_name, self.base + self.anim_addr, self)
+        self.anim = AnimData(self.anim_name, self.base + self.anim_addr, self) if self.TekkenVersion != 't8' else None
         self.cancel_idx = -1
         self.hit_condition_idx = -1
         self.extra_properties_idx = -1
+        self.move_start_properties_idx = -1
+        self.move_end_properties_idx = -1
         self.voiceclip_idx = -1
 
         if self.TekkenVersion == "t5" or self.TekkenVersion == "t5dr":
@@ -1724,6 +2074,10 @@ class Move:
             if self.u15 == 0x20000000:  # Player face towards opponent
                 self.u15 = 0x04000000
 
+    # def getAliasedId(self, moveId: int, aliases: list):
+    #     if aliases.index(moveId) != -1:
+    #     return
+    
     def dict(self):
         return {
             'name': self.name,
@@ -1736,6 +2090,8 @@ class Move:
             'hit_condition_idx': self.hit_condition_idx,
             'voiceclip_idx': self.voiceclip_idx,
             'extra_properties_idx': self.extra_properties_idx,
+            'move_start_properties_idx': self.move_start_properties_idx,
+            'move_end_properties_idx': self.move_end_properties_idx,
             'hitbox_location': self.hitbox_location,
             'first_active_frame': self.startup,
             'last_active_frame': self.recovery,
@@ -1769,6 +2125,12 @@ class Move:
 
     def setExtraPropertiesIdx(self, id):
         self.extra_properties_idx = id
+    
+    def setMoveStartPropertiesIdx(self, id):
+        self.move_start_properties_idx = id
+
+    def setMoveEndPropertiesIdx(self, id):
+        self.move_end_properties_idx = id
 
     def setVoiceclipId(self, id):
         self.voiceclip_idx = id
@@ -1904,6 +2266,25 @@ class UnknownParryRelated:
     def dict(self):
         return self.value
 
+class Unknown_0x298:
+    def __init__(self, addr, parent):
+        data = initTekkenStructure(self, parent, addr, parent.Unknown298_size)
+
+        readOffsetTable(self, '_unk_0x298')
+
+    def setRequirementId(self, requirement_idx):
+        self.requirement_idx = requirement_idx
+
+    def dict(self):
+        return {
+            '_0x0': self._0x0,
+            '_0x4': self._0x4,
+            '_0x6': self._0x6,
+            'requirement_idx': self.requirement_idx,
+            '_0xC': self._0xC,
+            '_0x10': self._0x10,
+        }
+
 
 class Motbin:
     def __init__(self, addr, exporterObject, name=''):
@@ -1938,9 +2319,11 @@ class Motbin:
                     self.creator_name = self.creator_name.decode('ascii')
                 except:
                     self.creator_name = 'UNKNOWN'
-
-            self.name = getMovesetName(
-                self.TekkenVersion, self.character_name) if name == '' else name
+            
+            if self.TekkenVersion == 't8':
+                self.character_name = name if name != '' else self.character_name
+            
+            self.name = getMovesetName(self.TekkenVersion, self.character_name)
             self.export_folder = self.name
 
         except Exception as e:
@@ -1958,6 +2341,8 @@ class Motbin:
         self.pushbacks = []
         self.pushback_extras = []
         self.extra_move_properties = []
+        self.move_start_props = []
+        self.move_end_props = []
         self.voiceclips = []
         self.input_sequences = []
         self.input_extradata = []
@@ -1966,6 +2351,7 @@ class Motbin:
         self.throw_extras = []
         self.throws = []
         self.parry_related = []
+        self._0x298 = []
 
     def getCharacterNameFromBytes(self):
         oldCharName = self.character_name
@@ -2014,8 +2400,7 @@ class Motbin:
         if self.chara_id == -1:
             print("Character: %s" % (self.character_name))
         else:
-            print("Character: %s (ID %d)" %
-                  (self.character_name, self.chara_id))
+            print("Character: %s (ID %d)" % (self.character_name, self.chara_id))
         print("Creator: %s" % (self.creator_name))
         print("Date: %s %s\n" % (self.date, self.fulldate))
 
@@ -2032,8 +2417,11 @@ class Motbin:
             'creator_name': self.creator_name,
             'date': self.date,
             'fulldate': self.fulldate,
-            'aliases': self.aliases,
-            'aliases2': self.aliases2,
+            **({'aliases': self.aliases } if hasattr(self, 'aliases') else {}),
+            **({'aliases2': self.aliases2 } if hasattr(self, 'aliases2') else {}),
+            **({'original_aliases': self.original_aliases } if hasattr(self, 'original_aliases') else {}),
+            **({'current_aliases': self.current_aliases } if hasattr(self, 'current_aliases') else {}),
+            **({'unknown_aliases': self.unknown_aliases } if hasattr(self, 'unknown_aliases') else {}),
             'requirements': self.requirements,
             'cancels': self.cancels,
             'group_cancels': self.group_cancels,
@@ -2043,6 +2431,8 @@ class Motbin:
             'pushbacks': self.pushbacks,
             'pushback_extras': self.pushback_extras,
             'extra_move_properties': self.extra_move_properties,
+            **({'move_start_props': self.move_start_props } if hasattr(self, 'move_start_props') else {}),
+            **({'move_end_props': self.move_end_props } if hasattr(self, 'move_end_props') else {}),
             'voiceclips': self.voiceclips,
             'input_sequences': self.input_sequences,
             'input_extradata': self.input_extradata,
@@ -2050,7 +2440,8 @@ class Motbin:
             'projectiles': self.projectiles,
             'throw_extras': self.throw_extras,
             'throws': self.throws,
-            'parry_related': self.parry_related
+            'parry_related': self.parry_related,
+            **({'_0x298': self._0x298 if hasattr(self, '_0x298') else {} }),
         }
 
     def calculateHash(self, movesetData):
@@ -2099,29 +2490,30 @@ class Motbin:
                 1 << 2)  # allow hand mota by default
             json.dump(movesetData, f, indent=4)
 
-        print("Saving animations...")
-        animBoundaries = sorted([anim.addr for anim in self.anims])
-        existingAnim = 0
-        for anim in self.anims:
-            try:
-                filePath = "%s/%s.bin" % (anim_path, anim.name)
-                if os.path.exists(filePath):
-                    existingAnim += 1
-                else:
-                    with open(filePath, "wb") as f:
-                        animdata = anim.getData(animBoundaries)
-                        if animdata == None:
-                            raise
-                        f.write(animdata)
-            except Exception as e:
-                print("Error extracting animation %s, file will not be created" % (
-                    anim.name), file=sys.stderr)
-        if existingAnim != 0:
-            animLen = len(self.anims)
-            missingAnims = animLen - existingAnim
-            if missingAnims != 0:
-                print("%d/%d missing anims have been imported." %
-                      (missingAnims, animLen))
+        if self.TekkenVersion != 't8':
+            print("Saving animations...")
+            animBoundaries = sorted([anim.addr for anim in self.anims])
+            existingAnim = 0
+            for anim in self.anims:
+                try:
+                    filePath = "%s/%s.bin" % (anim_path, anim.name)
+                    if os.path.exists(filePath):
+                        existingAnim += 1
+                    else:
+                        with open(filePath, "wb") as f:
+                            animdata = anim.getData(animBoundaries)
+                            if animdata == None:
+                                raise
+                            f.write(animdata)
+                except Exception as e:
+                    print("Error extracting animation %s, file will not be created" % (
+                        anim.name), file=sys.stderr)
+            if existingAnim != 0:
+                animLen = len(self.anims)
+                missingAnims = animLen - existingAnim
+                if missingAnims != 0:
+                    print("%d/%d missing anims have been imported." %
+                        (missingAnims, animLen))
 
         print("Saving MOTA animations...")
         emptyMota = [0x4d, 0x4f, 0x54, 0x41, 0x01, 0x0, 0x0, 0x0,
@@ -2170,141 +2562,138 @@ class Motbin:
 
         print("Reading parry-related...")
         for i in range(self.unknown_parryrelated_list_size):
-            unknown = UnknownParryRelated(
-                self.unknown_parryrelated_list_ptr + (i * self.UnknownParryRelated_size), self)
+            unknown = UnknownParryRelated(self.unknown_parryrelated_list_ptr + (i * self.UnknownParryRelated_size), self)
             self.parry_related.append(unknown.dict())
 
         if self.input_extradata_size != 0:
             print("Reading input extradata...")
             for i in range(self.input_extradata_size + 1):
-                input_extradata = InputExtradata(
-                    self.input_extradata_ptr + (i * self.InputExtradata_size), self)
+                input_extradata = InputExtradata(self.input_extradata_ptr + (i * self.InputExtradata_size), self)
                 self.input_extradata.append(input_extradata.dict())
 
         print("Reading input sequences...")
         for i in range(self.input_sequence_size):
-            input_sequence = InputSequence(
-                self.input_sequence_ptr + (i * self.InputSequence_size), self)
-            input_sequence.setExtradataId(
-                (input_sequence.extradata_addr - self.input_extradata_ptr) // self.InputExtradata_size)
+            input_sequence = InputSequence(self.input_sequence_ptr + (i * self.InputSequence_size), self)
+            input_sequence.setExtradataId((input_sequence.extradata_addr - self.input_extradata_ptr) // self.InputExtradata_size)
             self.input_sequences.append(input_sequence.dict())
 
         print("Reading requirements...")
         for i in range(self.requirement_count):
-            condition = Requirement(
-                self.requirements_ptr + (i * self.Requirement_size), self)
+            condition = Requirement(self.requirements_ptr + (i * self.Requirement_size), self)
             self.requirements.append(condition.dict())
 
         print("Reading cancels extradatas...")
         for i in range(self.cancel_extradata_list_size):
-            extradata = CancelExtradata(
-                self.cancel_extradata_head_ptr + (i * self.CancelExtradata_size), self)
+            extradata = CancelExtradata(self.cancel_extradata_head_ptr + (i * self.CancelExtradata_size), self)
             self.cancel_extradata.append(extradata.dict())
 
         print("Reading cancels...")
         for i in range(self.cancel_list_size):
-            cancel = Cancel(self.cancel_head_ptr +
-                            (i * self.Cancel_size), self)
-            cancel.setRequirementId(
-                (cancel.requirement_addr - self.requirements_ptr) // self.Requirement_size)
-            cancel.setExtradataId(
-                (cancel.extradata_addr - self.cancel_extradata_head_ptr) // self.CancelExtradata_size)
+            cancel = Cancel(self.cancel_head_ptr +(i * self.Cancel_size), self)
+            cancel.setRequirementId((cancel.requirement_addr - self.requirements_ptr) // self.Requirement_size)
+            cancel.setExtradataId((cancel.extradata_addr - self.cancel_extradata_head_ptr) // self.CancelExtradata_size)
             self.cancels.append(cancel.dict())
 
         print("Reading grouped cancels...")
         for i in range(self.group_cancel_list_size):
-            cancel = Cancel(self.group_cancel_head_ptr +
-                            (i * self.Cancel_size), self)
-            cancel.setRequirementId(
-                (cancel.requirement_addr - self.requirements_ptr) // self.Requirement_size)
-            cancel.setExtradataId(
-                (cancel.extradata_addr - self.cancel_extradata_head_ptr) // self.CancelExtradata_size)
+            cancel = Cancel(self.group_cancel_head_ptr + (i * self.Cancel_size), self)
+            cancel.setRequirementId((cancel.requirement_addr - self.requirements_ptr) // self.Requirement_size)
+            cancel.setExtradataId((cancel.extradata_addr - self.cancel_extradata_head_ptr) // self.CancelExtradata_size)
             self.group_cancels.append(cancel.dict())
 
         print("Reading pushbacks extradatas...")
         for i in range(self.pushback_extradata_size):
-            pushback_extra = PushbackExtradata(
-                self.pushback_extradata_ptr + (i * self.PushbackExtradata_size), self)
+            pushback_extra = PushbackExtradata(self.pushback_extradata_ptr + (i * self.PushbackExtradata_size), self)
             self.pushback_extras.append(pushback_extra.dict())
 
         print("Reading pushbacks...")
         for i in range(self.pushback_list_size):
-            pushback = Pushback(self.pushback_ptr +
-                                (i * self.Pushback_size), self)
-            pushback.setExtraIndex(
-                (pushback.extra_addr - self.pushback_extradata_ptr) // self.PushbackExtradata_size)
+            pushback = Pushback(self.pushback_ptr + (i * self.Pushback_size), self)
+            pushback.setExtraIndex((pushback.extra_addr - self.pushback_extradata_ptr) // self.PushbackExtradata_size)
             self.pushbacks.append(pushback.dict())
 
         print("Reading reaction lists...")
         for i in range(self.reaction_list_size):
-            reaction_list = ReactionList(
-                self.reaction_list_ptr + (i * self.ReactionList_size), self)
+            reaction_list = ReactionList(self.reaction_list_ptr + (i * self.ReactionList_size), self)
             reaction_list.setIndexes(self.pushback_ptr, self.Pushback_size)
             self.reaction_list.append(reaction_list.dict())
 
         print("Reading on-hit condition lists...")
         for i in range(self.hit_conditions_size):
-            hit_conditions = HitCondition(
-                self.hit_conditions_ptr + (i * self.HitCondition_size), self)
-            hit_conditions.setRequirementId(
-                (hit_conditions.requirement_addr - self.requirements_ptr) // self.Requirement_size)
-            hit_conditions.setReactionListId(
-                (hit_conditions.reaction_list_addr - self.reaction_list_ptr) // self.ReactionList_size)
+            hit_conditions = HitCondition(self.hit_conditions_ptr + (i * self.HitCondition_size), self)
+            hit_conditions.setRequirementId((hit_conditions.requirement_addr - self.requirements_ptr) // self.Requirement_size)
+            hit_conditions.setReactionListId((hit_conditions.reaction_list_addr - self.reaction_list_ptr) // self.ReactionList_size)
             self.hit_conditions.append(hit_conditions.dict())
 
         print("Reading extra move properties...")
         for i in range(self.extra_move_properties_size):
-            extra_move_property = ExtraMoveProperty(
-                self.extra_move_properties_ptr + (i * self.ExtraMoveProperty_size), self)
+            extra_move_property = ExtraMoveProperty(self.extra_move_properties_ptr + (i * self.ExtraMoveProperty_size), self)
+            if self.TekkenVersion == 't8':
+                extra_move_property.setRequirementId((extra_move_property.requirement_addr - self.requirements_ptr) // self.Requirement_size)
             self.extra_move_properties.append(extra_move_property.dict())
+
+        if self.TekkenVersion == 't8':
+            print("Reading move start extra properties...")
+            for i in range(self.move_start_props_size):
+                move_start_props = OtherMoveProperty(self.move_start_props_ptr + (i * self.OtherMoveProperty_size), self)
+                move_start_props.setRequirementId((move_start_props.requirement_addr - self.requirements_ptr) // self.Requirement_size)
+                self.move_start_props.append(move_start_props.dict())
+
+            print("Reading move end extra properties...")
+            for i in range(self.move_end_props_size):
+                move_end_props = OtherMoveProperty(self.move_end_props_ptr + (i * self.OtherMoveProperty_size), self)
+                move_end_props.setRequirementId((move_end_props.requirement_addr - self.requirements_ptr) // self.Requirement_size)
+                self.move_end_props.append(move_end_props.dict())
 
         print("Reading voiceclips...")
         for i in range(self.voiceclip_list_size):
-            voiceclip = Voiceclip(
-                self.voiceclip_list_ptr + (i * self.Voiceclip_size), self)
+            voiceclip = Voiceclip(self.voiceclip_list_ptr + (i * self.Voiceclip_size), self)
             self.voiceclips.append(voiceclip.dict())
 
         print("Reading projectiles...")
         for i in range(self.projectile_size):
-            projectile = Projectile(
-                self.projectile_ptr + (i * self.Projectile_size), self)
+            projectile = Projectile(self.projectile_ptr + (i * self.Projectile_size), self)
             if projectile.cancel_addr != 0:
-                projectile.setCancelIdx(
-                    (projectile.cancel_addr - self.cancel_head_ptr) // self.Cancel_size)
+                projectile.setCancelIdx((projectile.cancel_addr - self.cancel_head_ptr) // self.Cancel_size)
             if projectile.hit_condition_addr != 0:
-                projectile.setHitConditionIdx(
-                    (projectile.hit_condition_addr - self.hit_conditions_ptr) // self.HitCondition_size)
+                projectile.setHitConditionIdx((projectile.hit_condition_addr - self.hit_conditions_ptr) // self.HitCondition_size)
             self.projectiles.append(projectile.dict())
 
         print("Reading throw extras...")
         for i in range(self.throw_extras_size):
-            throw_extra = ThrowExtra(
-                self.throw_extras_ptr + (i * self.ThrowExtra_size), self)
+            throw_extra = ThrowExtra(self.throw_extras_ptr + (i * self.ThrowExtra_size), self)
             self.throw_extras.append(throw_extra.dict())
 
         print("Reading throws...")
         for i in range(self.throws_size):
             throw = Throw(self.throws_ptr + (i * self.Throw_size), self)
-            throw.setThrowExtraIdx(
-                (throw.throwextra_addr - self.throw_extras_ptr) // self.ThrowExtra_size)
+            throw.setThrowExtraIdx((throw.throwextra_addr - self.throw_extras_ptr) // self.ThrowExtra_size)
             self.throws.append(throw.dict())
 
+        if self.TekkenVersion == 't8':
+            print("Reading unknown _0x298...")
+            for i in range(self._0x298_size):
+                _0x298 = Unknown_0x298(self._0x298_ptr + (i * self.Unknown298_size), self)
+                _0x298.setRequirementId((_0x298.requirement_addr - self.requirements_ptr) // self.Requirement_size)
+                self._0x298.append(_0x298.dict())
+        
         print("Reading movelist...")
         for i in range(self.movelist_size):
             move = Move(self.movelist_head_ptr + (i * self.Move_size), self, i)
-            move.setCancelIdx(
-                (move.cancel_addr - self.cancel_head_ptr) // self.Cancel_size)
-            move.setHitConditionIdx(
-                (move.hit_condition_addr - self.hit_conditions_ptr) // self.HitCondition_size)
+            move.setCancelIdx((move.cancel_addr - self.cancel_head_ptr) // self.Cancel_size)
+            move.setHitConditionIdx((move.hit_condition_addr - self.hit_conditions_ptr) // self.HitCondition_size)
             if move.extra_properties_ptr != 0:
-                move.setExtraPropertiesIdx(
-                    (move.extra_properties_ptr - self.extra_move_properties_ptr) // self.ExtraMoveProperty_size)
+                move.setExtraPropertiesIdx((move.extra_properties_ptr - self.extra_move_properties_ptr) // self.ExtraMoveProperty_size)
+            if self.TekkenVersion == 't8':
+                if move.move_start_properties_ptr != 0:
+                    move.setMoveStartPropertiesIdx((move.move_start_properties_ptr - self.move_start_props_ptr) // self.OtherMoveProperty_size)
+                if move.move_end_properties_ptr != 0:
+                    move.setMoveEndPropertiesIdx((move.move_end_properties_ptr - self.move_end_props_ptr) // self.OtherMoveProperty_size)
             if move.voiceclip_ptr != 0:
-                move.setVoiceclipId(
-                    (move.voiceclip_ptr - self.voiceclip_list_ptr) // self.Voiceclip_size)
+                move.setVoiceclipId((move.voiceclip_ptr - self.voiceclip_list_ptr) // self.Voiceclip_size)
             self.moves.append(move.dict())
 
-            if move.anim not in self.anims:
+            if move.anim not in self.anims and self.TekkenVersion != 't8':
                 self.anims.append(move.anim)
 
         self.save()
@@ -2313,7 +2702,7 @@ class Motbin:
 if __name__ == "__main__":
 
     if len(sys.argv) <= 1:
-        print("Usage: ./motbinExport [t7/tag2/rev/t6/3d/t5/t5dr]")
+        print("Usage: ./motbinExport [t8/t7/tag2/rev/t6/3d/t5/t5dr]")
         os._exit(1)
 
     TekkenVersion = sys.argv[1]
@@ -2351,7 +2740,7 @@ if __name__ == "__main__":
             playerAddr += playerOffset
             continue
 
-        moveset = TekkenExporter.exportMoveset(playerAddr)
+        moveset = TekkenExporter.exportMoveset(playerAddr, player_name if TekkenVersion == 't8' else '')
         extractedMovesetNames.append(player_name)
         extractedMovesets.append(moveset)
         playerAddr += playerOffset

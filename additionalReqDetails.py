@@ -1,62 +1,47 @@
 charIDs = {
-    0: "Paul",
-    1: "Law",
-    2: "King",
-    3: "Yoshimitsu",
-    4: "Hwoarang",
-    5: "Xiayou",
-    6: "Jin",
-    7: "Bryan",
-    8: "Heihachi",
-    9: "Kazuya",
-    10: "Steve",
-    11: "JACK7",
-    12: "Asuka",
-    13: "Devil Jin",
-    14: "Feng",
-    15: "Lili",
-    16: "Dragunov",
-    17: "Leo",
-    18: "Lars",
-    19: "Alisa",
-    20: "Claudio",
-    21: "Katarina",
-    22: "Chloe",
-    23: "Shaheen",
-    24: "Josie",
-    25: "Gigas",
-    26: "Kazumi",
-    27: "Devil Kazumi",
-    28: "Nina",
-    29: "Master Raven",
-    30: "Lee",
-    31: "Bob",
-    32: "Akuma",
-    33: "Kuma",
-    34: "Panda",
-    35: "Eddy",
-    36: "Eliza",
-    37: "Miguel",
-    38: "SOLDIER",
-    39: "YOUNG KAZUYA",
-    40: "JACK4",
-    41: "YOUNG HEIHACHI",
-    42: "DUMMY",
-    43: "Geese",
-    44: "Noctis",
-    45: "Anna",
-    46: "Lei",
-    47: "Marduk",
-    48: "Armor King",
-    49: "Julia",
-    50: "Negan",
-    51: "Zafina",
-    52: "Ganryu",
-    53: "Leroy",
-    54: "Fahk",
-    55: "Kuni",
-    56: "Lidia",
-    75: "NONE"
+    0: 'Paul',
+    1: 'Law',
+    2: 'King',
+    3: 'Yoshimitsu',
+    4: 'Hwoarang',
+    5: 'Xiayou',
+    6: 'Jin',
+    7: 'Bryan',
+    8: 'Kazuya',
+    9: 'Steve',
+    10: 'Jack-8',
+    11: 'Asuka',
+    12: 'Devil Jin',
+    13: 'Feng',
+    14: 'Lili',
+    15: 'Dragunov',
+    16: 'Leo',
+    17: 'Lars',
+    18: 'Alisa',
+    19: 'Claudio',
+    20: 'Shaheen',
+    21: 'Nina',
+    22: 'Lee',
+    23: 'Kuma',
+    24: 'Panda',
+    25: 'Zafina',
+    26: 'Leroy',
+    27: 'Jun',
+    28: 'Reina',
+    29: 'Azucena',
+    30: 'Raven', # Placement of ID not 100% confirmed, just intuition
+    31: 'Victor', # Placement of ID not 100% confirmed, just intuition
+    32: 'Dummy',
+    33: 'DLC1',
+    34: 'DLC2',
+    35: 'DLC3',
+    36: 'DLC4',
+    116: '???',
+    117: '???',
+    118: '???',
+    119: 'Jack-7',
+    120: '???',
+    121: '???'
 }
 
 gamemodes = {
@@ -108,6 +93,17 @@ storyBattles = {
     27: "Special Chapter"
 }
 
+req567 = {
+    3: "Story prefight",
+    4: "Story postfight?",
+    # 8: "Treasure Battle, post-fight???",
+    # 10: "Arcade??",
+    12: "Story postfight?",
+    17: "Continue? timer",
+    18: "Customization: Stand",
+    33: "Customization sequence play?",
+}
+
 
 class req284:
     def get(self, x, default):
@@ -136,19 +132,19 @@ class req359:
 # Add req in this list and assign parameter list
 # Format: reqId -> paramList
 reqDetailsList = {
-    156: reqYesNo,
-    157: reqYesNo,
-    217: charIDs,  # Char ID checks
-    218: charIDs,
-    219: charIDs,
-    220: charIDs,
+    158: reqYesNo,
+    159: reqYesNo,
+    220: charIDs,  # Char ID checks
     221: charIDs,
     222: charIDs,
     223: charIDs,
     224: charIDs,
-    225: req225,  # Player is CPU
-    284: req284(),  # Player flag >= X
-    359: req359(),  # Player flag == X
-    559: storyBattles,  # Story Battle Number
-    563: gamemodes,  # Game mode
+    225: charIDs,
+    226: charIDs,
+    227: charIDs,
+    228: req225,  # Player is CPU
+    287: req284(),  # Player flag >= X
+    362: req359(),  # Player flag == X
+    # 562: storyBattles,  # Story Battle Number
+    566: gamemodes,  # Game mode
 }

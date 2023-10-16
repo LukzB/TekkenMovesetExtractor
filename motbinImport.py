@@ -29,8 +29,8 @@ forbiddenMoves = ['Co_DA_Ground']
 
 
 class Importer:
-    def __init__(self):
-        self.T = GameClass("TekkenGame-Win64-Shipping.exe")
+    def __init__(self, gameName = "TekkenGame-Win64-Shipping.exe"):
+        self.T = GameClass(gameName)
         self.T.applyModuleAddress(game_addresses)
 
     def readInt(self, addr, bytes_length=4):

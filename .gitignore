@@ -1,2 +1,3 @@
-extracted_chars/
+extracted_chars*/
 *.pyc
+.vscode

@@ -45,6 +45,7 @@ def appendFurtherDetails(itemId, param, key):
 
 
 reqListEndval = {
+    'Tekken8': 900,
     'Tekken7': 881,
     'Tag2': 690,
     'Revolution': 697,
@@ -532,8 +533,9 @@ class MassChangeCancelsByMoveIdWindow:
         self.selectedMoveIndex = -1
         self.movelist, self.filename = getMovelist(
             self.root.Charalist.movelist_path)
+        self.isNotT8 = self.movelist['version'] != 'Tekken8'
 
-        self.setMoves(self.movelist['moves'], self.movelist['aliases'])
+        self.setMoves(self.movelist['moves'], self.movelist['aliases' if self.isNotT8 else 'original_aliases'])
 
     def applyChanges(self):
         new_cancel_data = {}
@@ -623,7 +625,8 @@ class MassChangeCancelsByMoveIdWindow:
         self.movelist = movelist
         self.filename = filename
 
-        self.setMoves(movelist['moves'], movelist['aliases'])
+        key = 'aliases' if movelist['version'] != 'Tekken8' else 'original_aliases'
+        self.setMoves(movelist['moves'], movelist[key])
 
     def __call__(self, move):
         return move['move_id'] == self.moveId
@@ -815,7 +818,9 @@ class CharalistSelector:
         self.filename = filename
         self.last_selection = selection
 
-        self.root.MoveSelector.setMoves(movelist['moves'], movelist['aliases'])
+        self.isNotT8 = movelist['version'] != 'Tekken8'
+        self.root.isNotT8 = self.isNotT8
+        self.root.MoveSelector.setMoves(movelist['moves'], movelist['aliases' if self.isNotT8 else 'original_aliases'])
         self.root.MoveSelector.setCharacter(movelist['character_name'])
         self.root.movelist = movelist
         self.root.resetForms()
@@ -896,26 +901,32 @@ class MoveSelector:
         self.playMoveButton.configure(state="disabled")
 
     def playMove(self):
-        if self.root.movelist == None:
+        if self.root.movelist == None or ["Tekken7", "Tekken8"].index(self.root.movelist['version']) == -1:
             return
-        T = importLib.Importer()
+        isT8 = self.root.movelist["version"] == "Tekken8"
+        pKey = 't8' if isT8 else 't7'
 
-        playerAddr = game_addresses['t7_p1_addr'] + \
-            (self.playMovePid * game_addresses['t7_playerstruct_size'])
-        motbinOffset = game_addresses['t7_motbin_offset']
-        curr_frame_timer_offset = game_addresses['curr_frame_timer_offset']
-        next_move_offset = game_addresses['next_move_offset']
-        player_curr_move_offset = game_addresses['player_curr_move_offset']
+        T = importLib.Importer(game_addresses[("%s_process_name" % pKey)])
+        movelist_offset = 0x210 if not isT8 else 0x230
+        move_size = 0xB0 if not isT8 else 0x3A0
+
+
+        playerAddr = game_addresses[('%s_p1_addr' % pKey)] + (self.playMovePid * game_addresses[('%s_playerstruct_size' % pKey)])
+        motbinOffset = game_addresses[('%s_motbin_offset' % pKey)]
+        curr_frame_timer_offset = game_addresses['curr_frame_timer_offset'] if not isT8 else 0x370
+        next_move_offset = game_addresses['next_move_offset'] if not isT8 else 0x1CB0
+        player_curr_move_offset = game_addresses['player_curr_move_offset'] if not isT8 else 0x518
 
         moveset = T.readInt(playerAddr + motbinOffset, 8)
-        movelist = T.readInt(moveset + 0x210, 8)
+        movelist = T.readInt(moveset + movelist_offset, 8)
 
-        moveAddr = movelist + (self.playMoveId * 0xB0)
+        moveAddr = movelist + (self.playMoveId * move_size)
         T.writeInt(playerAddr + curr_frame_timer_offset, 99999, 4)
         T.writeInt(playerAddr + next_move_offset, moveAddr, 8)
         T.writeInt(playerAddr + player_curr_move_offset, self.playMoveId, 4)
 
-        for movesetOffset in [0x1528, 0x1530, 0x1538, 0x1540]:
+        offsets = [motbinOffset + 8 * i for i in range(4)]
+        for movesetOffset in offsets:
             T.writeInt(playerAddr + movesetOffset, moveset, 8)
 
     def hide(self):
@@ -940,12 +951,13 @@ class MoveSelector:
         self.playMovePid = playerId
         self.playMoveButton['text'] = "Play move (%dP)" % (playerId + 1)
 
-        TekkenGame = GameClass("TekkenGame-Win64-Shipping.exe")
+        gameKey = "TekkenGame-Win64-Shipping.exe" if self.root.isNotT8 else "Polaris-Win64-Shipping.exe"
+        TekkenGame = GameClass(gameKey)
         TekkenGame.applyModuleAddress(game_addresses)
 
-        playerAddress = game_addresses['t7_p1_addr'] + \
-            (playerId * game_addresses['t7_playerstruct_size'])
-        offset = game_addresses['player_curr_move_offset']
+        addrKey = 't7' if self.root.isNotT8 else 't8'
+        playerAddress = game_addresses['%s_p1_addr' % addrKey] + (playerId * game_addresses['%s_playerstruct_size' % addrKey])
+        offset = game_addresses['player_curr_move_offset'] + (0 if self.root.isNotT8 else 0x1C8)
 
         currMoveId = TekkenGame.readInt(playerAddress + offset, 4)
         currMoveId = self.root.getMoveId(currMoveId)
@@ -1374,8 +1386,16 @@ class ReactionListEditor(FormEditor):
 
         for i, val in enumerate(itemData['pushback_indexes']):
             self.setField(reactionlistExtraPushbackFields[i], val, True)
-        for i, val in enumerate(itemData['u1list']):
-            self.setField(reactionlistExtraLaunchFields[i], val, True)
+        if 'u1list' in itemData:
+            for i, val in enumerate(itemData['u1list']):
+                self.setField(reactionlistExtraLaunchFields[i], val, True)
+        else:
+            self.setField(reactionlistExtraLaunchFields[0], itemData['front_direction'], True)
+            self.setField(reactionlistExtraLaunchFields[1], itemData['back_direction'], True)
+            self.setField(reactionlistExtraLaunchFields[2], itemData['left_side_direction'], True)
+            self.setField(reactionlistExtraLaunchFields[3], itemData['right_side_direction'], True)
+            self.setField(reactionlistExtraLaunchFields[4], itemData['front_counterhit_direction'], True)
+            self.setField(reactionlistExtraLaunchFields[5], itemData['downed_direction'], True)
 
         self.editMode = True
         self.disableSaveButton()
@@ -1473,7 +1493,7 @@ class RequirementEditor(FormEditor):
         self.initFields()
 
     def setDetails(self):
-        if self.root.movelist['version'] != 'Tekken7':
+        if self.root.movelist['version'] != 'Tekken7' and self.root.movelist['version'] != 'Tekken8':
             return
 
         reqId = self.fieldValue['req']
@@ -1731,8 +1751,9 @@ class MoveEditor(FormEditor):
             self.fieldLabel[field] = fieldLabel
 
     def setMove(self, moveData, moveId):
-        if moveId in self.root.movelist['aliases']:
-            aliasValue = 32768 + self.root.movelist['aliases'].index(moveId)
+        key = 'original_aliases' if self.root.movelist['version'] == 'Tekken8' else 'aliases'
+        if moveId in self.root.movelist[key]:
+            aliasValue = 32768 + self.root.movelist[key].index(moveId)
             self.setLabel("Move %d: %s   (Aliased to: %d)" %
                           (moveId, moveData['name'], aliasValue))
         else:
@@ -1924,7 +1945,8 @@ class MoveCopyingWindow:
         self.movelist = movelist
         self.filename = filename
 
-        self.setMoves(movelist['moves'], movelist['aliases'])
+        key = 'original_aliases' if self.movelist['version'] == 'Tekken8' else 'aliases'
+        self.setMoves(movelist['moves'], movelist[key])
 
     def setMoves(self, moves, aliases):
         moves = [(i, move) for i, move in enumerate(moves)]
@@ -1948,9 +1970,10 @@ class MoveCopyingWindow:
         self.moveInfo['text'] = "Loading move %d..." % (moveId)
 
         moveText = "Move ID: %d" % (moveId)
-        if moveId in self.movelist['aliases']:
+        key = 'aliases' if self.isNotT8 else 'original_aliases'
+        if moveId in self.movelist[key]:
             moveText += "  (%d)" % (
-                self.movelist['aliases'].index(moveId) + 32768)
+                self.movelist[key].index(moveId) + 32768)
 
         moveText += "\nName: %s" % (move['name'])
         moveText += "\nAnimation: %s" % (move['anim_name'])
@@ -2200,8 +2223,10 @@ class MoveCopyingWindow:
                 pushback['pushbackextra_idx'], -1)
 
         messagebox.showinfo('Imported', 'Data successfully imported')
+
+        key = 'original_aliases' if self.movelist['version'] == 'Tekken8' else 'aliases'
         self.root.MoveSelector.setMoves(
-            targetMovelist['moves'], self.root.movelist['aliases'])
+            targetMovelist['moves'], self.root.movelist[key])
         self.root.setMove(moveInsertionIndex)
 
     def onMoveSelectionChange(self, event):
@@ -2286,9 +2311,10 @@ class MoveReferenceWindow:
             TextArea.insert(
                 "end", "No reference found for move %s (%d)" % (moveName, moveId))
         else:
-            if moveId in self.root.movelist['aliases']:
+            key = 'original_aliases' if self.root.movelist['version'] == 'Tekken8' else 'aliases'
+            if moveId in self.root.movelist[key]:
                 aliasedIndex = 0x8000 + \
-                    self.root.movelist['aliases'].index(moveId)
+                    self.root.movelist[key].index(moveId)
                 TextArea.insert("end", "%d entries for move %s (%d / %d):\n\n" %
                                 (len(referenceList), moveName, moveId, aliasedIndex))
             else:
@@ -2830,9 +2856,9 @@ Hand animations can be created in blender, using the following plugins:\ngithub.
         refList = []
         moveIds = [self.MoveEditor.id]
 
-        if self.MoveEditor.id in self.movelist['aliases']:
-            moveIds.append(
-                0x8000 + self.movelist['aliases'].index(self.MoveEditor.id))
+        key = 'aliases' if self.isNotT8 else 'original_aliases'
+        if self.MoveEditor.id in self.movelist[key]:
+            moveIds.append(0x8000 + self.movelist[key].index(self.MoveEditor.id))
 
         listId = 0
         for cancel_id, cancel in enumerate(self.movelist['group_cancels']):
@@ -2928,8 +2954,9 @@ Hand animations can be created in blender, using the following plugins:\ngithub.
             app.window.mainloop()
 
     def getMoveId(self, moveId):
-        if moveId >= 0x8000 and moveId - 0x8000 < len(self.movelist['aliases']):
-            return self.movelist['aliases'][moveId - 0x8000]
+        key = 'aliases' if self.movelist['version'] != 'Tekken8' else 'original_aliases'
+        if moveId >= 0x8000 and moveId - 0x8000 < len(self.movelist[key]):
+            return self.movelist[key][moveId - 0x8000]
         return moveId
 
     def getMoveName(self, moveId):
@@ -3589,7 +3616,7 @@ Hand animations can be created in blender, using the following plugins:\ngithub.
 
         self.MoveEditor.resetForm()
         self.MoveSelector.setMoves(
-            self.movelist['moves'], self.movelist['aliases'])
+            self.movelist['moves'], self.movelist['aliases' if self.isNotT8 else 'original_aliases'])
 
     def createMove(self, copyCurrent=False):
         if copyCurrent and self.MoveEditor.editMode == None:
@@ -3608,7 +3635,7 @@ Hand animations can be created in blender, using the following plugins:\ngithub.
 
         self.movelist['moves'].append(newMove)
         self.MoveSelector.setMoves(
-            self.movelist['moves'], self.movelist['aliases'])
+            self.movelist['moves'], self.movelist['aliases' if self.isNotT8 else 'original_aliases'])
         self.setMove(moveId)
 
     def saveField(self, key, id, field, value):
