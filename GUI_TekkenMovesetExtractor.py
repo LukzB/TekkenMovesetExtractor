@@ -552,6 +552,7 @@ def exportAll(parent, TekkenVersion):
 
 
 def importPlayer(parent, playerId):
+    return
     if parent.selected_char == None:
         print("No character selected")
         return
@@ -871,6 +872,7 @@ class GUI_TekkenMovesetExtractor(Tk):
             self.selected_char = None
 
     def toggleMonitor(self, parent, playerId):
+        return
         monitorId = playerId - 1
 
         if creatingMonitor[monitorId] == True:
