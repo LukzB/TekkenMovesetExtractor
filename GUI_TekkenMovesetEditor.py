@@ -45,7 +45,7 @@ def appendFurtherDetails(itemId, param, key):
 
 
 reqListEndval = {
-    'Tekken8': 900,
+    'Tekken8': 1100,
     'Tekken7': 881,
     'Tag2': 690,
     'Revolution': 697,
@@ -436,6 +436,12 @@ def getCommandStr(commandBytes):
             inputs += "+%d" % (i)
 
     if inputBits & (1 << 4):
+        inputs += "+HE"  # Label for Heat button
+
+    if inputBits & (1 << 5):
+        inputs += "+SS"  # Label for Special Style button
+
+    if inputBits & (1 << 6):
         inputs += "+RA"  # Label for Rage Art button
 
     if directionBits < 0x8000:
@@ -907,20 +913,19 @@ class MoveSelector:
         pKey = 't8' if isT8 else 't7'
 
         T = importLib.Importer(game_addresses[("%s_process_name" % pKey)])
-        movelist_offset = 0x210 if not isT8 else 0x230
-        move_size = 0xB0 if not isT8 else 0x3A0
-
+        movelist_offset = game_addresses['movelist_offset']
+        move_size = game_addresses['move_size']
 
         playerAddr = game_addresses[('%s_p1_addr' % pKey)] + (self.playMovePid * game_addresses[('%s_playerstruct_size' % pKey)])
         motbinOffset = game_addresses[('%s_motbin_offset' % pKey)]
-        curr_frame_timer_offset = game_addresses['curr_frame_timer_offset'] if not isT8 else 0x370
-        next_move_offset = game_addresses['next_move_offset'] if not isT8 else 0x1CB0
-        player_curr_move_offset = game_addresses['player_curr_move_offset'] if not isT8 else 0x518
+        curr_frame_timer_offset = game_addresses['curr_frame_timer_offset']
+        next_move_offset = game_addresses['next_move_offset']
+        player_curr_move_offset = game_addresses['player_curr_move_offset']
 
         moveset = T.readInt(playerAddr + motbinOffset, 8)
         movelist = T.readInt(moveset + movelist_offset, 8)
-
         moveAddr = movelist + (self.playMoveId * move_size)
+
         T.writeInt(playerAddr + curr_frame_timer_offset, 99999, 4)
         T.writeInt(playerAddr + next_move_offset, moveAddr, 8)
         T.writeInt(playerAddr + player_curr_move_offset, self.playMoveId, 4)
@@ -957,7 +962,7 @@ class MoveSelector:
 
         addrKey = 't7' if self.root.isNotT8 else 't8'
         playerAddress = game_addresses['%s_p1_addr' % addrKey] + (playerId * game_addresses['%s_playerstruct_size' % addrKey])
-        offset = game_addresses['player_curr_move_offset'] + (0 if self.root.isNotT8 else 0x1C8)
+        offset = game_addresses['player_curr_move_offset']
 
         currMoveId = TekkenGame.readInt(playerAddress + offset, 4)
         currMoveId = self.root.getMoveId(currMoveId)
