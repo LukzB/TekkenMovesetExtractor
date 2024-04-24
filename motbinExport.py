@@ -354,6 +354,8 @@ t8_offsetTable = {
 
     'move:name': {'offset': None, 'size': 'stringPtr'},
     'move:anim_name': {'offset': None, 'size': 'stringPtr'},
+    'move:name_key': {'offset': 0x0, 'size': 4},
+    'move:anim_key': {'offset': 0x4, 'size': 4},
     'move:anim_addr': {'offset': None, 'size': 8},
     'move:vuln': {'offset': 0x20, 'size': 4},
     'move:hitlevel': {'offset': 0x24, 'size': 4},
@@ -381,12 +383,14 @@ t8_offsetTable = {
     'move:u10': {'offset': 0x7c, 'size': 4},
     'move:u11': {'offset': 0x80, 'size': 4},
     'move:u12': {'offset': 0x84, 'size': 4},
+    'move:hitbox1': {'offset': 0xC0, 'size': 4},
+    'move:hitbox2': {'offset': 0xF0, 'size': 4},
     # 'move:u13': { 'offset': 0x10, 'size': 8 },
     # 'move:u14': { 'offset': 0x10, 'size': 8 },
     'move:u15': {'offset': 0xA8, 'size': 4},
     'move:u16': {'offset': 0x214, 'size': 2},
     'move:u17': {'offset': 0x216, 'size': 2},
-    'move:u18': {'offset': 0x37C, 'size': 4},
+    'move:u18': {'offset': 0x3BC, 'size': 4},
 
     'voiceclip:value': {'offset': 0x0, 'size': 4},
 
@@ -1395,7 +1399,14 @@ t8_character_name_mappping = {
     29: '[AZUCENA]',
     30: '[VICTOR]',
     31: '[RAVEN]',
+    32: '[AZAZEL]',
+    33: '[EDDY]',
     116: '[DUMMY]',
+    117: '[ANGEL_JIN]',
+    118: '[TRUE_DEVIL_KAZUYA]',
+    119: '[JACK7]',
+    120: '[SOLDIER]',
+    121: '[DEVIL_JIN_2]',
 }
 
 t5_character_name_mappping = {
@@ -2073,6 +2084,9 @@ class Move:
             # self.u15 = (self.u15 & 0xFFFFFFFF) >> 3  # 0x20000000 -> 0x04000000 (I'll check this one later)
             if self.u15 == 0x20000000:  # Player face towards opponent
                 self.u15 = 0x04000000
+        
+        if self.TekkenVersion == 't8':
+            self.hitbox_location = (self.hitbox2 << 16) | self.hitbox1
 
     # def getAliasedId(self, moveId: int, aliases: list):
     #     if aliases.index(moveId) != -1:
@@ -2082,6 +2096,8 @@ class Move:
         return {
             'name': self.name,
             'anim_name': self.anim_name,
+            **({'name_key': self.name_key} if self.name_key is not None else {}),
+            **({'anim_key': self.anim_key} if self.anim_key is not None else {}),
             'vuln': self.vuln,
             'hitlevel': self.hitlevel,
             'cancel_idx': self.cancel_idx,
