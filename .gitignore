@@ -3,3 +3,4 @@ extracted_chars*/
 .vscode
 dist
 build
+*.spec
