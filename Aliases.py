@@ -44,7 +44,8 @@ versionAliases = {
         'requirements': t4_requirements,
         'extraprop_func': disableProp #todo
     },
-    'Tekken7': {}
+    'Tekken7': {},
+    'Tekken8': {}
 }
 
 globalRequirementsReplace = {
@@ -81,7 +82,7 @@ def getRequirementAlias(version, req, param):
                 param = alias['param_alias'].get(param, param)
     return req, param
 
-def getMoveExtrapropAlias(version, type, id, value):
+def getMoveExtrapropAlias(version, type, id, value, _0x4, requirement_idx, value2, value3, value4, value5):
     if 'extraprop_func' in versionAliases[version]:
         return versionAliases[version]['extraprop_func'](type, id, value)
     if 'extra_move_properties' in versionAliases[version]:
@@ -90,7 +91,7 @@ def getMoveExtrapropAlias(version, type, id, value):
             id = alias['t7_id']
             if 'force_value' in alias:
                 value = alias['value']
-    return type, id, value
+    return type, id, value, _0x4, requirement_idx, value2, value3, value4, value5
 
 class ExtraPropertyFix:
     def __init__(self, alias):

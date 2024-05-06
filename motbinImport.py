@@ -10,14 +10,14 @@ from copy import deepcopy
 
 importVersion = "1.0.0"
 
-requirement_size = 0x8
+requirement_size = 0x14
 cancel_size = 0x28
-move_size = 0xb0
+move_size = 0x3A0
 reaction_list_size = 0x70
 hit_condition_size = 0x18
 pushback_size = 0x10
 pushback_extra_size = 0x2
-extra_move_property_size = 0xC
+extra_move_property_size = 0x28
 voiceclip_size = 0x4
 input_sequence_size = 0x10
 input_extradata_size = 0x8
@@ -29,7 +29,7 @@ forbiddenMoves = ['Co_DA_Ground']
 
 
 class Importer:
-    def __init__(self, gameName = "TekkenGame-Win64-Shipping.exe"):
+    def __init__(self, gameName = "Polaris-Win64-Shipping.exe"):
         self.T = GameClass(gameName)
         self.T.applyModuleAddress(game_addresses)
 
@@ -58,13 +58,13 @@ class Importer:
         return VirtualAllocEx(self.T.handle, 0, allocSize, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE)
 
     def getPlayerAddress(self, playerid):
-        playerAddr = game_addresses['t7_p1_addr']
+        playerAddr = game_addresses['t8_p1_addr']
 
         if playerAddr == 0:
             return None
 
         if playerid == 1:
-            playerAddr += game_addresses['t7_playerstruct_size']
+            playerAddr += game_addresses['t8_playerstruct_size']
 
         return playerAddr
 
@@ -72,7 +72,7 @@ class Importer:
         moveset = self.loadMoveset(
             folderName=folderName, moveset=moveset, charactersPath=charactersPath)
 
-        motbin_ptr_addr = playerAddr + game_addresses['t7_motbin_offset']
+        motbin_ptr_addr = playerAddr + game_addresses['t8_motbin_offset']
         current_motbin_ptr = self.readInt(motbin_ptr_addr, 8)
 
         try:
@@ -117,9 +117,9 @@ class Importer:
         p = MotbinStruct(m, folderName, self, animSearchFolder=charactersPath)
 
         character_name = p.writeString(m['character_name'])
-        creator_name = p.writeString(m['creator_name'])
-        date = p.writeString(m['date'])
-        fulldate = p.writeString(m['fulldate'])
+        creator_name = p.writeString("creator")
+        date = p.writeString("date")
+        fulldate = p.writeString("date_full")
 
         requirements_ptr, requirement_count = p.allocateRequirements()
         cancel_extradata_ptr, cancel_extradata_size = p.allocateCancelExtradata()
@@ -219,7 +219,7 @@ class Importer:
         return p
 
     def writeAliases(self, motbin_ptr, m):
-        alias_offset = 0x28
+        alias_offset = 0x30 # was 0x28
 
         if m["version"] == "Tekken5" or m["version"] == "Tekken5DR":  # different alias system for T5
             for i in range(2):
@@ -230,6 +230,21 @@ class Importer:
                 for i in range(20):
                     self.writeInt(motbin_ptr + alias_offset, 0, 2)
                     alias_offset += 2
+        elif m["version"] == "Tekken8":
+            for alias in m['original_aliases']:
+                self.writeInt(motbin_ptr + alias_offset, alias, 2)
+                alias_offset += 2
+            if 'current_aliases' in m:
+                alias_offset = 0xA8
+                for alias in m['current_aliases']:
+                    self.writeInt(motbin_ptr + alias_offset, alias, 2)
+                    alias_offset += 2
+            if 'unknown_aliases' in m:
+                alias_offset = 0x120
+                for alias in m['unknown_aliases']:
+                    self.writeInt(motbin_ptr + alias_offset, alias, 2)
+                    alias_offset += 2
+
         else:  # T6 and later games alias system
             for alias in m['aliases']:
                 self.writeInt(motbin_ptr + alias_offset, alias, 2)
@@ -276,9 +291,6 @@ def convertU15(number):
 def getMovesetTotalSize(m, folderName, animInfos):
     size = 0
     size += len(m['character_name']) + 1
-    size += len(m['creator_name']) + 1
-    size += len(m['date']) + 1
-    size += len(m['fulldate']) + 1
 
     size = align8Bytes(size)
     size += len(m['requirements']) * 8
@@ -316,19 +328,13 @@ def getMovesetTotalSize(m, folderName, animInfos):
         size += len(anim) + 1  # filename
 
     size = align8Bytes(size)
-    for anim in animInfos:
-        if animInfos[anim] != None:
-            size += animInfos[anim]['size']
-        else:
-            print("Anim %s missing, moveset might crash" %
-                  (anim), file=sys.stderr)
-
+    
     size = align8Bytes(size)
     for move in m['moves']:
         size += len(move['name']) + 1
 
     size = align8Bytes(size)
-    size += len(m['moves']) * 0xB0
+    size += len(m['moves']) * 0x3A0
 
     size = align8Bytes(size)
     size += len(m['input_extradata']) * input_extradata_size
@@ -694,8 +700,6 @@ class MotbinStruct:
 
             for pushback in reaction_list['pushback_indexes']:
                 self.writeInt(self.getPushbackFromId(pushback), 8)
-            for unknown in reaction_list['u1list']:
-                self.writeInt(unknown, 2)
 
             self.skip(0x8)
             self.writeInt(reaction_list['vertical_pushback'], 4)
@@ -801,32 +805,46 @@ class MotbinStruct:
         self.extra_move_properties_ptr = self.align()
 
         for extra_property in self.m['extra_move_properties']:
-            type, id, value = extra_property['type'], extra_property['id'], extra_property['value']
-            type, id, value = getMoveExtrapropAlias(
-                self.m['version'], type, id, value)
+            type = extra_property['type']
+            id = extra_property['id']
+            value = extra_property['value']
+            _0x4 = extra_property['_0x4']
+            requirement_idx = extra_property['requirement_idx']
+            value2 = extra_property['value2']
+            value3 = extra_property['value3']
+            value4 = extra_property['value4']
+            value5 = extra_property['value5']
+            type, id, value, _0x4, requirement_idx, value2, value3, value4, value5 = getMoveExtrapropAlias(
+                self.m['version'], type, id, value, _0x4, requirement_idx, value2, value3, value4, value5)
             self.writeInt(type, 4)
             self.writeInt(id, 4)
             self.writeInt(value, 4)
+            self.writeInt(_0x4, 4)
+            self.writeInt(requirement_idx, 4)
+            self.writeInt(value2, 4)
+            self.writeInt(value3, 4)
+            self.writeInt(value4, 4)
+            self.writeInt(value5, 4)
 
         return self.extra_move_properties_ptr, len(self.m['extra_move_properties'])
 
     def allocateAnimations(self):
-        print("Allocating animations...")
-        self.animation_names_ptr = self.align()
-        self.animation_table = {
-            name: {'name_ptr': self.writeString(name)} for name in self.animMapping}
+        print("Allocating animations is not available in this build")
+        # self.animation_names_ptr = self.align()
+        # self.animation_table = {
+        #     name: {'name_ptr': self.writeString(name)} for name in self.animMapping}
 
-        self.animation_ptr = self.align()
-        for name in self.animMapping:
-            try:
-                with open("%s/%s.bin" % (self.animMapping[name]['folder'], name), "rb") as f:
-                    self.animation_table[name]['data_ptr'] = self.writeBytes(
-                        f.read())
-            except Exception as e:
-                print(e)
-                self.animation_table[name]['data_ptr'] = 0
-                print("Warning: animation %s.bin missing from the anim folder, this moveset might crash" % (
-                    name), file=sys.stderr)
+        # self.animation_ptr = self.align()
+        # for name in self.animMapping:
+        #     try:
+        #         with open("%s/%s.bin" % (self.animMapping[name]['folder'], name), "rb") as f:
+        #            self.animation_table[name]['data_ptr'] = self.writeBytes(
+        #               f.read())
+        #    except Exception as e:
+        #        print(e)
+        #        self.animation_table[name]['data_ptr'] = 0
+        #        print("Warning: animation %s.bin missing from the anim folder, this moveset might crash" % (
+        #            name), file=sys.stderr)
 
     def allocateMota(self):
         if len(self.mota_list) != 0:
@@ -870,11 +888,12 @@ class MotbinStruct:
 
             name_addr = self.move_names_table.get(move['name'], 0)
             anim_dict = self.animation_table.get(move['anim_name'], None)
-            anim_name, anim_ptr = anim_dict['name_ptr'], anim_dict['data_ptr']
+            # anim_name = anim_dict['name_ptr']
+            # anim_ptr = anim_dict['data_ptr']
 
             self.writeInt(name_addr, 8)
-            self.writeInt(anim_name, 8)
-            self.writeInt(anim_ptr, 8)
+            # self.writeInt(anim_name, 8)
+            # self.writeInt(anim_ptr, 8)
             self.writeInt(move['vuln'], 4)
             self.writeInt(move['hitlevel'], 4)
             self.writeInt(self.getCancelFromId(move['cancel_idx']), 8)
@@ -934,7 +953,7 @@ class MotbinStruct:
 
     def applyCharacterIDAliases(self, playerAddr):
         currentChar = self.importer.readInt(
-            playerAddr + game_addresses['t7_chara_id_offset'])
+            playerAddr + game_addresses['t8_chara_id_offset'])
 
         movesetCharId = getCharacteridAlias(
             self.m['version'], self.m['character_id'])
@@ -958,7 +977,7 @@ class MotbinStruct:
 
         if source_motbin_ptr == None:
             source_motbin_ptr = self.importer.readInt(
-                playerAddr + game_addresses['t7_motbin_offset'], 8)
+                playerAddr + game_addresses['t8_motbin_offset'], 8)
 
         offsets = [
             0x280,  # Anims
@@ -978,7 +997,7 @@ class MotbinStruct:
         if "mota_type" in self.m:
             mota_type = self.m["mota_type"]
         else:
-            mota_type = 780 if self.m['version'] == 'Tekken7' else (1 << 2)
+            mota_type = 780 if self.m['version'] == 'Tekken8' else (1 << 2)
             # 780 has bit 2,3,8 & 9 set, which indicate respective mota
 
         # excludedOffsets = [0x290, 0x298, 0x2c0, 0x2c8]
@@ -992,7 +1011,7 @@ class MotbinStruct:
                 self.importer.writeBytes(self.motbin_ptr + offset, offsetBytes)
 
     def updateCameraMotaStaticPointer(self, playerAddr=None):
-        if self.m['version'] != 'Tekken7':
+        if self.m['version'] != 'Tekken8':
             return
         if playerAddr == None:
             raise Exception(
@@ -1013,9 +1032,9 @@ if __name__ == "__main__":
         os._exit(1)
 
     TekkenImporter = Importer()
-    playerAddress = game_addresses['t7_p1_addr']
+    playerAddress = game_addresses['t8_p1_addr']
     TekkenImporter.importMoveset(playerAddress, sys.argv[1])
 
     if len(sys.argv) > 2:
-        playerAddress += game_addresses['t7_playerstruct_size']
+        playerAddress += game_addresses['t8_playerstruct_size']
         TekkenImporter.importMoveset(playerAddress, sys.argv[2])
