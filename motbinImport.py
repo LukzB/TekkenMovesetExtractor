@@ -733,7 +733,7 @@ class MotbinStruct:
             for pushback in reaction_list['pushback_indexes']:
                 self.writeInt(self.getPushbackFromId(pushback), 8)
 
-            self.skip(0x8)
+            # self.skip(0x8) unused
             self.writeInt(reaction_list['vertical_pushback'], 4)
             self.writeInt(reaction_list['front_direction'], 2)
             self.writeInt(reaction_list['back_direction'], 2)
@@ -761,7 +761,7 @@ class MotbinStruct:
             self.writeInt(reaction_list['crouch_block'], 2)
             self.writeInt(reaction_list['wallslump'], 2)
             self.writeInt(reaction_list['downed'], 2)
-            self.skip(4)
+            # self.skip(4) unused
 
         return self.reaction_list_ptr, len(self.m['reaction_list'])
 
@@ -846,8 +846,8 @@ class MotbinStruct:
         self.extra_move_properties_ptr = self.align()
 
         for extra_property in self.m['extra_move_properties']:
-            type = extra_property['type']
-            id = extra_property['id']
+            t = extra_property['type']
+            _id = extra_property['id']
             value = extra_property['value']
             _0x4 = extra_property['_0x4']
             requirement_idx = extra_property['requirement_idx']
@@ -855,10 +855,10 @@ class MotbinStruct:
             value3 = extra_property['value3']
             value4 = extra_property['value4']
             value5 = extra_property['value5']
-            type, id, value, _0x4, requirement_idx, value2, value3, value4, value5 = getMoveExtrapropAlias(
-                self.m['version'], type, id, value, _0x4, requirement_idx, value2, value3, value4, value5)
-            self.writeInt(type, 4)
-            self.writeInt(id, 4)
+            #t, _id, value, _0x4, requirement_idx, value2, value3, value4, value5 = getMoveExtrapropAlias(
+            #    self.m['version'], t, _id, value, _0x4, requirement_idx, value2, value3, value4, value5)
+            self.writeInt(t, 4)
+            self.writeInt(_id, 4)
             self.writeInt(value, 4)
             self.writeInt(_0x4, 4)
             requirements_addr = self.getRequirementFromId(requirement_idx)
@@ -875,14 +875,14 @@ class MotbinStruct:
         self.move_start_props_ptr = self.align()
 
         for move_start_prop in self.m['move_start_props']:
-            id = move_start_prop['id']
+            _id = move_start_prop['id']
             value = move_start_prop['value']
             requirement_idx = move_start_prop['requirement_idx']
             value2 = move_start_prop['value2']
             value3 = move_start_prop['value3']
             value4 = move_start_prop['value4']
             value5 = move_start_prop['value5']
-            self.writeInt(id, 4)
+            self.writeInt(_id, 4)
             self.writeInt(value, 4)
             requirements_addr = self.getRequirementFromId(requirement_idx)
             self.writeInt(requirements_addr, 8)
@@ -899,7 +899,7 @@ class MotbinStruct:
         self.move_end_props_ptr = self.align()
 
         for move_end_prop in self.m['move_end_props']:
-            id = move_end_prop['id']
+            _id = move_end_prop['id']
             value = move_end_prop['value']
             requirement_idx = move_end_prop['requirement_idx']
             requirements_addr = self.getRequirementFromId(requirement_idx)
@@ -907,7 +907,7 @@ class MotbinStruct:
             value3 = move_end_prop['value3']
             value4 = move_end_prop['value4']
             value5 = move_end_prop['value5']
-            self.writeInt(id, 4)
+            self.writeInt(_id, 4)
             self.writeInt(value, 4)
             self.writeInt(requirements_addr, 8)
             self.writeInt(value2, 4)
@@ -1005,13 +1005,13 @@ class MotbinStruct:
             # anim_name = anim_dict['name_ptr']
             # anim_ptr = anim_dict['data_ptr']
 
-            # self.writeInt(name_addr, 8)
+            self.writeInt(0x1650E4, 8)
             self.writeInt(move['name_key'], 4)
             self.writeInt(move['anim_key'], 4)
-            # self.writeInt(anim_name, 8)
-            # self.writeInt(anim_ptr, 8)
-            self.writeInt(move['vuln'], 4)
-            self.writeInt(move['hitlevel'], 4)
+            self.writeInt(0, 8) # unused
+            self.writeInt(0x1650E4, 8)
+            self.writeInt(move['vuln'], 4) # unused
+            self.writeInt(move['hitlevel'], 4) # unused
             self.writeInt(self.getCancelFromId(move['cancel_idx']), 8)
 
             self.writeInt(0, 8)  # ['u1'], ptr
