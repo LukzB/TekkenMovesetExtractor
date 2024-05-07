@@ -81,8 +81,8 @@ class Importer:
         except:
             old_character_name = "???"
 
-        moveset.copyMotaOffsets(current_motbin_ptr)
-        moveset.applyCharacterIDAliases(playerAddr)
+        # moveset.copyMotaOffsets(current_motbin_ptr)
+        # moveset.applyCharacterIDAliases(playerAddr)
 
         print("\nOLD moveset pointer: 0x%x (%s)" %
               (current_motbin_ptr, old_character_name))
@@ -112,7 +112,7 @@ class Importer:
 
         fillAliasesDictonnaries(m['version'])
 
-        ApplyCharacterFixes(m)
+        # ApplyCharacterFixes(m)
 
         p = MotbinStruct(m, folderName, self, animSearchFolder=charactersPath)
 
@@ -131,6 +131,8 @@ class Importer:
         pushback_ptr, pushback_list_count = p.allocatePushbacks()
         reaction_list_ptr, reaction_list_count = p.allocateReactionList()
         extra_move_properties_ptr, extra_move_properties_count = p.allocateExtraMoveProperties()
+        move_start_props_ptr, move_start_props_count = p.allocateMoveStartProperties()
+        move_end_props_ptr, move_end_props_count = p.allocateMoveEndProperties()
         voiceclip_list_ptr, voiceclip_list_count = p.allocateVoiceclipIds()
         hit_conditions_ptr, hit_conditions_count = p.allocateHitConditions()
         moves_ptr, move_count = p.allocateMoves()
@@ -140,81 +142,85 @@ class Importer:
         throw_extras_ptr, throw_extras_count = p.allocateThrowExtras()
         throws_ptr, throws_count = p.allocateThrows()
         parry_related_ptr, parry_related_count = p.allocateParryRelated()
+        unknown_0x289_ptr, unknown_0x289_count = p.allocateUnknown289()
 
         p.allocateMota()
 
         self.writeInt(p.motbin_ptr + 0x0, 65536, 4)
         self.writeInt(p.motbin_ptr + 0x4, 4475208, 4)
 
-        self.writeInt(p.motbin_ptr + 0x8, character_name, 8)
-        self.writeInt(p.motbin_ptr + 0x10, creator_name, 8)
-        self.writeInt(p.motbin_ptr + 0x18, date, 8)
-        self.writeInt(p.motbin_ptr + 0x20, fulldate, 8)
+        self.writeInt(p.motbin_ptr, character_name, 8)
+        self.writeInt(p.motbin_ptr, creator_name, 8)
+        self.writeInt(p.motbin_ptr, date, 8)
+        self.writeInt(p.motbin_ptr, fulldate, 8)
 
         self.writeAliases(p.motbin_ptr, m)
 
-        self.writeInt(p.motbin_ptr + 0x150, reaction_list_ptr, 8)
-        self.writeInt(p.motbin_ptr + 0x158, reaction_list_count, 8)
+        self.writeInt(p.motbin_ptr + 0x168, reaction_list_ptr, 8)
+        self.writeInt(p.motbin_ptr + 0x178, reaction_list_count, 8)
 
-        self.writeInt(p.motbin_ptr + 0x160, requirements_ptr, 8)
-        self.writeInt(p.motbin_ptr + 0x168, requirement_count, 8)
+        self.writeInt(p.motbin_ptr + 0x180, requirements_ptr, 8)
+        self.writeInt(p.motbin_ptr + 0x188, requirement_count, 8)
 
-        self.writeInt(p.motbin_ptr + 0x170, hit_conditions_ptr, 8)
-        self.writeInt(p.motbin_ptr + 0x178, hit_conditions_count, 8)
+        self.writeInt(p.motbin_ptr + 0x190, hit_conditions_ptr, 8)
+        self.writeInt(p.motbin_ptr + 0x198, hit_conditions_count, 8)
 
-        self.writeInt(p.motbin_ptr + 0x180, projectiles_ptr, 8)
-        self.writeInt(p.motbin_ptr + 0x188, projectiles_count, 8)
+        self.writeInt(p.motbin_ptr + 0x1A0, projectiles_ptr, 8)
+        self.writeInt(p.motbin_ptr + 0x1A8, projectiles_count, 8)
 
-        self.writeInt(p.motbin_ptr + 0x190, pushback_ptr, 8)
-        self.writeInt(p.motbin_ptr + 0x198, pushback_list_count, 8)
+        self.writeInt(p.motbin_ptr + 0x1B0, pushback_ptr, 8)
+        self.writeInt(p.motbin_ptr + 0x1B8, pushback_list_count, 8)
 
-        self.writeInt(p.motbin_ptr + 0x1A0, pushback_extras_ptr, 8)
-        self.writeInt(p.motbin_ptr + 0x1A8, pushback_extras_count, 8)
+        self.writeInt(p.motbin_ptr + 0x1C0, pushback_extras_ptr, 8)
+        self.writeInt(p.motbin_ptr + 0x1C8, pushback_extras_count, 8)
 
-        self.writeInt(p.motbin_ptr + 0x1b0, cancel_ptr, 8)
-        self.writeInt(p.motbin_ptr + 0x1b8, cancel_count, 8)
+        self.writeInt(p.motbin_ptr + 0x1D0, cancel_ptr, 8)
+        self.writeInt(p.motbin_ptr + 0x1D8, cancel_count, 8)
 
-        self.writeInt(p.motbin_ptr + 0x1c0, group_cancel_ptr, 8)
-        self.writeInt(p.motbin_ptr + 0x1c8, group_cancel_count, 8)
+        self.writeInt(p.motbin_ptr + 0x1E0, group_cancel_ptr, 8)
+        self.writeInt(p.motbin_ptr + 0x1E8, group_cancel_count, 8)
 
-        self.writeInt(p.motbin_ptr + 0x1d0, cancel_extradata_ptr, 8)
-        self.writeInt(p.motbin_ptr + 0x1d8, cancel_extradata_size, 8)
+        self.writeInt(p.motbin_ptr + 0x1F0, cancel_extradata_ptr, 8)
+        self.writeInt(p.motbin_ptr + 0x1F8, cancel_extradata_size, 8)
 
-        self.writeInt(p.motbin_ptr + 0x1e0, extra_move_properties_ptr, 8)
-        self.writeInt(p.motbin_ptr + 0x1e8, extra_move_properties_count, 8)
+        self.writeInt(p.motbin_ptr + 0x200, extra_move_properties_ptr, 8)
+        self.writeInt(p.motbin_ptr + 0x208, extra_move_properties_count, 8)
 
-        self.writeInt(p.motbin_ptr + 0x1f0, 0, 8)  # ??
-        self.writeInt(p.motbin_ptr + 0x1f8, 0, 8)  # ??
+        self.writeInt(p.motbin_ptr + 0x210, move_start_props_ptr, 8)  # ??
+        self.writeInt(p.motbin_ptr + 0x218, move_start_props_count, 8)  # ??
 
-        self.writeInt(p.motbin_ptr + 0x200, 0, 8)  # ??
-        self.writeInt(p.motbin_ptr + 0x208, 0, 8)  # ??
+        self.writeInt(p.motbin_ptr + 0x220, move_end_props_ptr, 8)  # ??
+        self.writeInt(p.motbin_ptr + 0x228, move_end_props_count, 8)  # ??
 
-        self.writeInt(p.motbin_ptr + 0x210, moves_ptr, 8)
-        self.writeInt(p.motbin_ptr + 0x218, move_count, 8)
+        self.writeInt(p.motbin_ptr + 0x230, moves_ptr, 8)
+        self.writeInt(p.motbin_ptr + 0x238, move_count, 8)
 
-        self.writeInt(p.motbin_ptr + 0x220, voiceclip_list_ptr, 8)
-        self.writeInt(p.motbin_ptr + 0x228, voiceclip_list_count, 8)
+        self.writeInt(p.motbin_ptr + 0x240, voiceclip_list_ptr, 8)
+        self.writeInt(p.motbin_ptr + 0x248, voiceclip_list_count, 8)
 
-        self.writeInt(p.motbin_ptr + 0x230, input_sequences_ptr, 8)
-        self.writeInt(p.motbin_ptr + 0x238, input_sequences_count, 8)
+        self.writeInt(p.motbin_ptr + 0x250, input_sequences_ptr, 8)
+        self.writeInt(p.motbin_ptr + 0x258, input_sequences_count, 8)
 
-        self.writeInt(p.motbin_ptr + 0x240, input_extradata_ptr, 8)
-        self.writeInt(p.motbin_ptr + 0x248, input_extradata_count, 8)
+        self.writeInt(p.motbin_ptr + 0x260, input_extradata_ptr, 8)
+        self.writeInt(p.motbin_ptr + 0x268, input_extradata_count, 8)
 
-        self.writeInt(p.motbin_ptr + 0x250, parry_related_ptr, 8)
-        self.writeInt(p.motbin_ptr + 0x258, parry_related_count, 8)
+        self.writeInt(p.motbin_ptr + 0x270, parry_related_ptr, 8)
+        self.writeInt(p.motbin_ptr + 0x278, parry_related_count, 8)
 
-        self.writeInt(p.motbin_ptr + 0x260, throw_extras_ptr, 8)
-        self.writeInt(p.motbin_ptr + 0x268, throw_extras_count, 8)
+        self.writeInt(p.motbin_ptr + 0x280, throw_extras_ptr, 8)
+        self.writeInt(p.motbin_ptr + 0x288, throw_extras_count, 8)
 
-        self.writeInt(p.motbin_ptr + 0x270, throws_ptr, 8)
-        self.writeInt(p.motbin_ptr + 0x278, throws_count, 8)
+        self.writeInt(p.motbin_ptr + 0x290, throws_ptr, 8)
+        self.writeInt(p.motbin_ptr + 0x298, throws_count, 8)
 
-        p.applyMotaOffsets()
+        self.writeInt(p.motbin_ptr + 0x2A0, unknown_0x289_ptr, 8)
+        self.writeInt(p.motbin_ptr + 0x2A8, unknown_0x289_count, 8)
+
+        # p.applyMotaOffsets()
 
         print("%s (ID: %d) successfully imported in memory at 0x%x." %
               (m['character_name'], m['character_id'], p.motbin_ptr))
-        # print("%d/%d bytes left." % (p.size - (p.curr_ptr - p.head_ptr), p.size)) #print this to check if any allocated byte has not been used (written on)
+        print("%d/%d bytes left." % (p.size - (p.curr_ptr - p.head_ptr), p.size)) #print this to check if any allocated byte has not been used (written on)
 
         return p
 
@@ -231,6 +237,7 @@ class Importer:
                     self.writeInt(motbin_ptr + alias_offset, 0, 2)
                     alias_offset += 2
         elif m["version"] == "Tekken8":
+            print("Moveset belongs to Tekken 8, writing corresponding aliases...")
             for alias in m['original_aliases']:
                 self.writeInt(motbin_ptr + alias_offset, alias, 2)
                 alias_offset += 2
@@ -288,12 +295,12 @@ def convertU15(number):
     return (number >> 7) | ((reverseBitOrder(number)) << 24)
 
 
-def getMovesetTotalSize(m, folderName, animInfos):
+def getMovesetTotalSize(m, folderName):
     size = 0
     size += len(m['character_name']) + 1
 
     size = align8Bytes(size)
-    size += len(m['requirements']) * 8
+    size += len(m['requirements']) * 0x14
 
     size = align8Bytes(size)
     size += len(m['cancel_extradata']) * 4
@@ -317,15 +324,21 @@ def getMovesetTotalSize(m, folderName, animInfos):
     size += len(m['hit_conditions']) * 0x18
 
     size = align8Bytes(size)
-    size += len(m['extra_move_properties']) * 0xC
+    size += len(m['extra_move_properties']) * 0x28
+
+    size = align8Bytes(size)
+    size += len(m['move_start_props']) * 0x10
+
+    size = align8Bytes(size)
+    size += len(m['move_end_props']) * 0x10
 
     size = align8Bytes(size)
     size += len(m['voiceclips']) * 0x4
 
     size = align8Bytes(size)
     # size += sum([k for k in animInfos]) + len(animInfos.keys())
-    for anim in animInfos:
-        size += len(anim) + 1  # filename
+    # for anim in animInfos:
+        # size += len(anim) + 1  # filename
 
     size = align8Bytes(size)
     
@@ -371,8 +384,8 @@ class MotbinStruct:
 
         self.folderName = folderName
 
-        self.loadAnimationInfos(animSearchFolder)
-        allocSize = getMovesetTotalSize(motbin, folderName, self.animMapping)
+        # self.loadAnimationInfos(animSearchFolder)
+        allocSize = getMovesetTotalSize(motbin, folderName)
         head_ptr = self.importer.allocateMem(allocSize)
 
         self.motbin_ptr = self.importer.allocateMem(0x2e0)
@@ -387,7 +400,7 @@ class MotbinStruct:
         self.grouped_cancel_ptr = 0
         self.requirements_ptr = 0
         self.movelist_ptr = 0
-        self.animation_ptr = 0
+        # self.animation_ptr = 0
         self.movelist_names_ptr = 0
         self.animation_names_ptr = 0
         self.extra_data_ptr = 0
@@ -396,12 +409,16 @@ class MotbinStruct:
         self.pushback_ptr = 0
         self.pushback_extras_ptr = 0
         self.extra_move_properties_ptr = 0
+        self.move_start_props_ptr = 0
+        self.move_end_props_ptr = 0
         self.voiceclip_ptr = 0
         self.input_extradata_ptr = 0
         self.input_sequences_ptr = 0
         self.projectile_ptr = 0
         self.throw_extras_ptr = 0
         self.throws_ptr = 0
+        self.unknown_0x289_ptr = 0
+        self.unknown_0x289_count = 0
 
         self.mota_list = []
         self.move_names_table = {}
@@ -458,45 +475,49 @@ class MotbinStruct:
         return self.curr_ptr
 
     def loadAnimationInfos(self, animSearchFolder):
-        anim_names = set([move['anim_name'] for move in self.m['moves']])
-        animMapping = {anim: None for anim in anim_names}
+        if self.m['version'] == "Tekken8":
+            print("Animation info not available for Tekken 8, skipping...")
+            return
+        else: 
+            anim_names = set([move['anim_name'] for move in self.m['moves']])
+            animMapping = {anim: None for anim in anim_names}
 
-        animFolder = "%s/anim" % (self.folderName)
-        try:
-            existingAnims = [a[:-4]
-                             for a in os.listdir(animFolder) if a.endswith('.bin')]
-        except:
-            existingAnims = []
+            animFolder = "%s/anim" % (self.folderName)
+            try:
+                existingAnims = [a[:-4]
+                                 for a in os.listdir(animFolder) if a.endswith('.bin')]
+            except:
+                existingAnims = []
 
-        try:
-            prefix = self.folderName.split(
-                "\\")[-1].split("//")[-1].split("_")[0] + '_'
-            searchFolders = [animSearchFolder + '/' + c for c in os.listdir(
-                animSearchFolder) if os.path.isdir(animSearchFolder + c) if c.startswith(prefix)]
-            searchFolders += [animSearchFolder + '/' + c for c in os.listdir(
-                animSearchFolder) if os.path.isdir(animSearchFolder + c) if not c.startswith(prefix)]
-        except:
-            searchFolders = [animSearchFolder + '/' + c for c in os.listdir(
-                animSearchFolder) if os.path.isdir(animSearchFolder + c)]
+            try:
+                prefix = self.folderName.split(
+                    "\\")[-1].split("//")[-1].split("_")[0] + '_'
+                searchFolders = [animSearchFolder + '/' + c for c in os.listdir(
+                    animSearchFolder) if os.path.isdir(animSearchFolder + c) if c.startswith(prefix)]
+                searchFolders += [animSearchFolder + '/' + c for c in os.listdir(
+                    animSearchFolder) if os.path.isdir(animSearchFolder + c) if not c.startswith(prefix)]
+            except:
+                searchFolders = [animSearchFolder + '/' + c for c in os.listdir(
+                    animSearchFolder) if os.path.isdir(animSearchFolder + c)]
 
-        for anim in anim_names:
-            if anim not in existingAnims:
-                try:
-                    for char in searchFolders:
-                        folder = "%s/anim" % (char)
-                        if os.path.exists("%s/%s.bin" % (folder, anim)):
-                            size = os.path.getsize(
-                                '%s/%s.bin' % (folder, anim))
-                            animMapping[anim] = {
-                                'folder': folder, 'size': size}
-                            break
-                except:
-                    pass
-            else:
-                size = os.path.getsize('%s/%s.bin' % (animFolder, anim))
-                animMapping[anim] = {'folder': animFolder, 'size': size}
+            for anim in anim_names:
+                if anim not in existingAnims:
+                    try:
+                        for char in searchFolders:
+                            folder = "%s/anim" % (char)
+                            if os.path.exists("%s/%s.bin" % (folder, anim)):
+                                size = os.path.getsize(
+                                    '%s/%s.bin' % (folder, anim))
+                                animMapping[anim] = {
+                                    'folder': folder, 'size': size}
+                                break
+                    except:
+                        pass
+                else:
+                    size = os.path.getsize('%s/%s.bin' % (animFolder, anim))
+                    animMapping[anim] = {'folder': animFolder, 'size': size}
 
-        self.animMapping = animMapping
+            self.animMapping = animMapping
 
     def getCancelFromId(self, idx):
         if self.cancel_ptr == 0:
@@ -601,20 +622,23 @@ class MotbinStruct:
         requirements = self.m['requirements']
         requirement_count = len(requirements)
 
-        if self.m['version'] != "Tekken7":
+        if self.m['version'] != "Tekken8":
             for i, requirement in enumerate(requirements):
                 req, param = getRequirementAlias(
                     self.m['version'], requirement['req'], requirement['param'])
                 requirements[i]['req'] = req
                 requirements[i]['param'] = param
 
-        applyGlobalRequirementAliases(requirements)
+        # applyGlobalRequirementAliases(requirements)
 
         for i, requirement in enumerate(requirements):
-            req, param = requirement['req'], requirement['param']
+            req, param, param2, param3, param4 = requirement['req'], requirement['param'], requirement['param2'], requirement['param3'], requirement['param4']
 
             self.writeInt(req, 4)
             self.writeInt(param, 4)
+            self.writeInt(param2, 4)
+            self.writeInt(param3, 4)
+            self.writeInt(param4, 4)
 
         return self.requirements_ptr, requirement_count
 
@@ -650,6 +674,13 @@ class MotbinStruct:
         cancel_count = len(cancels)
 
         for cancel in cancels:
+            if cancel['command'] == 0x800b:
+                cancel['command'] = 0x800d
+            elif cancel['command'] == 0x800c:
+                cancel['command'] = 0x800e
+            elif cancel['command'] >= 0x800d and cancel['command'] <= 0x82FF:
+                cancel['command'] += 1
+
             self.writeInt(cancel['command'], 8)
 
             requirements_addr = self.getRequirementFromId(
@@ -703,6 +734,18 @@ class MotbinStruct:
 
             self.skip(0x8)
             self.writeInt(reaction_list['vertical_pushback'], 4)
+            self.writeInt(reaction_list['front_direction'], 2)
+            self.writeInt(reaction_list['back_direction'], 2)
+            self.writeInt(reaction_list['left_side_direction'], 2)
+            self.writeInt(reaction_list['right_side_direction'], 2)
+            self.writeInt(reaction_list['front_counterhit_direction'], 2)
+            self.writeInt(reaction_list['downed_direction'], 2)
+            self.writeInt(reaction_list['front_rotation'], 2)
+            self.writeInt(reaction_list['back_rotation'], 2)
+            self.writeInt(reaction_list['left_side_rotation'], 2)
+            self.writeInt(reaction_list['right_side_rotation'], 2)
+            self.writeInt(reaction_list['front_counterhit_rotation'], 2)
+            self.writeInt(reaction_list['downed_rotation'], 2)
             self.writeInt(reaction_list['standing'], 2)
             self.writeInt(reaction_list['crouch'], 2)
             self.writeInt(reaction_list['ch'], 2)
@@ -820,7 +863,8 @@ class MotbinStruct:
             self.writeInt(id, 4)
             self.writeInt(value, 4)
             self.writeInt(_0x4, 4)
-            self.writeInt(requirement_idx, 4)
+            requirements_addr = self.getRequirementFromId(requirement_idx)
+            self.writeInt(requirements_addr, 8)
             self.writeInt(value2, 4)
             self.writeInt(value3, 4)
             self.writeInt(value4, 4)
@@ -828,8 +872,76 @@ class MotbinStruct:
 
         return self.extra_move_properties_ptr, len(self.m['extra_move_properties'])
 
+    def allocateMoveStartProperties(self):
+        print("Allocating move start properties...")
+        self.move_start_props_ptr = self.align()
+
+        for move_start_prop in self.m['move_start_props']:
+            id = move_start_prop['id']
+            value = move_start_prop['value']
+            requirement_idx = move_start_prop['requirement_idx']
+            value2 = move_start_prop['value2']
+            value3 = move_start_prop['value3']
+            value4 = move_start_prop['value4']
+            value5 = move_start_prop['value5']
+            self.writeInt(id, 4)
+            self.writeInt(value, 4)
+            requirements_addr = self.getRequirementFromId(requirement_idx)
+            self.writeInt(requirements_addr, 8)
+            self.writeInt(value2, 4)
+            self.writeInt(value3, 4)
+            self.writeInt(value4, 4)
+            self.writeInt(value5, 4)
+
+        return self.move_start_props_ptr, len(self.m['move_start_props'])
+
+
+    def allocateMoveEndProperties(self):
+        print("Allocating move end properties...")
+        self.move_end_props_ptr = self.align()
+
+        for move_end_prop in self.m['move_end_props']:
+            id = move_end_prop['id']
+            value = move_end_prop['value']
+            requirement_idx = move_end_prop['requirement_idx']
+            requirements_addr = self.getRequirementFromId(requirement_idx)
+            value2 = move_end_prop['value2']
+            value3 = move_end_prop['value3']
+            value4 = move_end_prop['value4']
+            value5 = move_end_prop['value5']
+            self.writeInt(id, 4)
+            self.writeInt(value, 4)
+            self.writeInt(requirements_addr, 8)
+            self.writeInt(value2, 4)
+            self.writeInt(value3, 4)
+            self.writeInt(value4, 4)
+            self.writeInt(value5, 4)
+
+        return self.move_end_props_ptr, len(self.m['move_end_props'])
+
+    def allocateUnknown289(self): 
+        print("Allocating 0x289...")
+        self.unknown_0x289_ptr = self.align()
+
+        for unknown289 in self.m['_0x298']:
+            _0x0 = unknown289['_0x0']
+            _0x4 = unknown289['_0x4']
+            _0x6 = unknown289['_0x6']
+            requirement_idx = unknown289['requirement_idx']
+            requirements_addr = self.getRequirementFromId(requirement_idx)
+            _0xC = unknown289['_0xC']
+            _0x10 = unknown289['_0x10']
+            self.writeInt(_0x0, 4)
+            self.writeInt(_0x4, 2)
+            self.writeInt(_0x6, 2)
+            self.writeInt(requirements_addr, 8)
+            self.writeInt(_0xC, 4)
+            self.writeInt(_0x10, 4)
+
+        return self.unknown_0x289_ptr, len(self.m['_0x298'])
+
     def allocateAnimations(self):
-        print("Allocating animations is not available in this build")
+        print("Allocating animations is not available in this build, skipping...")
         # self.animation_names_ptr = self.align()
         # self.animation_table = {
         #     name: {'name_ptr': self.writeString(name)} for name in self.animMapping}
@@ -847,26 +959,30 @@ class MotbinStruct:
         #            name), file=sys.stderr)
 
     def allocateMota(self):
-        if len(self.mota_list) != 0:
+        if self.m['version'] == "Tekken8":
+            print("Mota allocation not available for Tekken 8, skipping...")
             return
-        self.align()
+        else: 
+            if len(self.mota_list) != 0:
+                return
+            self.align()
 
-        for i in range(12):
-            try:
-                with open("%s/mota_%d.bin" % (self.folderName, i), "rb") as f:
-                    motaBytes = f.read()
+            for i in range(12):
+                try:
+                    with open("%s/mota_%d.bin" % (self.folderName, i), "rb") as f:
+                        motaBytes = f.read()
 
-                    if motaBytes[0:4] == b'MOTA':
-                        motaAddr = self.curr_ptr
-                    else:
-                        motaAddr = 0
-                        #print("DEBUG: Mota %d not valid, not importing" % i)
+                        if motaBytes[0:4] == b'MOTA':
+                            motaAddr = self.curr_ptr
+                        else:
+                            motaAddr = 0
+                            #print("DEBUG: Mota %d not valid, not importing" % i)
 
-                    self.writeBytes(motaBytes)
-                    self.mota_list.append(motaAddr)
-            except:
-                self.mota_list.append(0)
-                #print("Warning: impossible to import MOTA %d" % (i))
+                        self.writeBytes(motaBytes)
+                        self.mota_list.append(motaAddr)
+                except:
+                    self.mota_list.append(0)
+                    #print("Warning: impossible to import MOTA %d" % (i))
 
     def allocateMoves(self):
         self.allocateAnimations()
@@ -886,12 +1002,14 @@ class MotbinStruct:
             if move['name'] in forbiddenMoves:
                 forbiddenMoveIds.append(i)
 
-            name_addr = self.move_names_table.get(move['name'], 0)
-            anim_dict = self.animation_table.get(move['anim_name'], None)
+            # name_addr = self.move_names_table.get(move['name'], 0)
+            # anim_dict = self.animation_table.get(move['anim_name'], None)
             # anim_name = anim_dict['name_ptr']
             # anim_ptr = anim_dict['data_ptr']
 
-            self.writeInt(name_addr, 8)
+            # self.writeInt(name_addr, 8)
+            self.writeInt(move['name_key'], 4)
+            self.writeInt(move['anim_key'], 4)
             # self.writeInt(anim_name, 8)
             # self.writeInt(anim_ptr, 8)
             self.writeInt(move['vuln'], 4)
@@ -926,9 +1044,15 @@ class MotbinStruct:
             voiceclip_addr = self.getVoiceclipFromId(move['voiceclip_idx'])
             extra_properties_addr = self.getExtraMovePropertiesFromId(
                 move['extra_properties_idx'])
+            move_start_properties_addr = self.getExtraMovePropertiesFromId(
+                move['move_start_properties_idx'])
+            move_end_properties_addr = self.getExtraMovePropertiesFromId(
+                move['move_end_properties_idx'])
 
             self.writeInt(voiceclip_addr, 8)
             self.writeInt(extra_properties_addr, 8)
+            self.writeInt(move_start_properties_addr, 8)
+            self.writeInt(move_end_properties_addr, 8)
 
             self.writeInt(0, 8)  # ['u13'], ptr
             self.writeInt(0, 8)  # ['u14'], ptr

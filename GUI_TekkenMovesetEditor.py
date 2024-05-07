@@ -832,7 +832,7 @@ class CharalistSelector:
         self.root.resetForms()
 
         self.hide()
-        if movelist['version'] != 'Tekken7':
+        if movelist['version'] != 'Tekken8':
             messagebox.showwarning(
                 'Warning', 'Modifying non-Tekken 7 movesets works, but is not recommended.\nLoad the moveset in Tekken 7 and export it to convert it to the Tekken7 format.\nRequirement and extra-move property will be differents otherwise.')
 

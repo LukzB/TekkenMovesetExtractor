@@ -221,9 +221,9 @@ def allocateMovesetWritingInjection(movesetAddr, movesetAddr2, importer):
     importer.writeBytes(codeAddr, bytes(twoPlayersBytecode))
 
     try:
-        importer.writeInt(playerLocation, game_addresses['t7_p1_addr'], 8)
+        importer.writeInt(playerLocation, game_addresses['t8_p1_addr'], 8)
         importer.writeInt(
-            playerLocation + 8, game_addresses['t7_p1_addr'] + game_addresses['t7_playerstruct_size'], 8)
+            playerLocation + 8, game_addresses['t8_p1_addr'] + game_addresses['t8_playerstruct_size'], 8)
     except:
         importer.writeInt(playerLocation, 0, 8)  # can't write those yet
         importer.writeInt(playerLocation + 8, 0, 8)
@@ -344,9 +344,9 @@ class Monitor:
     def writePlayerAddressesToCode(self):
         global codeInjection
         playerLocation = codeInjection + codeInjectionInfo["o_playerLocation"]
-        self.Importer.writeInt(playerLocation, game_addresses['t7_p1_addr'], 8)
+        self.Importer.writeInt(playerLocation, game_addresses['t8_p1_addr'], 8)
         self.Importer.writeInt(
-            playerLocation + 8, game_addresses['t7_p1_addr'] + game_addresses['t7_playerstruct_size'], 8)
+            playerLocation + 8, game_addresses['t8_p1_addr'] + game_addresses['t8_playerstruct_size'], 8)
 
     def getPlayerAddress(self):
         self.playerAddr = self.Importer.getPlayerAddress(0)
@@ -361,7 +361,7 @@ class Monitor:
         if playerId == 3:
             playerId = 1
         if playerId == 2:
-            self.playerAddr += game_addresses['t7_playerstruct_size']
+            self.playerAddr += game_addresses['t8_playerstruct_size']
 
         self.playerSideId = playerId
 
@@ -370,7 +370,7 @@ class Monitor:
     def getCharacterId(self):
         if self.playerAddr == None:
             return -1
-        return self.Importer.readInt(self.playerAddr + game_addresses['t7_chara_id_offset'], 8)
+        return self.Importer.readInt(self.playerAddr + game_addresses['t8_chara_id_offset'], 8)
 
     def applyCharacterAliases(self):
         self.moveset.applyCharacterIDAliases(self.playerAddr)
@@ -382,13 +382,13 @@ class Monitor:
         if self.playerAddr != None:
             try:
                 moveset_addr = self.Importer.readInt(
-                    self.playerAddr + game_addresses['t7_motbin_offset'], 8)
+                    self.playerAddr + game_addresses['t8_motbin_offset'], 8)
                 self.moveset.copyMotaOffsets(moveset_addr)
                 self.moveset.updateCameraMotaStaticPointer(self.playerAddr)
             except Exception as e:
                 pass
             self.Importer.writeInt(
-                self.playerAddr + game_addresses['t7_motbin_offset'], self.moveset.motbin_ptr, 8)
+                self.playerAddr + game_addresses['t8_motbin_offset'], self.moveset.motbin_ptr, 8)
 
         prev_charaId = self.getCharacterId()
 
