@@ -88,7 +88,11 @@ class Importer:
               (current_motbin_ptr, old_character_name))
         print("NEW moveset pointer: 0x%x (%s)" %
               (moveset.motbin_ptr, moveset.m['character_name']))
-        self.writeInt(motbin_ptr_addr, moveset.motbin_ptr, 8)
+        print("Hit condition pointer: ", moveset.hit_conditions_ptr)
+        print("Hit conditions?: ", moveset.m['hit_conditions'])
+        self.writeInt(current_motbin_ptr + 0x190, moveset.hit_conditions_ptr, 8)
+        self.writeInt(current_motbin_ptr + 0x198, len(moveset.m['hit_conditions']), 8)
+        # self.writeInt(motbin_ptr_addr, moveset.motbin_ptr, 8)
 
         moveset.updateCameraMotaStaticPointer(playerAddr)
 
@@ -149,10 +153,10 @@ class Importer:
         self.writeInt(p.motbin_ptr + 0x0, 65536, 4)
         self.writeInt(p.motbin_ptr + 0x4, 4475208, 4)
 
-        self.writeInt(p.motbin_ptr, character_name, 8)
-        self.writeInt(p.motbin_ptr, creator_name, 8)
-        self.writeInt(p.motbin_ptr, date, 8)
-        self.writeInt(p.motbin_ptr, fulldate, 8)
+        # self.writeInt(p.motbin_ptr, character_name, 8)
+        # self.writeInt(p.motbin_ptr, creator_name, 8)
+        # self.writeInt(p.motbin_ptr, date, 8)
+        # self.writeInt(p.motbin_ptr, fulldate, 8)
 
         self.writeAliases(p.motbin_ptr, m)
 
@@ -290,10 +294,8 @@ def reverseBitOrder(number):
         res |= (bitVal << (7 - i))
     return res
 
-
 def convertU15(number):
     return (number >> 7) | ((reverseBitOrder(number)) << 24)
-
 
 def getMovesetTotalSize(m, folderName):
     size = 0
@@ -629,7 +631,7 @@ class MotbinStruct:
                 requirements[i]['req'] = req
                 requirements[i]['param'] = param
 
-        # applyGlobalRequirementAliases(requirements)
+        applyGlobalRequirementAliases(requirements)
 
         for i, requirement in enumerate(requirements):
             req, param, param2, param3, param4 = requirement['req'], requirement['param'], requirement['param2'], requirement['param3'], requirement['param4']

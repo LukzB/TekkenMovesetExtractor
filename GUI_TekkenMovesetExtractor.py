@@ -552,7 +552,6 @@ def exportAll(parent, TekkenVersion):
 
 
 def importPlayer(parent, playerId):
-    return
     if parent.selected_char == None:
         print("No character selected")
         return

@@ -158,7 +158,7 @@ class GlobalRequirementFix:
         self.value = globalRequirementsReplace[req]
     
     def searchReq(self, requirement_list, starting_index):
-        if starting_index > 0 and requirement_list[starting_index - 1]['req'] != 881:
+        if starting_index > 0 and requirement_list[starting_index - 1]['req'] != 1100:
             return requirement_list[starting_index - 1]
                 
         index = starting_index
@@ -167,7 +167,7 @@ class GlobalRequirementFix:
                 return requirement_list[index]
             index += 1
             
-        return { 'req': 881, 'param': 0 }
+        return { 'req': 1100, 'param': 0, 'param2': 0, 'param3': 0, 'param4': 0 }
         
     def applyFix(self, requirement_list, index):
         if requirement_list[index]['req'] != self.req:
