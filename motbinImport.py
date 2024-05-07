@@ -24,6 +24,8 @@ input_extradata_size = 0x8
 projectile_size = 0xa8
 throw_extras_size = 0xC
 throws_size = 0x10
+parry_related_size = 0x4
+unknown289_size = 0x18
 
 placeholder_address = 0x146FD2500
 
@@ -312,7 +314,7 @@ def getMovesetTotalSize(m, folderName):
     size += len(m['requirements']) * 0x14
 
     size = align8Bytes(size)
-    size += len(m['cancel_extradata']) * 4
+    size += len(m['cancel_extradata']) * 0x4
 
     size = align8Bytes(size)
     size += len(m['cancels']) * 0x28
@@ -349,14 +351,14 @@ def getMovesetTotalSize(m, folderName):
     # for anim in animInfos:
         # size += len(anim) + 1  # filename
 
-    size = align8Bytes(size)
+    # size = align8Bytes(size)
     
-    size = align8Bytes(size)
+    # size = align8Bytes(size)
     for move in m['moves']:
         size += len(move['name']) + 1
 
     size = align8Bytes(size)
-    size += len(m['moves']) * 0x3A0
+    size += len(m['moves']) * 0x4E8
 
     size = align8Bytes(size)
     size += len(m['input_extradata']) * input_extradata_size
@@ -374,14 +376,16 @@ def getMovesetTotalSize(m, folderName):
     size += len(m['throws']) * throws_size
 
     size = align8Bytes(size)
-    size += len(m['parry_related']) * 4
+    size += len(m['parry_related']) * parry_related_size
 
     size = align8Bytes(size)
-    for i in range(12):
-        try:
-            size += os.path.getsize("%s/mota_%d.bin" % (folderName, i))
-        except:
-            pass  # print("Can't open file '%s/mota_%d.bin'" % (folderName, i))
+    size += len(m['_0x298']) * unknown289_size
+    size = align8Bytes(size)
+    # for i in range(12):
+    #    try:
+    #        size += os.path.getsize("%s/mota_%d.bin" % (folderName, i))
+    #    except:
+    #        pass  # print("Can't open file '%s/mota_%d.bin'" % (folderName, i))
 
     return size
 
@@ -437,6 +441,9 @@ class MotbinStruct:
         return self.curr_ptr - self.head_ptr
 
     def isDataFittable(self, size):
+        if not (self.getCurrOffset() + size) <= self.size:
+            print("Sum: ", self.getCurrOffset() + size)
+            print("Self Size: ", self.size)
         return (self.getCurrOffset() + size) <= self.size
 
     def writeBytes(self, data):
@@ -842,18 +849,19 @@ class MotbinStruct:
 
     def allocateParryRelated(self):
         print("Allocating parry-related...")
-        # self.parry_related_ptr = self.align()
+        self.parry_related_ptr = self.align()
 
         for value in self.m['parry_related']:
-            # bytes = value.to_bytes(4)
-            try:
-                self.writeInt(value >> 16, 2)
-                self.writeInt(value & 0xFFFF, 2)
+                self.writeInt(value, 4)
+            #bytes = value.to_bytes(4)
+            # try:
+               # self.writeInt(value >> 16, 2)
+           #     self.writeInt(value & 0xFFFF, 2)
                 # self.writeBytes(bytes[0:2])
                 # self.writeBytes(bytes[2:4])
-            except:
-                print("ISSUE VALUE:", value)
-                raise
+         #   except:
+         #       print("ISSUE VALUE:", value)
+         #       raise
 
         return self.parry_related_ptr, len(self.m['parry_related'])
 
