@@ -229,6 +229,7 @@ structSizes = {
 }
 
 t8_offsetTable = {
+    '_0x4': {'offset': 0x4, 'size': 4},
     'character_name': {'offset': None, 'size': 'stringPtr'},
     'creator_name': {'offset': None, 'size': 'stringPtr'},
     'date': {'offset': None, 'size': 'stringPtr'},
@@ -357,6 +358,8 @@ t8_offsetTable = {
     'move:name_key': {'offset': 0x0, 'size': 4},
     'move:anim_key': {'offset': 0x4, 'size': 4},
     'move:anim_addr': {'offset': None, 'size': 8},
+    'move:anim_addr_enc1': {'offset': 0x18, 'size': 4},
+    'move:anim_addr_enc2': {'offset': 0x1C, 'size': 4},
     'move:vuln': {'offset': 0x20, 'size': 4},
     'move:hitlevel': {'offset': 0x24, 'size': 4},
     'move:cancel_addr': {'offset': 0x28, 'size': 8},
@@ -2098,6 +2101,8 @@ class Move:
             'anim_name': self.anim_name,
             **({'name_key': self.name_key} if self.name_key is not None else {}),
             **({'anim_key': self.anim_key} if self.anim_key is not None else {}),
+            **({'anim_addr_enc1': self.anim_addr_enc1} if self.anim_addr_enc1 is not None else {}),
+            **({'anim_addr_enc2': self.anim_addr_enc2} if self.anim_addr_enc2 is not None else {}),
             'vuln': self.vuln,
             'hitlevel': self.hitlevel,
             'cancel_idx': self.cancel_idx,
@@ -2428,6 +2433,7 @@ class Motbin:
             'version': self.version,
             'character_id': self.chara_id,
             'extraction_date': self.extraction_date,
+            **({'_0x4': self._0x4 } if hasattr(self, '_0x4') else {}),
             'character_name': self.name,
             'tekken_character_name': self.character_name,
             'creator_name': self.creator_name,

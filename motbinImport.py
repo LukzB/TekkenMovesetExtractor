@@ -25,6 +25,8 @@ projectile_size = 0xa8
 throw_extras_size = 0xC
 throws_size = 0x10
 
+placeholder_address = 0x146FD2500
+
 forbiddenMoves = ['Co_DA_Ground']
 
 
@@ -119,10 +121,10 @@ class Importer:
 
         p = MotbinStruct(m, folderName, self, animSearchFolder=charactersPath)
 
-        character_name = p.writeString(m['character_name'])
-        creator_name = p.writeString("creator")
-        date = p.writeString("date")
-        fulldate = p.writeString("date_full")
+        # character_name = p.writeString(m['character_name'])
+        # creator_name = p.writeString("creator")
+        # date = p.writeString("date")
+        # fulldate = p.writeString("date_full")
 
         requirements_ptr, requirement_count = p.allocateRequirements()
         cancel_extradata_ptr, cancel_extradata_size = p.allocateCancelExtradata()
@@ -150,12 +152,18 @@ class Importer:
         p.allocateMota()
 
         self.writeInt(p.motbin_ptr + 0x0, 65536, 4)
-        self.writeInt(p.motbin_ptr + 0x4, 4475208, 4)
+        self.writeInt(p.motbin_ptr + 0x4, m['_0x4'], 4)
+        self.writeInt(p.motbin_ptr + 0x8, 0x4B4554, 4)
 
         # self.writeInt(p.motbin_ptr, character_name, 8)
         # self.writeInt(p.motbin_ptr, creator_name, 8)
         # self.writeInt(p.motbin_ptr, date, 8)
         # self.writeInt(p.motbin_ptr, fulldate, 8)
+
+        self.writeInt(p.motbin_ptr, placeholder_address, 8)
+        self.writeInt(p.motbin_ptr, placeholder_address, 8)
+        self.writeInt(p.motbin_ptr, placeholder_address, 8)
+        self.writeInt(p.motbin_ptr, placeholder_address, 8)
 
         self.writeAliases(p.motbin_ptr, m)
 
@@ -298,7 +306,7 @@ def convertU15(number):
 
 def getMovesetTotalSize(m, folderName):
     size = 0
-    size += len(m['character_name']) + 1
+    # size += len(m['character_name']) + 1
 
     size = align8Bytes(size)
     size += len(m['requirements']) * 0x14
@@ -855,14 +863,15 @@ class MotbinStruct:
             value3 = extra_property['value3']
             value4 = extra_property['value4']
             value5 = extra_property['value5']
-            #t, _id, value, _0x4, requirement_idx, value2, value3, value4, value5 = getMoveExtrapropAlias(
-            #    self.m['version'], t, _id, value, _0x4, requirement_idx, value2, value3, value4, value5)
-            self.writeInt(t, 4)
-            self.writeInt(_id, 4)
-            self.writeInt(value, 4)
-            self.writeInt(_0x4, 4)
+            # Alias funciton not needed for now
+            # type, id, value, _0x4, requirement_idx, value2, value3, value4, value5 = getMoveExtrapropAlias(
+            #     self.m['version'], type, id, value, _0x4, requirement_idx, value2, value3, value4, value5)
             requirements_addr = self.getRequirementFromId(requirement_idx)
+            self.writeInt(type, 4)
+            self.writeInt(_0x4, 4)
             self.writeInt(requirements_addr, 8)
+            self.writeInt(id, 4)
+            self.writeInt(value, 4)
             self.writeInt(value2, 4)
             self.writeInt(value3, 4)
             self.writeInt(value4, 4)
@@ -882,10 +891,10 @@ class MotbinStruct:
             value3 = move_start_prop['value3']
             value4 = move_start_prop['value4']
             value5 = move_start_prop['value5']
-            self.writeInt(_id, 4)
-            self.writeInt(value, 4)
             requirements_addr = self.getRequirementFromId(requirement_idx)
             self.writeInt(requirements_addr, 8)
+            self.writeInt(id, 4)
+            self.writeInt(value, 4)
             self.writeInt(value2, 4)
             self.writeInt(value3, 4)
             self.writeInt(value4, 4)
@@ -907,9 +916,9 @@ class MotbinStruct:
             value3 = move_end_prop['value3']
             value4 = move_end_prop['value4']
             value5 = move_end_prop['value5']
-            self.writeInt(_id, 4)
-            self.writeInt(value, 4)
             self.writeInt(requirements_addr, 8)
+            self.writeInt(id, 4)
+            self.writeInt(value, 4)
             self.writeInt(value2, 4)
             self.writeInt(value3, 4)
             self.writeInt(value4, 4)
