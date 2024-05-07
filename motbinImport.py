@@ -88,11 +88,10 @@ class Importer:
               (current_motbin_ptr, old_character_name))
         print("NEW moveset pointer: 0x%x (%s)" %
               (moveset.motbin_ptr, moveset.m['character_name']))
-        print("Hit condition pointer: ", moveset.hit_conditions_ptr)
-        print("Hit conditions?: ", moveset.m['hit_conditions'])
-        self.writeInt(current_motbin_ptr + 0x190, moveset.hit_conditions_ptr, 8)
-        self.writeInt(current_motbin_ptr + 0x198, len(moveset.m['hit_conditions']), 8)
-        # self.writeInt(motbin_ptr_addr, moveset.motbin_ptr, 8)
+        # self.writeInt(current_motbin_ptr + 0x190, moveset.hit_conditions_ptr, 8)
+        # print("Hit condition count: ", len(moveset.m['hit_conditions']))
+        # self.writeInt(current_motbin_ptr + 0x198, len(moveset.m['hit_conditions']), 8)
+        self.writeInt(motbin_ptr_addr, moveset.motbin_ptr, 8)
 
         moveset.updateCameraMotaStaticPointer(playerAddr)
 
@@ -769,12 +768,9 @@ class MotbinStruct:
     def allocateHitConditions(self):
         print("Allocating hit conditions...")
         self.hit_conditions_ptr = self.align()
-
         for hit_condition in self.m['hit_conditions']:
-            requirement_addr = self.getRequirementFromId(
-                hit_condition['requirement_idx'])
-            reaction_list_addr = self.getReactionListFromId(
-                hit_condition['reaction_list_idx'])
+            requirement_addr = self.getRequirementFromId(hit_condition['requirement_idx'])
+            reaction_list_addr = self.getReactionListFromId(hit_condition['reaction_list_idx'])
             self.writeInt(requirement_addr, 8)
             self.writeInt(hit_condition['damage'], 4)
             self.writeInt(0, 4)
