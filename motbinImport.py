@@ -19,10 +19,10 @@ pushback_size = 0x10
 pushback_extra_size = 0x2
 extra_move_property_size = 0x28
 other_move_props_size = 0x20
-voiceclip_size = 0x4
+voiceclip_size = 0xC
 input_sequence_size = 0x10
 input_extradata_size = 0x8
-projectile_size = 0xa8
+projectile_size = 0xD8
 throw_extras_size = 0xC
 throws_size = 0x10
 parry_related_size = 0x4
@@ -312,40 +312,40 @@ def getMovesetTotalSize(m, folderName):
     # size += len(m['character_name']) + 1
 
     size = align8Bytes(size)
-    size += len(m['requirements']) * 0x14
+    size += len(m['requirements']) * requirement_size
 
     size = align8Bytes(size)
     size += len(m['cancel_extradata']) * 0x4
 
     size = align8Bytes(size)
-    size += len(m['cancels']) * 0x28
+    size += len(m['cancels']) * cancel_size
 
     size = align8Bytes(size)
-    size += len(m['group_cancels']) * 0x28
+    size += len(m['group_cancels']) * cancel_size
 
     size = align8Bytes(size)
-    size += len(m['pushback_extras']) * 0x2
+    size += len(m['pushback_extras']) * pushback_extra_size
 
     size = align8Bytes(size)
-    size += len(m['pushbacks']) * 0x10
+    size += len(m['pushbacks']) * pushback_size
 
     size = align8Bytes(size)
-    size += len(m['reaction_list']) * 0x70
+    size += len(m['reaction_list']) * reaction_list_size
 
     size = align8Bytes(size)
-    size += len(m['hit_conditions']) * 0x18
+    size += len(m['hit_conditions']) * hit_condition_size
 
     size = align8Bytes(size)
-    size += len(m['extra_move_properties']) * 0x28
+    size += len(m['extra_move_properties']) * extra_move_property_size
 
     size = align8Bytes(size)
-    size += len(m['move_start_props']) * 0x10
+    size += len(m['move_start_props']) * other_move_props_size
 
     size = align8Bytes(size)
-    size += len(m['move_end_props']) * 0x10
+    size += len(m['move_end_props']) * other_move_props_size
 
     size = align8Bytes(size)
-    size += len(m['voiceclips']) * 0x4
+    size += len(m['voiceclips']) * voiceclip_size
 
     size = align8Bytes(size)
     # size += sum([k for k in animInfos]) + len(animInfos.keys())
@@ -684,7 +684,7 @@ class MotbinStruct:
         if self.voiceclip_ptr != 0:
             return
         print("Allocating voiceclips IDs...")
-        self.voiceclip_ptr = self.align()
+        # self.voiceclip_ptr = self.align()
 
         for voiceclip in self.m['voiceclips']:
             self.writeInt(voiceclip['val1'], 4)
@@ -831,11 +831,6 @@ class MotbinStruct:
             for value in p['u2']:
                 self.writeInt(value, 4)
 
-            y = self.curr_ptr - curr
-            if y != 0xa8:
-                print("Error, %d %x" % (y, y))
-                raise
-
         return self.projectile_ptr, len(self.m['projectiles'])
 
     def allocateThrowExtras(self):
@@ -956,7 +951,7 @@ class MotbinStruct:
         return self.move_end_props_ptr, len(self.m['move_end_props'])
 
     def allocateUnknown289(self): 
-        print("Allocating 0x289...")
+        print("Allocating 0x298...")
         self.unknown_0x289_ptr = self.align()
 
         for unknown289 in self.m['_0x298']:
