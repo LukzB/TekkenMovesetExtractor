@@ -1852,8 +1852,8 @@ class Requirement:
                 'req': self.req,
                 'param': self.param,
                 **({'param2': self.param2 } if hasattr(self, 'param2') else {}),
-                **({'param3': self.param2 } if hasattr(self, 'param3') else {}),
-                **({'param4': self.param2 } if hasattr(self, 'param4') else {}),
+                **({'param3': self.param3 } if hasattr(self, 'param3') else {}),
+                **({'param4': self.param4 } if hasattr(self, 'param4') else {}),
             }
 
 

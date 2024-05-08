@@ -12,6 +12,7 @@ importVersion = "1.0.0"
 
 requirement_size = 0x14
 cancel_size = 0x28
+cancel_extradata_size = 0x4
 move_size = 0x3A0
 reaction_list_size = 0x70
 hit_condition_size = 0x18
@@ -22,11 +23,11 @@ other_move_props_size = 0x20
 voiceclip_size = 0xC
 input_sequence_size = 0x10
 input_extradata_size = 0x8
-projectile_size = 0xa8
+projectile_size = 0xD8
 throw_extras_size = 0xC
 throws_size = 0x10
 parry_related_size = 0x4
-unknown289_size = 0x18
+unknown298_size = 0x18
 
 placeholder_address = 0x146FD2500
 
@@ -150,7 +151,7 @@ class Importer:
         throw_extras_ptr, throw_extras_count = p.allocateThrowExtras()
         throws_ptr, throws_count = p.allocateThrows()
         parry_related_ptr, parry_related_count = p.allocateParryRelated()
-        unknown_0x289_ptr, unknown_0x289_count = p.allocateUnknown289()
+        unknown_0x298_ptr, unknown_0x298_count = p.allocateUnknown298()
 
         p.allocateMota()
 
@@ -227,8 +228,8 @@ class Importer:
         self.writeInt(p.motbin_ptr + 0x290, throws_ptr, 8)
         self.writeInt(p.motbin_ptr + 0x298, throws_count, 8)
 
-        self.writeInt(p.motbin_ptr + 0x2A0, unknown_0x289_ptr, 8)
-        self.writeInt(p.motbin_ptr + 0x2A8, unknown_0x289_count, 8)
+        self.writeInt(p.motbin_ptr + 0x2A0, unknown_0x298_ptr, 8)
+        self.writeInt(p.motbin_ptr + 0x2A8, unknown_0x298_count, 8)
 
         # p.applyMotaOffsets()
 
@@ -312,40 +313,40 @@ def getMovesetTotalSize(m, folderName):
     # size += len(m['character_name']) + 1
 
     size = align8Bytes(size)
-    size += len(m['requirements']) * 0x14
+    size += len(m['requirements']) * requirement_size
 
     size = align8Bytes(size)
-    size += len(m['cancel_extradata']) * 0x4
+    size += len(m['cancel_extradata']) * cancel_extradata_size
 
     size = align8Bytes(size)
-    size += len(m['cancels']) * 0x28
+    size += len(m['cancels']) * cancel_size
 
     size = align8Bytes(size)
-    size += len(m['group_cancels']) * 0x28
+    size += len(m['group_cancels']) * cancel_size
 
     size = align8Bytes(size)
-    size += len(m['pushback_extras']) * 0x2
+    size += len(m['pushback_extras']) * pushback_extra_size
 
     size = align8Bytes(size)
-    size += len(m['pushbacks']) * 0x10
+    size += len(m['pushbacks']) * pushback_size
 
     size = align8Bytes(size)
-    size += len(m['reaction_list']) * 0x70
+    size += len(m['reaction_list']) * reaction_list_size
 
     size = align8Bytes(size)
-    size += len(m['hit_conditions']) * 0x18
+    size += len(m['hit_conditions']) * hit_condition_size
 
     size = align8Bytes(size)
-    size += len(m['extra_move_properties']) * 0x28
+    size += len(m['extra_move_properties']) * extra_move_property_size
 
     size = align8Bytes(size)
-    size += len(m['move_start_props']) * 0x10
+    size += len(m['move_start_props']) * other_move_props_size
 
     size = align8Bytes(size)
-    size += len(m['move_end_props']) * 0x10
+    size += len(m['move_end_props']) * other_move_props_size
 
     size = align8Bytes(size)
-    size += len(m['voiceclips']) * 0xC
+    size += len(m['voiceclips']) * voiceclip_size
 
     size = align8Bytes(size)
     # size += sum([k for k in animInfos]) + len(animInfos.keys())
@@ -380,7 +381,7 @@ def getMovesetTotalSize(m, folderName):
     size += len(m['parry_related']) * parry_related_size
 
     size = align8Bytes(size)
-    size += len(m['_0x298']) * unknown289_size
+    size += len(m['_0x298']) * unknown298_size
     size = align8Bytes(size)
     # for i in range(12):
     #    try:
@@ -431,8 +432,8 @@ class MotbinStruct:
         self.projectile_ptr = 0
         self.throw_extras_ptr = 0
         self.throws_ptr = 0
-        self.unknown_0x289_ptr = 0
-        self.unknown_0x289_count = 0
+        self.unknown_0x298_ptr = 0
+        self.unknown_0x298_count = 0
 
         self.mota_list = []
         self.move_names_table = {}
@@ -815,8 +816,8 @@ class MotbinStruct:
             self.importer.writeBytes(
                 self.curr_ptr, bytes([0] * projectile_size))
 
-            for short in p['u1']:
-                self.writeInt(short, 4)
+            for value in p['u1']:
+                self.writeInt(value, 4)
 
             on_hit_addr = 0
             cancel_addr = 0
@@ -828,8 +829,8 @@ class MotbinStruct:
             self.writeInt(on_hit_addr, 8)
             self.writeInt(cancel_addr, 8)
 
-            for short in p['u2']:
-                self.writeInt(short, 4)
+            for value in p['u2']:
+                self.writeInt(value, 4)
 
         return self.projectile_ptr, len(self.m['projectiles'])
 
@@ -950,18 +951,18 @@ class MotbinStruct:
 
         return self.move_end_props_ptr, len(self.m['move_end_props'])
 
-    def allocateUnknown289(self): 
-        print("Allocating 0x289...")
-        self.unknown_0x289_ptr = self.align()
+    def allocateUnknown298(self): 
+        print("Allocating 0x298...")
+        self.unknown_0x298_ptr = self.align()
 
-        for unknown289 in self.m['_0x298']:
-            _0x0 = unknown289['_0x0']
-            _0x4 = unknown289['_0x4']
-            _0x6 = unknown289['_0x6']
-            requirement_idx = unknown289['requirement_idx']
+        for unknown298 in self.m['_0x298']:
+            _0x0 = unknown298['_0x0']
+            _0x4 = unknown298['_0x4']
+            _0x6 = unknown298['_0x6']
+            requirement_idx = unknown298['requirement_idx']
             requirements_addr = self.getRequirementFromId(requirement_idx)
-            _0xC = unknown289['_0xC']
-            _0x10 = unknown289['_0x10']
+            _0xC = unknown298['_0xC']
+            _0x10 = unknown298['_0x10']
             self.writeInt(_0x0, 4)
             self.writeInt(_0x4, 2)
             self.writeInt(_0x6, 2)
@@ -969,7 +970,7 @@ class MotbinStruct:
             self.writeInt(_0xC, 4)
             self.writeInt(_0x10, 4)
 
-        return self.unknown_0x289_ptr, len(self.m['_0x298'])
+        return self.unknown_0x298_ptr, len(self.m['_0x298'])
 
     def allocateAnimations(self):
         print("Allocating animations is not available in this build, skipping...")
