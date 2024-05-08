@@ -684,7 +684,7 @@ class MotbinStruct:
         if self.voiceclip_ptr != 0:
             return
         print("Allocating voiceclips IDs...")
-        # self.voiceclip_ptr = self.align()
+        self.voiceclip_ptr = self.align()
 
         for voiceclip in self.m['voiceclips']:
             self.writeInt(voiceclip['val1'], 4)
