@@ -114,10 +114,10 @@ t8StructSizes = {
     'ExtraMoveProperty_size': 0x28,
     'OtherMoveProperty_size': 0x20,
     'Move_size': 0x3A0,
-    'Voiceclip_size': 0x4,
+    'Voiceclip_size': 0xC,
     'InputExtradata_size': 0x8,
     'InputSequence_size': 0x10,
-    'Projectile_size': 0xa8,
+    'Projectile_size': 0xD8,
     'ThrowExtra_size': 0xC,
     'Throw_size': 0x10,
     'UnknownParryRelated_size': 0x4,
@@ -405,7 +405,9 @@ t8_offsetTable = {
     'move:u17': {'offset': 0x216, 'size': 2},
     'move:u18': {'offset': 0x39C, 'size': 4},
 
-    'voiceclip:value': {'offset': 0x0, 'size': 4},
+    'voiceclip:val1': {'offset': 0x0, 'size': 4},
+    'voiceclip:val2': {'offset': 0x4, 'size': 4},
+    'voiceclip:val3': {'offset': 0x8, 'size': 4},
 
     'inputextradata:u1': {'offset': 0x0, 'size': 4},
     'inputextradata:u2': {'offset': 0x4, 'size': 4},
@@ -2197,6 +2199,12 @@ class Voiceclip:
                     self.value & 0x000000FF)
 
     def dict(self):
+        if self.TekkenVersion == "t8":
+            return {
+                "val1": self.val1,
+                "val2": self.val2,
+                "val3": self.val3,
+            }
         return self.value
 
 

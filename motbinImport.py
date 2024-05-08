@@ -19,7 +19,7 @@ pushback_size = 0x10
 pushback_extra_size = 0x2
 extra_move_property_size = 0x28
 other_move_props_size = 0x20
-voiceclip_size = 0x4
+voiceclip_size = 0xC
 input_sequence_size = 0x10
 input_extradata_size = 0x8
 projectile_size = 0xa8
@@ -345,7 +345,7 @@ def getMovesetTotalSize(m, folderName):
     size += len(m['move_end_props']) * 0x10
 
     size = align8Bytes(size)
-    size += len(m['voiceclips']) * 0x4
+    size += len(m['voiceclips']) * 0xC
 
     size = align8Bytes(size)
     # size += sum([k for k in animInfos]) + len(animInfos.keys())
@@ -687,7 +687,9 @@ class MotbinStruct:
         self.voiceclip_ptr = self.align()
 
         for voiceclip in self.m['voiceclips']:
-            self.writeInt(voiceclip, 4)
+            self.writeInt(voiceclip['val1'], 4)
+            self.writeInt(voiceclip['val2'], 4)
+            self.writeInt(voiceclip['val3'], 4)
 
         return self.voiceclip_ptr, len(self.m['voiceclips'])
 
@@ -814,7 +816,7 @@ class MotbinStruct:
                 self.curr_ptr, bytes([0] * projectile_size))
 
             for short in p['u1']:
-                self.writeInt(short, 2)
+                self.writeInt(short, 4)
 
             on_hit_addr = 0
             cancel_addr = 0
@@ -827,12 +829,7 @@ class MotbinStruct:
             self.writeInt(cancel_addr, 8)
 
             for short in p['u2']:
-                self.writeInt(short, 2)
-
-            y = self.curr_ptr - curr
-            if y != 0xa8:
-                print("Error, %d %x" % (y, y))
-                raise
+                self.writeInt(short, 4)
 
         return self.projectile_ptr, len(self.m['projectiles'])
 
