@@ -117,7 +117,7 @@ t8StructSizes = {
     'Voiceclip_size': 0xC,
     'InputExtradata_size': 0x8,
     'InputSequence_size': 0x10,
-    'Projectile_size': 0xa8,
+    'Projectile_size': 0xD8,
     'ThrowExtra_size': 0xC,
     'Throw_size': 0x10,
     'UnknownParryRelated_size': 0x4,
