@@ -5,9 +5,9 @@ repo_link   = https://raw.githubusercontent.com/Kiloutre/TekkenMovesetExtractor/
 # Tekken 8 addresses and offsets. Changes with updates
 t8_process_name       = Polaris-Win64-Shipping.exe
 t8_base               = 0x0                # base is useless here
-t8_p1_addr            = +0x08E67620, 0x30, 0x0
-t8_playerstruct_size  = 0x1A810            # Distance between 2 players addresses
-t8_motbin_offset      = 0x2CB0
+t8_p1_addr            = +0x0999D500, 0x30, 0x0
+t8_playerstruct_size  = 0x1B580            # Distance between 2 players addresses
+t8_motbin_offset      = 0x2D88
 t8_chara_id_offset    = 0x168
 
 # Tekken 7 addresses and offsets. Changes with updates
@@ -89,10 +89,12 @@ t4_chara_id_offset    = -0xEEC
 
 
 # miscellaneous
-player_curr_move_addr_offset = 0x220                          # Used by Animator to overwrite current address
-player_curr_move_offset      = 0x350                          # Used by editor to force a move to play
-next_move_offset             = 0xDA0                          # Used by editor to force sa move to play
-curr_frame_timer_offset      = 0x1D4                          # Used by editor to force a move to play
+movelist_offset              = 0x230                          # Used by editor to force play a move
+move_size                    = 0x3A0
+player_curr_move_addr_offset = 0x3B8                          # Used by Animator to overwrite current address
+player_curr_move_offset      = 0x51C                          # Used by editor to force a move to play
+next_move_offset             = 0x1D70                         # Used by editor to force sa move to play
+curr_frame_timer_offset      = 0x370                          # Used by editor to force a move to play
 code_injection_addr          = +0x74ABFF                      # Address that writes on player+motbin_offset; used for online play. 
 playerid_ptr                 = +0x34CE508, 0x0                # Used to find whether local player is 1P or 2P; used for online play
 #Finding playerid_starting_ptr: Go in training mode as 2p; scan for value on 1. Change to 1P; scan for value on 0. Repeat many times to lower matches to a few hundreds. Do combo; grabs and change outfit & character to keep lowering matches.

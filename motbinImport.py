@@ -18,6 +18,7 @@ hit_condition_size = 0x18
 pushback_size = 0x10
 pushback_extra_size = 0x2
 extra_move_property_size = 0x28
+other_move_props_size = 0x20
 voiceclip_size = 0x4
 input_sequence_size = 0x10
 input_extradata_size = 0x8
@@ -565,6 +566,16 @@ class MotbinStruct:
             return 0
         return self.extra_move_properties_ptr + (idx * extra_move_property_size)
 
+    def getMoveStartPropertiesFromId(self, idx):
+        if self.move_start_props_ptr == 0 or idx == -1:
+            return 0
+        return self.move_start_props_ptr + (idx * other_move_props_size)
+
+    def getMoveEndPropertiesFromId(self, idx):
+        if self.move_start_props_ptr == 0 or idx == -1:
+            return 0
+        return self.move_end_props_ptr + (idx * other_move_props_size)
+
     def getVoiceclipFromId(self, idx):
         if self.voiceclip_ptr == 0 or idx == -1:
             return 0
@@ -1070,12 +1081,9 @@ class MotbinStruct:
             self.writeInt(move['u12'], 4) # ground_fall
 
             voiceclip_addr = self.getVoiceclipFromId(move['voiceclip_idx'])
-            extra_properties_addr = self.getExtraMovePropertiesFromId(
-                move['extra_properties_idx'])
-            move_start_properties_addr = self.getExtraMovePropertiesFromId(
-                move['move_start_properties_idx'])
-            move_end_properties_addr = self.getExtraMovePropertiesFromId(
-                move['move_end_properties_idx'])
+            extra_properties_addr = self.getExtraMovePropertiesFromId(move['extra_properties_idx'])
+            move_start_properties_addr = self.getMoveStartPropertiesFromId(move['move_start_properties_idx'])
+            move_end_properties_addr = self.getMoveEndPropertiesFromId(move['move_end_properties_idx'])
 
             self.writeInt(voiceclip_addr, 8) # 0x88
             self.writeInt(extra_properties_addr, 8) # 0x90
