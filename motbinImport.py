@@ -687,7 +687,9 @@ class MotbinStruct:
         self.voiceclip_ptr = self.align()
 
         for voiceclip in self.m['voiceclips']:
-            self.writeInt(voiceclip, 4)
+            self.writeInt(voiceclip['val1'], 4)
+            self.writeInt(voiceclip['val2'], 4)
+            self.writeInt(voiceclip['val3'], 4)
 
         return self.voiceclip_ptr, len(self.m['voiceclips'])
 
@@ -813,8 +815,8 @@ class MotbinStruct:
             self.importer.writeBytes(
                 self.curr_ptr, bytes([0] * projectile_size))
 
-            for short in p['u1']:
-                self.writeInt(short, 2)
+            for value in p['u1']:
+                self.writeInt(value, 4)
 
             on_hit_addr = 0
             cancel_addr = 0
@@ -826,8 +828,8 @@ class MotbinStruct:
             self.writeInt(on_hit_addr, 8)
             self.writeInt(cancel_addr, 8)
 
-            for short in p['u2']:
-                self.writeInt(short, 2)
+            for value in p['u2']:
+                self.writeInt(value, 4)
 
             y = self.curr_ptr - curr
             if y != 0xa8:
