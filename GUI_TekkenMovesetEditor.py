@@ -186,7 +186,13 @@ reactionlistExtraLaunchFields = [
     'left_side_direction',
     'right_side_direction',
     'front_ch_direction',
-    'downed_direction'
+    'downed_direction',
+    'front_rotation',
+    'back_rotation',
+    'left_side_rotation',
+    'right_side_rotation',
+    'front_ch_rotation',
+    'downed_rotation'
 ]
 
 reactionlistFields = {
@@ -217,7 +223,13 @@ reactionlistFields = {
     'left_side_direction': 'short',
     'right_side_direction': 'short',
     'front_ch_direction': 'short',
-    'downed_direction': 'short'
+    'downed_direction': 'short',
+    'front_rotation': 'short',
+    'back_rotation': 'short',
+    'left_side_rotation': 'short',
+    'right_side_rotation': 'short',
+    'front_ch_rotation': 'short',
+    'downed_rotation': 'short'
 }
 
 pushbackFields = {
@@ -1414,6 +1426,12 @@ class ReactionListEditor(FormEditor):
             self.setField(reactionlistExtraLaunchFields[3], itemData['right_side_direction'], True)
             self.setField(reactionlistExtraLaunchFields[4], itemData['front_counterhit_direction'], True)
             self.setField(reactionlistExtraLaunchFields[5], itemData['downed_direction'], True)
+            self.setField(reactionlistExtraLaunchFields[6], itemData['front_rotation'], True)
+            self.setField(reactionlistExtraLaunchFields[7], itemData['back_rotation'], True)
+            self.setField(reactionlistExtraLaunchFields[8], itemData['left_rotation'], True)
+            self.setField(reactionlistExtraLaunchFields[9], itemData['right_rotation'], True)
+            self.setField(reactionlistExtraLaunchFields[10], itemData['front_counterhit_rotation'], True)
+            self.setField(reactionlistExtraLaunchFields[11], itemData['downed_rotation'], True)
 
         self.editMode = True
         self.disableSaveButton()

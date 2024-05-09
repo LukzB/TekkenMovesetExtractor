@@ -1987,8 +1987,8 @@ class ReactionList:
                 'crouch_block': self.crouch_block,
                 'wallslump': self.wallslump,
                 'downed': self.downed,
-                'front_counterhit_direction': self.front_counterhit_rotation,
-                'downed_direction': self.downed_rotation
+                'front_counterhit_rotation': self.front_counterhit_rotation,
+                'downed_rotation': self.downed_rotation
             }
         return {
             'pushback_indexes': self.pushback_indexes,
