@@ -1104,38 +1104,59 @@ class MotbinStruct:
             self.writeInt(move['hitbox_location1'], 4) # 0xC0
             
             # 0xC4 to 0xE8
-            for _ in range(0, 9):
-                self.writeInt(0, 4)
+            for value in move['unk1']:
+                self.writeInt(value, 4)
+            # for _ in range(0, 9):
+            #     self.writeInt(0, 4)
 
             self.writeInt(move['first_active_frame2'], 4) # 0xE8
             self.writeInt(move['last_active_frame2'], 4) # 0xEC
             self.writeInt(move['hitbox_location2'], 4) # 0xF0
 
+            # 0xF4 to 0x114
+            for value in move['unk2']:
+                self.writeInt(value, 4)
+            
             # 0xF4 to 0x214
-            for _ in range(0, 72):
-                self.writeInt(0, 4)
+            # for _ in range(0, 72):
+            #     self.writeInt(0, 4)
+            
+            # 0x118 to 0x148
+            self.writeInt(move['first_active_frame3'], 4) # 0x118
+            self.writeInt(move['last_active_frame3'], 4) # 0x11C
+            self.writeInt(move['hitbox_location3'], 4) # 0x120
+            for value in move['unk3']:
+                self.writeInt(value, 4)
+            
+            # 0x148 to 0x214
+            for value in move['unk4']:
+                self.writeInt(value, 4)
 
             self.writeInt(move['u16'], 2) # 0x214
             self.writeInt(move['u17'], 2) # 0x216
 
+            # 0x218 - 0x39C
+            for value in move['unk5']:
+                self.writeInt(value, 4)
+
             # 0x218 - 0x228
-            for _ in range(0, 4):
-                self.writeInt(0, 4)
+            # for _ in range(0, 4):
+            #     self.writeInt(0, 4)
             
             # 0x228 - 0x384
-            for _ in range(0, 8):
-                for j in range(0, 5):
-                    self.writeInt(0, 4)
-                for j in range(0, 3):
-                    self.writeInt(-1, 4)
-                for j in range(0, 3):
-                    self.writeInt(0xBF800000, 4)
+            # for _ in range(0, 8):
+            #     for j in range(0, 5):
+            #         self.writeInt(0, 4)
+            #     for j in range(0, 3):
+            #         self.writeInt(-1, 4)
+            #     for j in range(0, 3):
+            #         self.writeInt(0xBF800000, 4)
 
-            self.writeInt(0, 4) # 0x388
-            self.writeInt(0, 4) # 0x38C
-            self.writeInt(0, 4) # 0x390
-            self.writeInt(0, 4) # 0x394
-            self.writeInt(0, 4) # 0x398
+            # self.writeInt(0, 4) # 0x388
+            # self.writeInt(0, 4) # 0x38C
+            # self.writeInt(0, 4) # 0x390
+            # self.writeInt(0, 4) # 0x394
+            # self.writeInt(0, 4) # 0x398
             self.writeInt(move['u18'], 4) # 0x39C
 
         for move_id in forbiddenMoveIds:
