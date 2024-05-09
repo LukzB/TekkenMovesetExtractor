@@ -285,7 +285,7 @@ t8_offsetTable = {
 
     'pushback:val1': {'offset': 0x0, 'size': 2},
     'pushback:val2': {'offset': 0x2, 'size': 2},
-    'pushback:val3': {'offset': 0x4, 'size': 2},
+    'pushback:val3': {'offset': 0x4, 'size': 4},
     'pushback:extra_addr': {'offset': 0x8, 'size': 8},
 
     'pushbackextradata:value': {'offset': 0x0, 'size': 2},
