@@ -321,8 +321,8 @@ t8_offsetTable = {
     'reactionlist:back_rotation': {'offset': 0x46, 'size': 2},
     'reactionlist:left_side_rotation': {'offset': 0x48, 'size': 2},
     'reactionlist:right_side_rotation': {'offset': 0x4A, 'size': 2},
-    'reactionlist:front_counterhit_rotation': {'offset': 0x4C, 'size': 2},
-    'reactionlist:downed_rotation': {'offset': 0x4E, 'size': 2},
+    # vertical_pushback
+    'reactionlist:vertical_pushback': {'offset': 0x4C, 'size': 4},
     # move ids
     'reactionlist:standing': {'offset': 0x50, 'size': 2},
     'reactionlist:crouch': {'offset': 0x52, 'size': 2},
@@ -337,7 +337,9 @@ t8_offsetTable = {
     'reactionlist:block': {'offset': 0x64, 'size': 2},
     'reactionlist:crouch_block': {'offset': 0x66, 'size': 2},
     'reactionlist:wallslump': {'offset': 0x68, 'size': 2},
-    'reactionlist:downed': {'offset': 0x6a, 'size': 2},
+    'reactionlist:downed': {'offset': 0x6A, 'size': 2},
+    'reactionlist:front_counterhit_rotation': {'offset': 0x6C, 'size': 2},
+    'reactionlist:downed_rotation': {'offset': 0x6E, 'size': 2},
 
     'hitcondition:requirement_addr': {'offset': 0x0, 'size': 8},
     'hitcondition:damage': {'offset': 0x8, 'size': 4},
@@ -1960,7 +1962,6 @@ class ReactionList:
         if self.TekkenVersion == 't8':
             return {
                 'pushback_indexes': self.pushback_indexes,
-                'vertical_pushback': 0,
                 'front_direction': self.front_direction,
                 'back_direction': self.back_direction,
                 'left_side_direction': self.left_side_direction,
@@ -1971,8 +1972,7 @@ class ReactionList:
                 'back_rotation': self.back_rotation,
                 'left_side_rotation': self.left_side_rotation,
                 'right_side_rotation': self.right_side_rotation,
-                'front_counterhit_rotation': self.front_counterhit_rotation,
-                'downed_rotation': self.downed_rotation,
+                'vertical_pushback': self.vertical_pushback,
                 'standing': self.standing,
                 'ch': self.ch,
                 'crouch': self.crouch,
@@ -1987,6 +1987,8 @@ class ReactionList:
                 'crouch_block': self.crouch_block,
                 'wallslump': self.wallslump,
                 'downed': self.downed,
+                'front_counterhit_direction': self.front_counterhit_rotation,
+                'downed_direction': self.downed_rotation
             }
         return {
             'pushback_indexes': self.pushback_indexes,

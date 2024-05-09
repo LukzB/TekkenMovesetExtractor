@@ -768,11 +768,11 @@ class MotbinStruct:
             self.writeInt(reaction_list['left_side_direction'], 2)
             self.writeInt(reaction_list['right_side_direction'], 2)
             self.writeInt(reaction_list['front_counterhit_direction'], 2)
+            self.writeInt(reaction_list['downed_direction'], 2)
             self.writeInt(reaction_list['front_rotation'], 2)
             self.writeInt(reaction_list['back_rotation'], 2)
             self.writeInt(reaction_list['left_side_rotation'], 2)
             self.writeInt(reaction_list['right_side_rotation'], 2)
-            self.writeInt(reaction_list['front_counterhit_rotation'], 2)
             self.writeInt(reaction_list['vertical_pushback'], 4)
             self.writeInt(reaction_list['standing'], 2)
             self.writeInt(reaction_list['crouch'], 2)
@@ -788,9 +788,9 @@ class MotbinStruct:
             self.writeInt(reaction_list['crouch_block'], 2)
             self.writeInt(reaction_list['wallslump'], 2)
             self.writeInt(reaction_list['downed'], 2)
-            self.writeInt(reaction_list['downed_direction'], 2)
+            self.writeInt(reaction_list['front_counterhit_rotation'], 2)
             self.writeInt(reaction_list['downed_rotation'], 2)
-            # self.skip(4) unused
+            # self.skip(4) # unused
 
         return self.reaction_list_ptr, len(self.m['reaction_list'])
 
