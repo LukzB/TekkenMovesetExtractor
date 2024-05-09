@@ -898,7 +898,7 @@ class MotbinStruct:
             self.writeInt(id, 4)
             self.writeInt(value, 4)
             self.writeInt(value2, 4)
-            self.writeInt(value3, 4)
+            self.writeInt(value3, 4) # voiceline ID??
             self.writeInt(value4, 4)
             self.writeInt(value5, 4)
 

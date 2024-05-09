@@ -100,7 +100,6 @@ fieldLabels = {
 
 moveFields = {
     'name': 'text',
-    'anim_name': 'text',
     'vuln': 'int',
     'hitlevel': 'int',
     'cancel_idx': 'positive_index',
@@ -109,21 +108,33 @@ moveFields = {
     'hit_condition_idx': 'positive_index',
     'voiceclip_idx': 'index',
     'extra_properties_idx': 'index',
+    'move_start_properties_idx': 'index',
+    'move_end_properties_idx': 'index',
     'hitbox_location': 'hex',
     'first_active_frame': 'int',
     'last_active_frame': 'int',
+    'hitbox_location1': 'hex',
+    'first_active_frame1': 'int',
+    'last_active_frame1': 'int',
+    'hitbox_location2': 'hex',
+    'first_active_frame2': 'int',
+    'last_active_frame2': 'int',
     'u2': 'long',
     'u3': 'long',
     'u4': 'long',
     'u6': 'int',
     'u7': 'short',
-    'u8': 'short',
     'u8_2': 'short',
+    '_0x64': 'int',
+    'ordinal_id': 'positive_index',
+    '_0x70': 'int',
+    '_0x74': 'int',
     'u9': 'int',
     'u10': 'int',
     'u11': 'int',
     'u12': 'int',
     'u15': 'int',
+    '_0xAC': 'int',
     'u16': 'short',
     'u18': 'short',
     'u17': 'int'
@@ -148,7 +159,9 @@ requirementFields = {
 extrapropFields = {
     'type': 'int',
     'id': 'hex',
-    'value': 'int'
+    'requirement_idx': 'positive_index',
+    'value': 'int',
+    'value3': 'int'
 }
 
 hitConditionFields = {
