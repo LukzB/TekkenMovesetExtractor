@@ -1039,15 +1039,15 @@ class MotbinStruct:
             # anim_name = anim_dict['name_ptr']
             # anim_ptr = anim_dict['data_ptr']
 
-            self.writeInt(move['name_key'], 4)
-            self.writeInt(move['anim_key'], 4)
-            self.writeInt(placeholder_address, 8)
-            self.writeInt(placeholder_address, 8)
-            self.writeInt(move['anim_addr_enc1'], 4)
-            self.writeInt(move['anim_addr_enc2'], 4)
-            self.writeInt(move['vuln'], 4)
-            self.writeInt(move['hitlevel'], 4)
-            self.writeInt(self.getCancelFromId(move['cancel_idx']), 8)
+            self.writeInt(move['name_key'], 4) # 0x0
+            self.writeInt(move['anim_key'], 4) # 0x4
+            self.writeInt(placeholder_address, 8) # 0x8
+            self.writeInt(placeholder_address, 8) # 0x10
+            self.writeInt(move['anim_addr_enc1'], 4) # 0x18
+            self.writeInt(move['anim_addr_enc2'], 4) # 0x1C
+            self.writeInt(move['vuln'], 4) # 0x20
+            self.writeInt(move['hitlevel'], 4) # 0x24
+            self.writeInt(self.getCancelFromId(move['cancel_idx']), 8) # 0x28
 
             self.writeInt(0, 8)  # 0x30
             self.writeInt(0, 8)  # 0x38
@@ -1056,9 +1056,9 @@ class MotbinStruct:
             self.writeInt(move['u4'], 8) # 0x50
             self.writeInt(move['u6'], 4) # 0x58
 
-            self.writeInt(move['transition'], 2) # 0x5c
+            self.writeInt(move['transition'], 2) # 0x5C
 
-            self.writeInt(move['u7'], 2) # 0x5e
+            self.writeInt(move['u7'], 2) # 0x5E
             self.writeInt(move['ordinal_id'], 4) # 0x60
             self.writeInt(move['_0x64'], 4) # 0x64
             # self.writeInt(move['u8'], 2)
@@ -1067,16 +1067,16 @@ class MotbinStruct:
 
             on_hit_addr = self.getHitConditionFromId(move['hit_condition_idx'])
             self.writeInt(on_hit_addr, 8) # 0x68
-            self.writeInt(move['_0x70'], 4)
-            self.writeInt(move['_0x74'], 4)
+            self.writeInt(move['_0x70'], 4) # 0x70
+            self.writeInt(move['_0x74'], 4) # 0x74
             self.writeInt(move['anim_max_len'], 4) # 0x78
 
             if self.m['version'] == "Tag2" or self.m['version'] == "Revolution":
                 move['u15'] = convertU15(move['u15'])
 
-            self.writeInt(move['u10'], 4) # airborne_start
-            self.writeInt(move['u11'], 4) # airborne_end
-            self.writeInt(move['u12'], 4) # ground_fall
+            self.writeInt(move['u10'], 4) # 0x7C airborne_start
+            self.writeInt(move['u11'], 4) # 0x80 airborne_end
+            self.writeInt(move['u12'], 4) # 0x84 ground_fall
 
             voiceclip_addr = self.getVoiceclipFromId(move['voiceclip_idx'])
             extra_properties_addr = self.getExtraMovePropertiesFromId(move['extra_properties_idx'])
@@ -1103,7 +1103,7 @@ class MotbinStruct:
             self.writeInt(move['last_active_frame1'], 4) # 0xBC
             self.writeInt(move['hitbox_location1'], 4) # 0xC0
             
-            # 0xC4 to 0xE4
+            # 0xC4 to 0xE8
             for _ in range(0, 9):
                 self.writeInt(0, 4)
 
@@ -1111,8 +1111,15 @@ class MotbinStruct:
             self.writeInt(move['last_active_frame2'], 4) # 0xEC
             self.writeInt(move['hitbox_location2'], 4) # 0xF0
 
-            # 0xF4 to 0x224
-            for _ in range(0, 77):
+            # 0xF4 to 0x214
+            for _ in range(0, 72):
+                self.writeInt(0, 4)
+
+            self.writeInt(move['u16'], 2) # 0x214
+            self.writeInt(move['u17'], 2) # 0x216
+
+            # 0x218 - 0x228
+            for _ in range(0, 4):
                 self.writeInt(0, 4)
             
             # 0x228 - 0x384
@@ -1124,8 +1131,6 @@ class MotbinStruct:
                 for j in range(0, 3):
                     self.writeInt(0xBF800000, 4)
 
-            # self.writeInt(move['u16'], 2)
-            # self.writeInt(move['u17'], 2)
             self.writeInt(0, 4) # 0x388
             self.writeInt(0, 4) # 0x38C
             self.writeInt(0, 4) # 0x390

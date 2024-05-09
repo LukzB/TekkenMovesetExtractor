@@ -377,7 +377,7 @@ t8_offsetTable = {
     'move:_0x70': {'offset': 0x70, 'size': 4},
     'move:_0x74': {'offset': 0x74, 'size': 4},
     'move:anim_max_len': {'offset': 0x78, 'size': 4},
-    'move:u10': {'offset': 0x7c, 'size': 4},
+    'move:u10': {'offset': 0x7C, 'size': 4},
     'move:u11': {'offset': 0x80, 'size': 4},
     'move:u12': {'offset': 0x84, 'size': 4},
     'move:voiceclip_ptr': {'offset': 0x88, 'size': 8},
