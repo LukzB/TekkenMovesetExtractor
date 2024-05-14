@@ -96,88 +96,12 @@
 226,Opponent character ID
 227,Opponent NOT character ID
 228,Character Controller
-256,Bryan taunt value >= param
-258,Value (prop 0x807c) >= param
-259,Bryan taunted
-276,prop 0x80c8 >= param
-277,prop 0x80cb >= param
-287,_
-288,prop 0x810c >= param
-311,Chloe Points <= param
-313,prop 0x80c8 <= param
-314,prop 0x80cb <= param
-324,player flag <= param
-325,prop 0x810c <= param
-326,prop 0x80ed <= param
-332,Check value (prop 0x807c)
-347,Kazuya Devil Form
-348,Chloe points == param
-349,Check value (prop 0x80c5)
-350,Check value (prop 0x80c8)
-351,Check value (prop 0x80cb)
-354,Claudio Starburst
-355,Check value (prop 0x80a6)
-356,Check value (prop 0x80a9)
-362,_
-364,Check value (prop 0x80ed)
-535,Player speed >= param
-536,Player speed <= param
-537,Player speed == param
-555,Random number generator (uniform)
-556,Random number generator (weighted)
-559,Arcade Battle
-561,Story Battle
-562,Story Battle Number
-563,Customization seq#
-566,Gamemode
-567,Round Type?
-569,Outro Related(?)
-572,Round Number?
-573,Outro Related(?)
-576,Check Stage ID
-582,Player check (P1/P2)
-586,Character is male
-587,Character is female
-610,Opponent is Airborne
-611,Opponent is Not Airborne
-612,Has item
-617,Juggle
-618,Screw available
-632,Meter >= param
-637,Treasure Battle Special Match
-639,Assist button pressed
-640,Check Match Point
-642,Parry Zoom
-644,Once per match (Leroy Cane)
-646,is Kuni mask On?
-768,Arcade Cutscene
-788,Projectile on-hit
-789,Projectile on-block
-810,prop 0x8414 >= param
-811,prop 0x8414 <= param
-812,Check value (prop 0x8414)
-814,Basic combo enabled
-816,Parry high
-817,Parry mid
-818,Parry low
-819,Parry high and mid
-820,Parry group
-833,Attack absorption (Power Crush)
-845,Parry high
-846,Parry mid
-847,Parry low
-848,Parry high and mid
-849,Parry group
-862,Parry high (special)
-863,Parry mid (special)
-864,Parry low (special)
-865,Parry high and mid (special)
-866,Parry high
-867,Parry mid
-868,Parry low
-869,Parry high and mid
-874,Parry high
-875,Parry mid
-876,Parry low
-877,Parry high and mid
-900,Requirements end
+654,RNG-related
+667,Playing Story mode
+668,Story battle number
+718,Has Item
+723,Juggle
+724,Screw available
+1035,Parry high
+1049,Attack absorption
+1100,Requirements end

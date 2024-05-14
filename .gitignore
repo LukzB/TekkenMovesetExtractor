@@ -4,3 +4,4 @@ extracted_chars*/
 dist
 build
 *.spec
+*script*
