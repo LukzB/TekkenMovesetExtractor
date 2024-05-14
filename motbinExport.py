@@ -321,8 +321,9 @@ t8_offsetTable = {
     'reactionlist:back_rotation': {'offset': 0x46, 'size': 2},
     'reactionlist:left_side_rotation': {'offset': 0x48, 'size': 2},
     'reactionlist:right_side_rotation': {'offset': 0x4A, 'size': 2},
-    # vertical_pushback
+    # vertical_pushback a.k.a front_counterhit_rotation
     'reactionlist:vertical_pushback': {'offset': 0x4C, 'size': 4},
+    'reactionlist:downed_rotation': {'offset': 0x4E, 'size': 2},
     # move ids
     'reactionlist:standing': {'offset': 0x50, 'size': 2},
     'reactionlist:crouch': {'offset': 0x52, 'size': 2},
@@ -338,8 +339,8 @@ t8_offsetTable = {
     'reactionlist:crouch_block': {'offset': 0x66, 'size': 2},
     'reactionlist:wallslump': {'offset': 0x68, 'size': 2},
     'reactionlist:downed': {'offset': 0x6A, 'size': 2},
-    'reactionlist:front_counterhit_rotation': {'offset': 0x6C, 'size': 2},
-    'reactionlist:downed_rotation': {'offset': 0x6E, 'size': 2},
+    # 'reactionlist:front_counterhit_rotation': {'offset': 0x6C, 'size': 2},
+    # 'reactionlist:downed_rotation': {'offset': 0x6E, 'size': 2},
 
     'hitcondition:requirement_addr': {'offset': 0x0, 'size': 8},
     'hitcondition:damage': {'offset': 0x8, 'size': 4},
