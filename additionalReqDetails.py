@@ -29,19 +29,19 @@ charIDs = {
     27: 'Jun',
     28: 'Reina',
     29: 'Azucena',
-    30: 'Raven', # Placement of ID not 100% confirmed, just intuition
-    31: 'Victor', # Placement of ID not 100% confirmed, just intuition
-    32: 'Dummy',
-    33: 'DLC1',
-    34: 'DLC2',
+    30: 'Raven',
+    31: 'Victor',
+    32: 'Azazel',
+    33: 'Eddy',
+    34: 'Lidia',
     35: 'DLC3',
     36: 'DLC4',
-    116: '???',
-    117: '???',
-    118: '???',
+    116: 'Dummy',
+    117: 'Angel Jin',
+    118: 'True Devil Kazuya',
     119: 'Jack-7',
-    120: '???',
-    121: '???'
+    120: 'Soldier',
+    121: 'Devil Jin (v2)'
 }
 
 gamemodes = {
@@ -148,3 +148,8 @@ reqDetailsList = {
     # 562: storyBattles,  # Story Battle Number
     566: gamemodes,  # Game mode
 }
+
+def getStoryBattle(battleCode: int):
+    chapter = (battleCode & 0xF0) >> 4
+    fight = battleCode & 0xF
+    return "CH %d BT %d" % (chapter, fight)
