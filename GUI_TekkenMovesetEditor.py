@@ -34,13 +34,14 @@ def getLabel(itemId, key):
 def appendFurtherDetails(itemId, param, key):
     detail = ""
     if key == 'requirements':  # for requirements
+        if itemId == 668:  # Story Battle Number
+            detail = " (%s)" % ard.getStoryBattle(param)
+            return detail
         try:
             desc = ard.reqDetailsList[itemId].get(param, "Invalid")
         except KeyError:
             return detail
         detail = " : %s" % desc if desc != None else ""
-        if itemId == 559:  # Story Battle Number
-            detail = " (%s)" % ard.storyBattles.get(param, "Invalid")
     return detail
 
 
@@ -95,6 +96,7 @@ fieldLabels = {
     },
     'reaction_list': {
         'standing': 'default',
+        'vertical_pushback': 'vertical_pushback / front_ch_rot',
     }
 }
 
@@ -196,7 +198,7 @@ reactionlistExtraLaunchFields = [
 ]
 
 reactionlistFields = {
-    'vertical_pushback': 'int',
+    # 'vertical_pushback': 'int',
     'standing': 'short',
     'ch': 'short',
     'crouch': 'short',
@@ -228,7 +230,7 @@ reactionlistFields = {
     'back_rotation': 'short',
     'left_side_rotation': 'short',
     'right_side_rotation': 'short',
-    'front_ch_rotation': 'short',
+    'vertical_pushback': 'short', #aka front_counterhit_rotation
     'downed_rotation': 'short'
 }
 
@@ -1430,7 +1432,7 @@ class ReactionListEditor(FormEditor):
             self.setField(reactionlistExtraLaunchFields[7], itemData['back_rotation'], True)
             self.setField(reactionlistExtraLaunchFields[8], itemData['left_rotation'], True)
             self.setField(reactionlistExtraLaunchFields[9], itemData['right_rotation'], True)
-            self.setField(reactionlistExtraLaunchFields[10], itemData['front_counterhit_rotation'], True)
+            self.setField(reactionlistExtraLaunchFields[10], itemData['vertical_pushback'], True) #aka front_counterhit_rotation
             self.setField(reactionlistExtraLaunchFields[11], itemData['downed_rotation'], True)
 
         self.editMode = True
