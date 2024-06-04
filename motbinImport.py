@@ -881,12 +881,12 @@ class MotbinStruct:
             type = extra_property['type']
             id = extra_property['id']
             value = extra_property['value']
-            _0x4 = extra_property['_0x4']
+            _0x4 = extra_property['_0x4'] if '_0x4' in extra_property else 0
             requirement_idx = extra_property['requirement_idx']
-            value2 = extra_property['value2']
-            value3 = extra_property['value3']
-            value4 = extra_property['value4']
-            value5 = extra_property['value5']
+            value2 = extra_property['value2'] if 'value2' in extra_property else 0
+            value3 = extra_property['value3'] if 'value3' in extra_property else 0
+            value4 = extra_property['value4'] if 'value4' in extra_property else 0
+            value5 = extra_property['value5'] if 'value5' in extra_property else 0
             # Alias funciton not needed for now
             # type, id, value, _0x4, requirement_idx, value2, value3, value4, value5 = getMoveExtrapropAlias(
             #     self.m['version'], type, id, value, _0x4, requirement_idx, value2, value3, value4, value5)
