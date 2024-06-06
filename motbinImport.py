@@ -34,8 +34,18 @@ placeholder_address = 0x146FD2500
 forbiddenMoves = ['Co_DA_Ground']
 
 
+def readJsonFile(folderName: str):
+    jsonFilename = next(file for file in os.listdir(
+        folderName) if file.endswith(".json"))
+    print("Reading %s..." % (jsonFilename))
+    with open("%s/%s" % (folderName, jsonFilename), "r") as f:
+        m = json.load(f)
+        f.close()
+        return m
+
+
 class Importer:
-    def __init__(self, gameName = "Polaris-Win64-Shipping.exe"):
+    def __init__(self, gameName="Polaris-Win64-Shipping.exe"):
         self.T = GameClass(gameName)
         self.T.applyModuleAddress(game_addresses)
 
@@ -75,6 +85,15 @@ class Importer:
         return playerAddr
 
     def importMoveset(self, playerAddr, folderName, moveset=None, charactersPath='extracted_chars/'):
+        moveset = readJsonFile(folderName)
+
+        loaded_chara_id = self.readInt(
+            playerAddr + game_addresses['t8_chara_id_offset'])
+
+        if loaded_chara_id != moveset['character_id']:
+            print("Cannot import because a different character is loaded")
+            return None
+
         moveset = self.loadMoveset(
             folderName=folderName, moveset=moveset, charactersPath=charactersPath)
 
@@ -105,12 +124,7 @@ class Importer:
 
     def loadMoveset(self, folderName=None, moveset=None, charactersPath=None):
         if moveset == None:
-            jsonFilename = next(file for file in os.listdir(
-                folderName) if file.endswith(".json"))
-            print("Reading %s..." % (jsonFilename))
-            with open("%s/%s" % (folderName, jsonFilename), "r") as f:
-                m = json.load(f)
-                f.close()
+            m = readJsonFile(folderName)
         else:
             m = deepcopy(moveset)
 
@@ -235,12 +249,14 @@ class Importer:
 
         print("%s (ID: %d) successfully imported in memory at 0x%x." %
               (m['character_name'], m['character_id'], p.motbin_ptr))
-        print("%d/%d bytes left." % (p.size - (p.curr_ptr - p.head_ptr), p.size)) #print this to check if any allocated byte has not been used (written on)
+        # print this to check if any allocated byte has not been used (written on)
+        print("%d/%d bytes left." %
+              (p.size - (p.curr_ptr - p.head_ptr), p.size))
 
         return p
 
     def writeAliases(self, motbin_ptr, m):
-        alias_offset = 0x30 # was 0x28
+        alias_offset = 0x30  # was 0x28
 
         if m["version"] == "Tekken5" or m["version"] == "Tekken5DR":  # different alias system for T5
             for i in range(2):
@@ -305,8 +321,10 @@ def reverseBitOrder(number):
         res |= (bitVal << (7 - i))
     return res
 
+
 def convertU15(number):
     return (number >> 7) | ((reverseBitOrder(number)) << 24)
+
 
 def getMovesetTotalSize(m, folderName):
     size = 0
@@ -351,10 +369,10 @@ def getMovesetTotalSize(m, folderName):
     size = align8Bytes(size)
     # size += sum([k for k in animInfos]) + len(animInfos.keys())
     # for anim in animInfos:
-        # size += len(anim) + 1  # filename
+    # size += len(anim) + 1  # filename
 
     # size = align8Bytes(size)
-    
+
     # size = align8Bytes(size)
     for move in m['moves']:
         size += len(move['name']) + 1
@@ -496,7 +514,7 @@ class MotbinStruct:
         if self.m['version'] == "Tekken8":
             print("Animation info not available for Tekken 8, skipping...")
             return
-        else: 
+        else:
             anim_names = set([move['anim_name'] for move in self.m['moves']])
             animMapping = {anim: None for anim in anim_names}
 
@@ -660,13 +678,18 @@ class MotbinStruct:
         applyGlobalRequirementAliases(requirements)
 
         for i, requirement in enumerate(requirements):
-            req, param, param2, param3, param4 = requirement['req'], requirement['param'], requirement['param2'], requirement['param3'], requirement['param4']
-
-            self.writeInt(req, 4)
-            self.writeInt(param, 4)
-            self.writeInt(param2, 4)
-            self.writeInt(param3, 4)
-            self.writeInt(param4, 4)
+            # The order in which these 4-byte values will be written
+            keys = [
+                "req",
+                "param",
+                "param2",
+                "param3",
+                "param4"
+            ]
+            for key in keys:
+                # if the value doesn't exist, simply write a 0 there
+                value = requirement[key] if key in requirement else 0
+                self.writeInt(value, 4)
 
         return self.requirements_ptr, requirement_count
 
@@ -688,9 +711,12 @@ class MotbinStruct:
         self.voiceclip_ptr = self.align()
 
         for voiceclip in self.m['voiceclips']:
-            self.writeInt(voiceclip['val1'], 4)
-            self.writeInt(voiceclip['val2'], 4)
-            self.writeInt(voiceclip['val3'], 4)
+            # The order in which these 4-byte values will be written
+            keys = ["val1", "val2", "val3"]
+            for key in keys:
+                # if the value doesn't exist, simply write a 0 there
+                value = voiceclip[key] if key in voiceclip else 0
+                self.writeInt(value, 4)
 
         return self.voiceclip_ptr, len(self.m['voiceclips'])
 
@@ -773,7 +799,8 @@ class MotbinStruct:
             self.writeInt(reaction_list['back_rotation'], 2)
             self.writeInt(reaction_list['left_side_rotation'], 2)
             self.writeInt(reaction_list['right_side_rotation'], 2)
-            self.writeInt(reaction_list['vertical_pushback'], 2) # aka front_counterhit_rotation
+            # aka front_counterhit_rotation
+            self.writeInt(reaction_list['vertical_pushback'], 2)
             self.writeInt(reaction_list['downed_rotation'], 2)
             self.writeInt(reaction_list['standing'], 2)
             self.writeInt(reaction_list['crouch'], 2)
@@ -789,7 +816,7 @@ class MotbinStruct:
             self.writeInt(reaction_list['crouch_block'], 2)
             self.writeInt(reaction_list['wallslump'], 2)
             self.writeInt(reaction_list['downed'], 2)
-            self.skip(4) # unused
+            self.skip(4)  # unused
 
         return self.reaction_list_ptr, len(self.m['reaction_list'])
 
@@ -797,8 +824,10 @@ class MotbinStruct:
         print("Allocating hit conditions...")
         self.hit_conditions_ptr = self.align()
         for hit_condition in self.m['hit_conditions']:
-            requirement_addr = self.getRequirementFromId(hit_condition['requirement_idx'])
-            reaction_list_addr = self.getReactionListFromId(hit_condition['reaction_list_idx'])
+            requirement_addr = self.getRequirementFromId(
+                hit_condition['requirement_idx'])
+            reaction_list_addr = self.getReactionListFromId(
+                hit_condition['reaction_list_idx'])
             self.writeInt(requirement_addr, 8)
             self.writeInt(hit_condition['damage'], 4)
             self.writeInt(0, 4)
@@ -860,16 +889,16 @@ class MotbinStruct:
         self.parry_related_ptr = self.align()
 
         for value in self.m['parry_related']:
-                self.writeInt(value, 4)
-            #bytes = value.to_bytes(4)
+            self.writeInt(value, 4)
+            # bytes = value.to_bytes(4)
             # try:
-               # self.writeInt(value >> 16, 2)
-           #     self.writeInt(value & 0xFFFF, 2)
-                # self.writeBytes(bytes[0:2])
-                # self.writeBytes(bytes[2:4])
-         #   except:
-         #       print("ISSUE VALUE:", value)
-         #       raise
+           # self.writeInt(value >> 16, 2)
+       #     self.writeInt(value & 0xFFFF, 2)
+            # self.writeBytes(bytes[0:2])
+            # self.writeBytes(bytes[2:4])
+     #   except:
+     #       print("ISSUE VALUE:", value)
+     #       raise
 
         return self.parry_related_ptr, len(self.m['parry_related'])
 
@@ -897,7 +926,7 @@ class MotbinStruct:
             self.writeInt(id, 4)
             self.writeInt(value, 4)
             self.writeInt(value2, 4)
-            self.writeInt(value3, 4) # voiceline ID??
+            self.writeInt(value3, 4)  # voiceline ID??
             self.writeInt(value4, 4)
             self.writeInt(value5, 4)
 
@@ -926,7 +955,6 @@ class MotbinStruct:
 
         return self.move_start_props_ptr, len(self.m['move_start_props'])
 
-
     def allocateMoveEndProperties(self):
         print("Allocating move end properties...")
         self.move_end_props_ptr = self.align()
@@ -950,7 +978,7 @@ class MotbinStruct:
 
         return self.move_end_props_ptr, len(self.m['move_end_props'])
 
-    def allocateUnknown298(self): 
+    def allocateUnknown298(self):
         print("Allocating 0x298...")
         self.unknown_0x298_ptr = self.align()
 
@@ -993,7 +1021,7 @@ class MotbinStruct:
         if self.m['version'] == "Tekken8":
             print("Mota allocation not available for Tekken 8, skipping...")
             return
-        else: 
+        else:
             if len(self.mota_list) != 0:
                 return
             self.align()
@@ -1007,13 +1035,13 @@ class MotbinStruct:
                             motaAddr = self.curr_ptr
                         else:
                             motaAddr = 0
-                            #print("DEBUG: Mota %d not valid, not importing" % i)
+                            # print("DEBUG: Mota %d not valid, not importing" % i)
 
                         self.writeBytes(motaBytes)
                         self.mota_list.append(motaAddr)
                 except:
                     self.mota_list.append(0)
-                    #print("Warning: impossible to import MOTA %d" % (i))
+                    # print("Warning: impossible to import MOTA %d" % (i))
 
     def allocateMoves(self):
         self.allocateAnimations()
@@ -1038,101 +1066,104 @@ class MotbinStruct:
             # anim_name = anim_dict['name_ptr']
             # anim_ptr = anim_dict['data_ptr']
 
-            self.writeInt(move['name_key'], 4) # 0x0
-            self.writeInt(move['anim_key'], 4) # 0x4
-            self.writeInt(placeholder_address, 8) # 0x8
-            self.writeInt(placeholder_address, 8) # 0x10
-            self.writeInt(move['anim_addr_enc1'], 4) # 0x18
-            self.writeInt(move['anim_addr_enc2'], 4) # 0x1C
-            self.writeInt(move['vuln'], 4) # 0x20
-            self.writeInt(move['hitlevel'], 4) # 0x24
-            self.writeInt(self.getCancelFromId(move['cancel_idx']), 8) # 0x28
+            self.writeInt(move['name_key'], 4)  # 0x0
+            self.writeInt(move['anim_key'], 4)  # 0x4
+            self.writeInt(placeholder_address, 8)  # 0x8
+            self.writeInt(placeholder_address, 8)  # 0x10
+            self.writeInt(move['anim_addr_enc1'], 4)  # 0x18
+            self.writeInt(move['anim_addr_enc2'], 4)  # 0x1C
+            self.writeInt(move['vuln'], 4)  # 0x20
+            self.writeInt(move['hitlevel'], 4)  # 0x24
+            self.writeInt(self.getCancelFromId(move['cancel_idx']), 8)  # 0x28
 
             self.writeInt(0, 8)  # 0x30
             self.writeInt(0, 8)  # 0x38
-            self.writeInt(move['u2'], 8) # 0x40
-            self.writeInt(move['u3'], 8) # 0x48
-            self.writeInt(move['u4'], 8) # 0x50
-            self.writeInt(move['u6'], 4) # 0x58
+            self.writeInt(move['u2'], 8)  # 0x40
+            self.writeInt(move['u3'], 8)  # 0x48
+            self.writeInt(move['u4'], 8)  # 0x50
+            self.writeInt(move['u6'], 4)  # 0x58
 
-            self.writeInt(move['transition'], 2) # 0x5C
+            self.writeInt(move['transition'], 2)  # 0x5C
 
-            self.writeInt(move['u7'], 2) # 0x5E
-            self.writeInt(move['ordinal_id'], 4) # 0x60
-            self.writeInt(move['_0x64'], 4) # 0x64
+            self.writeInt(move['u7'], 2)  # 0x5E
+            self.writeInt(move['ordinal_id'], 4)  # 0x60
+            self.writeInt(move['_0x64'], 4)  # 0x64
             # self.writeInt(move['u8'], 2)
             # self.writeInt(move['u8_2'], 2)
             # self.writeInt(move['u9'], 4)
 
             on_hit_addr = self.getHitConditionFromId(move['hit_condition_idx'])
-            self.writeInt(on_hit_addr, 8) # 0x68
-            self.writeInt(move['_0x70'], 4) # 0x70
-            self.writeInt(move['_0x74'], 4) # 0x74
-            self.writeInt(move['anim_max_len'], 4) # 0x78
+            self.writeInt(on_hit_addr, 8)  # 0x68
+            self.writeInt(move['_0x70'], 4)  # 0x70
+            self.writeInt(move['_0x74'], 4)  # 0x74
+            self.writeInt(move['anim_max_len'], 4)  # 0x78
 
             if self.m['version'] == "Tag2" or self.m['version'] == "Revolution":
                 move['u15'] = convertU15(move['u15'])
 
-            self.writeInt(move['u10'], 4) # 0x7C airborne_start
-            self.writeInt(move['u11'], 4) # 0x80 airborne_end
-            self.writeInt(move['u12'], 4) # 0x84 ground_fall
+            self.writeInt(move['u10'], 4)  # 0x7C airborne_start
+            self.writeInt(move['u11'], 4)  # 0x80 airborne_end
+            self.writeInt(move['u12'], 4)  # 0x84 ground_fall
 
             voiceclip_addr = self.getVoiceclipFromId(move['voiceclip_idx'])
-            extra_properties_addr = self.getExtraMovePropertiesFromId(move['extra_properties_idx'])
-            move_start_properties_addr = self.getMoveStartPropertiesFromId(move['move_start_properties_idx'])
-            move_end_properties_addr = self.getMoveEndPropertiesFromId(move['move_end_properties_idx'])
+            extra_properties_addr = self.getExtraMovePropertiesFromId(
+                move['extra_properties_idx'])
+            move_start_properties_addr = self.getMoveStartPropertiesFromId(
+                move['move_start_properties_idx'])
+            move_end_properties_addr = self.getMoveEndPropertiesFromId(
+                move['move_end_properties_idx'])
 
-            self.writeInt(voiceclip_addr, 8) # 0x88
-            self.writeInt(extra_properties_addr, 8) # 0x90
-            self.writeInt(move_start_properties_addr, 8) # 0x98
-            self.writeInt(move_end_properties_addr, 8) #0xA0
+            self.writeInt(voiceclip_addr, 8)  # 0x88
+            self.writeInt(extra_properties_addr, 8)  # 0x90
+            self.writeInt(move_start_properties_addr, 8)  # 0x98
+            self.writeInt(move_end_properties_addr, 8)  # 0xA0
 
             # self.writeInt(0, 8)  # ['u13'], ptr
             # self.writeInt(0, 8)  # ['u14'], ptr
-            self.writeInt(move['u15'], 4) # 0xA8
-            self.writeInt(move['_0xAC'], 4) # 0xAC
+            self.writeInt(move['u15'], 4)  # 0xA8
+            self.writeInt(move['_0xAC'], 4)  # 0xAC
 
             hitbox = getHitboxAliases(
                 self.m['version'], move['hitbox_location'])
 
             # self.writeInt(hitbox, 4)
-            self.writeInt(move['first_active_frame'], 4) # 0xB0
-            self.writeInt(move['last_active_frame'], 4) # 0xB4
-            self.writeInt(move['first_active_frame1'], 4) # 0xB8
-            self.writeInt(move['last_active_frame1'], 4) # 0xBC
-            self.writeInt(move['hitbox_location1'], 4) # 0xC0
-            
+            self.writeInt(move['first_active_frame'], 4)  # 0xB0
+            self.writeInt(move['last_active_frame'], 4)  # 0xB4
+            self.writeInt(move['first_active_frame1'], 4)  # 0xB8
+            self.writeInt(move['last_active_frame1'], 4)  # 0xBC
+            self.writeInt(move['hitbox_location1'], 4)  # 0xC0
+
             # 0xC4 to 0xE8
             for value in move['unk1']:
                 self.writeInt(value, 4)
             # for _ in range(0, 9):
             #     self.writeInt(0, 4)
 
-            self.writeInt(move['first_active_frame2'], 4) # 0xE8
-            self.writeInt(move['last_active_frame2'], 4) # 0xEC
-            self.writeInt(move['hitbox_location2'], 4) # 0xF0
+            self.writeInt(move['first_active_frame2'], 4)  # 0xE8
+            self.writeInt(move['last_active_frame2'], 4)  # 0xEC
+            self.writeInt(move['hitbox_location2'], 4)  # 0xF0
 
             # 0xF4 to 0x114
             for value in move['unk2']:
                 self.writeInt(value, 4)
-            
+
             # 0xF4 to 0x214
             # for _ in range(0, 72):
             #     self.writeInt(0, 4)
-            
+
             # 0x118 to 0x148
-            self.writeInt(move['first_active_frame3'], 4) # 0x118
-            self.writeInt(move['last_active_frame3'], 4) # 0x11C
-            self.writeInt(move['hitbox_location3'], 4) # 0x120
+            self.writeInt(move['first_active_frame3'], 4)  # 0x118
+            self.writeInt(move['last_active_frame3'], 4)  # 0x11C
+            self.writeInt(move['hitbox_location3'], 4)  # 0x120
             for value in move['unk3']:
                 self.writeInt(value, 4)
-            
+
             # 0x148 to 0x214
             for value in move['unk4']:
                 self.writeInt(value, 4)
 
-            self.writeInt(move['u16'], 2) # 0x214
-            self.writeInt(move['u17'], 2) # 0x216
+            self.writeInt(move['u16'], 2)  # 0x214
+            self.writeInt(move['u17'], 2)  # 0x216
 
             # 0x218 - 0x39C
             for value in move['unk5']:
@@ -1141,7 +1172,7 @@ class MotbinStruct:
             # 0x218 - 0x228
             # for _ in range(0, 4):
             #     self.writeInt(0, 4)
-            
+
             # 0x228 - 0x384
             # for _ in range(0, 8):
             #     for j in range(0, 5):
@@ -1156,7 +1187,7 @@ class MotbinStruct:
             # self.writeInt(0, 4) # 0x390
             # self.writeInt(0, 4) # 0x394
             # self.writeInt(0, 4) # 0x398
-            self.writeInt(move['u18'], 4) # 0x39C
+            self.writeInt(move['u18'], 4)  # 0x39C
 
         for move_id in forbiddenMoveIds:
             self.forbidCancel(move_id, groupedCancels=True)
