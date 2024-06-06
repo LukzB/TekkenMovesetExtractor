@@ -193,12 +193,11 @@ reactionlistExtraLaunchFields = [
     'back_rotation',
     'left_side_rotation',
     'right_side_rotation',
-    'front_ch_rotation',
+    'vertical_pushback',
     'downed_rotation'
 ]
 
 reactionlistFields = {
-    # 'vertical_pushback': 'int',
     'standing': 'short',
     'ch': 'short',
     'crouch': 'short',
@@ -1430,8 +1429,8 @@ class ReactionListEditor(FormEditor):
             self.setField(reactionlistExtraLaunchFields[5], itemData['downed_direction'], True)
             self.setField(reactionlistExtraLaunchFields[6], itemData['front_rotation'], True)
             self.setField(reactionlistExtraLaunchFields[7], itemData['back_rotation'], True)
-            self.setField(reactionlistExtraLaunchFields[8], itemData['left_rotation'], True)
-            self.setField(reactionlistExtraLaunchFields[9], itemData['right_rotation'], True)
+            self.setField(reactionlistExtraLaunchFields[8], itemData['left_side_rotation'], True)
+            self.setField(reactionlistExtraLaunchFields[9], itemData['right_side_rotation'], True)
             self.setField(reactionlistExtraLaunchFields[10], itemData['vertical_pushback'], True) #aka front_counterhit_rotation
             self.setField(reactionlistExtraLaunchFields[11], itemData['downed_rotation'], True)
 
