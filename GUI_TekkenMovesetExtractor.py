@@ -559,9 +559,10 @@ def importPlayer(parent, playerId):
 
     TekkenImporter = importLib.Importer()
     playerAddr = TekkenImporter.getPlayerAddress(playerId - 1)
-    TekkenImporter.importMoveset(
+    moveset = TekkenImporter.importMoveset(
         playerAddr, folderPath, charactersPath=charactersPath)
-    print("\nSuccessfully imported %s !" % (parent.selected_char))
+    if moveset != None:
+        print("\nSuccessfully imported %s !" % (parent.selected_char))
 
 
 class TextRedirector(object):
