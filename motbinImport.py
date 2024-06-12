@@ -85,7 +85,8 @@ class Importer:
         return playerAddr
 
     def importMoveset(self, playerAddr, folderName, moveset=None, charactersPath='extracted_chars/'):
-        moveset = readJsonFile(folderName)
+        if moveset == None:
+            moveset = readJsonFile(folderName)
 
         loaded_chara_id = self.readInt(
             playerAddr + game_addresses['t8_chara_id_offset'])
