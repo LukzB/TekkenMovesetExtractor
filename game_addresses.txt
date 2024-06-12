@@ -1,6 +1,6 @@
 # For updating purposes
 version     = 12 # Must be different for it to register it as an update
-repo_link   = https://raw.githubusercontent.com/LukzB/TekkenMovesetExtractor/master/
+repo_link   = https://raw.githubusercontent.com/LukzB/TekkenMovesetExtractor/tekken-8-import/
 
 # Tekken 8 addresses and offsets. Changes with updates
 t8_process_name       = Polaris-Win64-Shipping.exe
@@ -93,7 +93,7 @@ movelist_offset              = 0x230                          # Used by editor t
 move_size                    = 0x3A0
 player_curr_move_addr_offset = 0x3B8                          # Used by Animator to overwrite current address
 player_curr_move_offset      = 0x51C                          # Used by editor to force a move to play
-next_move_offset             = 0x1D70                         # Used by editor to force sa move to play
+next_move_offset             = 0x1DC0                         # Used by editor to force sa move to play
 curr_frame_timer_offset      = 0x370                          # Used by editor to force a move to play
 code_injection_addr          = +0x74ABFF                      # Address that writes on player+motbin_offset; used for online play. 
 playerid_ptr                 = +0x34CE508, 0x0                # Used to find whether local player is 1P or 2P; used for online play
