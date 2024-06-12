@@ -1,13 +1,13 @@
 # For updating purposes
-version     = 11 # Must be different for it to register it as an update
-repo_link   = https://raw.githubusercontent.com/Kiloutre/TekkenMovesetExtractor/master/
+version     = 12 # Must be different for it to register it as an update
+repo_link   = https://raw.githubusercontent.com/LukzB/TekkenMovesetExtractor/master/
 
 # Tekken 8 addresses and offsets. Changes with updates
 t8_process_name       = Polaris-Win64-Shipping.exe
 t8_base               = 0x0                # base is useless here
-t8_p1_addr            = +0x0999D500, 0x30, 0x0
-t8_playerstruct_size  = 0x1B580            # Distance between 2 players addresses
-t8_motbin_offset      = 0x2D88
+t8_p1_addr            = +0x099BAFB0, 0x30, 0x0
+t8_playerstruct_size  = 0x1B5E0            # Distance between 2 players addresses
+t8_motbin_offset      = 0x2DD8
 t8_chara_id_offset    = 0x168
 
 # Tekken 7 addresses and offsets. Changes with updates
