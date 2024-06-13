@@ -1,6 +1,6 @@
 # Python 3.6.5
 
-from tkinter import Tk, Frame, Listbox, Label, Scrollbar, StringVar, Toplevel, Menu, messagebox, Text, simpledialog, filedialog
+from tkinter import Tk, Frame, Listbox, Label, Scrollbar, StringVar, Toplevel, Menu, messagebox, Text, simpledialog, filedialog, Canvas
 from tkinter.ttk import Button, Entry, Style
 from Addresses import game_addresses, GameClass
 import additionalReqDetails as ard  # additional req details
@@ -1035,6 +1035,7 @@ class FormEditor:
         self.fieldLabel = {}
         self.fieldValue = {}
         self.container = None
+        self.navContainer = None
         self.lastValidLabel = None
         self.listSaveFunction = None
         self.navigatorLabel = None
@@ -1045,20 +1046,64 @@ class FormEditor:
     def initEditor(self, col, row):
         container = Frame(self.rootFrame)
         container.grid(row=row, column=col, sticky="nsew")
-        container.pack_propagate(False)
+        container.grid_rowconfigure(1, weight=1)
+        container.grid_columnconfigure(0, weight=1)
 
         label = Label(container, bg='#ddd')
-        label.pack(side='top', fill='x')
+        label.grid(row=0, column=0, sticky="ew")
 
-        content = Frame(container)
-        content.pack(side='top', fill='both', expand=True)
+        scrollable_frame_container = Frame(container)
+        scrollable_frame_container.grid(row=1, column=0, sticky="nsew")
+        scrollable_frame_container.grid_rowconfigure(0, weight=1)
+        scrollable_frame_container.grid_columnconfigure(0, weight=1)
+        
+        canvas = Canvas(scrollable_frame_container, highlightthickness=0)
+        scrollbar = Scrollbar(scrollable_frame_container, orient="vertical", command=canvas.yview)
+        
+        scrollable_frame = Frame(canvas)
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(
+                scrollregion=canvas.bbox("all")
+            )
+        )
 
-        saveButton = Button(container, text="Apply", command=self.saveFunction)
-        saveButton.pack(side='bottom', fill='x')
+        canvas.configure(yscrollcommand=scrollbar.set)
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
 
-        self.container = content
+        canvas.grid(row=0, column=0, sticky="nsew")
+        scrollbar.grid(row=0, column=1, sticky="ns")
+        
+        # bind scrollwheel on enter
+        scrollable_frame.bind("<Enter>", lambda e: self._bind_to_mousewheel(canvas))
+        scrollable_frame.bind("<Leave>", lambda e: self._unbind_from_mousewheel(canvas))
+
+        navContainer = Frame(container)
+        navContainer.grid(row=2, column=0, sticky="ew")
+        
+        saveContainer = Frame(container)
+        saveContainer.grid(row=3, column=0, sticky="ew")
+
+        saveButton = Button(saveContainer, text="Apply", command=self.saveFunction)
+        saveButton.pack(fill='x')
+
+        self.container = scrollable_frame
         self.label = label
         self.saveButton = saveButton
+        self.navContainer = navContainer
+
+    def _bind_to_mousewheel(self, canvas):
+        canvas.bind_all("<MouseWheel>", lambda event: self._on_mousewheel(event, canvas))
+
+    def _unbind_from_mousewheel(self, canvas):
+        canvas.unbind_all("<MouseWheel>")
+
+    def _on_mousewheel(self, event, canvas):
+        canvas_height = canvas.winfo_height()
+        rows_height = canvas.bbox("all")[3]
+        # limit scroll height
+        if rows_height > canvas_height: 
+            canvas.yview_scroll(int(-1*(event.delta/120)), "units")
 
     def setLabel(self, text, saveLabel=True):
         self.label['text'] = text
@@ -1168,7 +1213,7 @@ class FormEditor:
             self.navigateToItem(self.listIndex + offset)
 
     def enableNavigator(self, itemLabel):
-        navigatorFrame = Frame(self.container)
+        navigatorFrame = Frame(self.navContainer)
         navigatorFrame.pack(side='bottom', fill='x', expand=False)
 
         navigatorLabel = Label(navigatorFrame)
@@ -1773,7 +1818,7 @@ class MoveEditor(FormEditor):
                 fieldLabelText = fieldLabels[self.key].get(field, field)
             else:
                 fieldLabelText = field
-            fieldLabel = Label(container, text=fieldLabelText, width=15)
+            fieldLabel = Label(container, text=fieldLabelText, width=20)
             fieldLabel.grid(row=0, column=0, sticky='w')
 
             sv = StringVar()
@@ -2487,7 +2532,7 @@ class GUI_TekkenMovesetEditor():
         self.setTitle()
         window.iconbitmap('InterfaceData/renge.ico')
         window.minsize(960, 540)
-        window.geometry("1280x770")
+        window.geometry("1536x864")
 
         self.Charalist = CharalistSelector(self, window)
         self.MoveSelector = MoveSelector(self, window)
