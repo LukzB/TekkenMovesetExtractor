@@ -98,10 +98,16 @@
 228,Character controller
 229,Opponent character controller
 274,Kazuya devil >= X
+281,0x80c5 >= X
+282,0x80c8 >= X
 288,Short flag >= X
 312,Kazuya devil <= X
+319,0x80c5 <= X
+320,0x80c8 <= X
 326,Short flag <= X
 350,Kazuya devil == X
+358,0x80c5 == X
+359,0x80c8 == X
 365,Short flag == X
 442,Heat available
 466,Heat related

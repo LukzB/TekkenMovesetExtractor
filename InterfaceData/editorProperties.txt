@@ -33,7 +33,9 @@
 0x814a,Raven clone horizontal offset
 0x814b,Add recoverable health
 0x8151,Activate devil permanently
+0x81fc,Change VULN
 0x822d,Power Crush
+0x82bc,AI Input?
 0x830d,Health Bar display/vfx
 0x8338,Use fake frame advantage
 0x8383,Refill/drain heat
@@ -110,3 +112,4 @@
 0x854e,Restore alias 0x8020
 0x877b,Related to the new 0x2A0 Struct
 0x87f8,Related to the new 0x2A0 Struct
+0x87f9,Preset camera zoom
