@@ -1276,7 +1276,7 @@ class FormEditor:
                                         function=function: function(self.fieldValue[field]) if self.editMode != None else 0)
 
     def enableDetailsArea(self):
-        details = Label(self.container)
+        details = Label(self.navContainer)
         details.pack(side='bottom', fill='x', padx=0, pady=0)
         self.details = details
 
