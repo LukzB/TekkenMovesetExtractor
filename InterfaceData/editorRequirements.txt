@@ -82,9 +82,9 @@
 149,Standing on right side
 150,On ground (right side)
 151,On ground (left side)
-157,If Ki Charged
+157,If Ki-charged
+158,If not Ki-charged
 159,Player is in rage
-178,Geese in Max-Mode
 184,Near Wall
 219,Something wallsplat related
 220,Player character ID
@@ -95,13 +95,56 @@
 225,Player NOT Character ID
 226,Opponent character ID
 227,Opponent NOT character ID
-228,Character Controller
+228,Character controller
+229,Opponent character controller
+274,Kazuya devil >= X
+288,Short flag >= X
+312,Kazuya devil <= X
+326,Short flag <= X
+350,Kazuya devil == X
+365,Short flag == X
+442,Heat available
+466,Heat related
 654,RNG-related
 667,Playing Story mode
 668,Story battle number
+716,Opponent airborne
+717,Opponent not airborne
 718,Has Item
 723,Juggle
 724,Screw available
-1035,Parry high
-1049,Attack absorption
+1028,Player is in heat
+1032,Parry High
+1033,Parry Mid
+1034,Parry Low
+1035,Parry High and Mid
+1036,Parry Group
+1038,Parry High
+1039,Parry Mid
+1040,Parry Low
+1041,Parry High and Mid
+1042,Parry Group
+1049,Power Crush Attack Absorption
+1061,Parry High
+1062,Parry Mid
+1063,Parry Low
+1064,Parry High and Mid
+1065,Parry Group
+1067,Parry High
+1068,Parry Mid
+1069,Parry Low
+1070,Parry High and Mid
+1071,Parry Group
+1078,Parry High
+1079,Parry Mid
+1080,Parry Low
+1081,Parry High and Mid
+1082,Parry High
+1083,Parry Mid
+1084,Parry Low
+1085,Parry High and Mid
+1090,Parry High
+1091,Parry Mid
+1092,Parry Low
+1093,Parry High and Mid
 1100,Requirements end
