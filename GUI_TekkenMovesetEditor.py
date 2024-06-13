@@ -663,6 +663,108 @@ class MassChangeCancelsByMoveIdWindow:
     def __call__(self, move):
         return move['move_id'] == self.moveId
 
+# Silly Portable Converter
+
+class ConverterWindow:
+    def __init__(self, root):
+        window = Toplevel()
+
+        self.window = window
+        self.root = root
+
+        self.window.protocol("WM_DELETE_WINDOW", self.on_close)
+
+        self.mainFrame = Frame(window)
+        self.mainFrame.pack(fill='both', expand=1)
+
+        window.iconbitmap('InterfaceData/renge.ico')
+        window.geometry("200x100")
+        window.maxsize(400, 220)
+        window.minsize(200, 110)
+        self.window.wm_attributes("-topmost", 1)
+
+        rightColumn = createGrid(self.mainFrame, None)
+        rightColumn.grid(row=0, column=0, sticky="nsew")
+
+        # Decimal field
+        decimal_label = Label(rightColumn, text="DEC:")
+        decimal_label.grid(row=1, column=0, padx=10, pady=5, sticky="e")
+        self.decimal_entry = Entry(rightColumn)
+        self.decimal_entry.grid(row=1, column=1, padx=10, pady=5)
+        self.decimal_entry.bind("<Return>", self.convertDecimal)
+
+        # Unsigned Int field
+        unsigned_label = Label(rightColumn, text="INT:")
+        unsigned_label.grid(row=2, column=0, padx=10, pady=5, sticky="e")
+        self.unsigned_entry = Entry(rightColumn)
+        self.unsigned_entry.grid(row=2, column=1, padx=10, pady=5)
+        self.unsigned_entry.bind("<Return>", self.convertUInt)
+
+        # Hexadecimal field
+        hex_label = Label(rightColumn, text="HEX:")
+        hex_label.grid(row=3, column=0, padx=10, pady=5, sticky="e")
+        self.hex_entry = Entry(rightColumn)
+        self.hex_entry.grid(row=3, column=1, padx=10, pady=5)
+        self.hex_entry.bind("<Return>", self.convertHexadecimal)
+
+        self.decimal_entry.bind("<KeyRelease>", self.convertDecimal)
+        self.unsigned_entry.bind("<KeyRelease>", self.convertUInt)
+        self.hex_entry.bind("<KeyRelease>", self.convertHexadecimal)
+
+    def on_close(self):
+        self.root.ConverterWindow = None
+        self.window.destroy()
+        self.window.update()
+
+    def setTitle(self, label=""):
+        title = "TekkenMovesetEditor %s" % (editorVersion)
+        if label != "":
+            title += " - " + label
+        self.window.wm_title(title)
+
+    def __call__(self, move):
+        return move['move_id'] == self.moveId
+
+    def convertDecimal(self, event):
+        try:
+            dec = int(self.decimal_entry.get())
+            uInt = dec & 0xFFFFFFFF
+            hex_val = hex(uInt)[2:]
+            self.updateInputs(dec, uInt, hex_val)
+        except ValueError:
+            pass
+
+    def convertUInt(self, event):
+        try:
+            uInt = abs(int(self.unsigned_entry.get()))
+            dec = uInt
+            hex_val = hex(uInt)[2:]
+            self.updateInputs(dec, uInt, hex_val)
+        except ValueError:
+            pass
+
+    def convertHexadecimal(self, event):
+        hex_val = self.hex_entry.get().lower()
+        if hex_val.startswith("0x"):
+            hex_val = hex_val[2:]
+        try:
+            dec = int(hex_val, 16)
+            uInt = dec & 0xFFFFFFFFFFFFFFFF
+            hex_val = hex(uInt)[2:]
+            self.updateInputs(dec, uInt, hex_val)
+        except ValueError:
+            pass
+
+    def updateInputs(self, dec, uInt, hex_val):
+        self.decimal_entry.delete(0, 'end')
+        self.decimal_entry.insert(0, dec)
+
+        self.unsigned_entry.delete(0, 'end')
+        self.unsigned_entry.insert(0, uInt)
+
+        hex_val_with_prefix = "0x" + hex_val
+        self.hex_entry.delete(0, 'end')
+        self.hex_entry.insert(0, hex_val_with_prefix)
 
 class Motafile:
     def __init__(self, filename):
@@ -2585,6 +2687,7 @@ class GUI_TekkenMovesetEditor():
         self.GroupCancelEditor = None
         self.MoveCopyingWindow = None
         self.MassChangeCancelsByMoveIdWindow = None
+        self.ConverterWindow = None
 
         moveCreationMenu = [
             ("Create new empty move", self.createMove),
@@ -2674,6 +2777,7 @@ class GUI_TekkenMovesetEditor():
             ("What reactions use this move", self.listReactionsForMove),
             ("Mass-change cancels by move id (MAKE SURE YOU KNOW WHAT YOU'RE DOING!)",
              self.massChangeCancelsByMoveId),
+            ("Convert Values", self.openConverter)
         ]
 
         gotoMenu = [
@@ -3033,6 +3137,13 @@ Hand animations can be created in blender, using the following plugins:\ngithub.
                 'Warning', 'This feature will overwrite ALL cancels with the selected move id, save your moveset before using it!!!')
             app = MassChangeCancelsByMoveIdWindow(self)
             self.MassChangeCancelsByMoveIdWindow = app
+            app.window.mainloop()
+
+    def openConverter(self):
+        if self.ConverterWindow is None:
+            app = ConverterWindow(self)
+            self.ConverterWindow = app
+            app.decimal_entry.focus()
             app.window.mainloop()
 
     def getMoveId(self, moveId):
