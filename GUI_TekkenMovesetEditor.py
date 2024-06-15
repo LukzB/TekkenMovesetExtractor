@@ -34,14 +34,10 @@ def getLabel(itemId, key):
 def appendFurtherDetails(itemId, param, key):
     detail = ""
     if key == 'requirements':  # for requirements
-        if itemId == 668:  # Story Battle Number
-            detail = " (%s)" % ard.getStoryBattle(param)
-            return detail
-        try:
-            desc = ard.reqDetailsList[itemId].get(param, "Invalid")
-        except KeyError:
-            return detail
-        detail = " : %s" % desc if desc != None else ""
+        req_processor = ard.reqDetailsList.get(itemId)
+        if req_processor:
+            desc = req_processor.get(param, "Invalid")
+            detail = " : %s" % desc if desc != None else ""
     return detail
 
 

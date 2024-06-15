@@ -65,34 +65,6 @@ req225 = {
     3: "Intro/Outro?"
 }
 
-storyBattles = {
-    0: "Prologue",
-    1: "Throwing KAZ off cliff",
-    2: "HEI vs T-Force",
-    3: "HEI vs NINA",
-    4: "KAZ vs JACK4",
-    5: "HEI vs JACK4",
-    6: "HEI vs CLAUDIO",
-    7: "LARS vs G-CORP",
-    9: "LEE vs ALISA",
-    10: "ALISA vs T-FORCE",
-    11: "LEEs vs T-FORCE",
-    12: "HEI vs AKUMA 1",
-    13: "HEI vs JACK6",
-    14: "HEI vs AKUMA 2",
-    15: "ALISA vs NINA 1",
-    16: "ALISA vs NINA 2",
-    18: "KAZ vs AKUMA 1",
-    19: "KAZ vs AKUMA 2",
-    21: "HEI vs KAZUMI",
-    22: "HEI vs KAZ 1",
-    23: "HEI vs KAZ 2",
-    24: "HEI vs KAZ 3",
-    25: "HEI vs KAZ 4",
-    26: "???",
-    27: "Special Chapter"
-}
-
 req567 = {
     3: "Story prefight",
     4: "Story postfight?",
@@ -104,8 +76,27 @@ req567 = {
     33: "Customization sequence play?",
 }
 
+def getStoryBattle(battleCode: int):
+    chapter = (battleCode & 0xF0) >> 4
+    fight = battleCode & 0xF
+    return "CH %d BT %d" % (chapter, fight)
 
-class req284:
+
+class Requirement:
+    def get(self, x, default):
+        raise NotImplementedError(
+            "This method should be overridden by subclasses")
+
+
+class DictionaryRequirement(Requirement):
+    def __init__(self, data):
+        self.data = data
+
+    def get(self, x, default):
+        return self.data.get(x, default)
+
+
+class ShortFlagGT(Requirement):
     def get(self, x, default):
         try:
             y = int(x)
@@ -113,11 +104,10 @@ class req284:
             return default
         flag = x >> 16
         value = x & 0xFFFF
-        output = "Player flag %d >= %d" % (flag, value)
-        return output
+        return f"Short flag {flag} >= {value}"
 
 
-class req359:
+class ShortFlagLT(Requirement):
     def get(self, x, default):
         try:
             y = int(x)
@@ -125,31 +115,54 @@ class req359:
             return default
         flag = x >> 16
         value = x & 0xFFFF
-        output = "Player flag %d == %d" % (flag, value)
-        return output
+        return f"Short flag {flag} <= {value}"
+
+
+class ShortFlagEQ(Requirement):
+    def get(self, x, default):
+        try:
+            y = int(x)
+        except:
+            return default
+        flag = x >> 16
+        value = x & 0xFFFF
+        return f"Short flag {flag} == {value}"
+
+
+class StoryBattleRequirement(Requirement):
+    def get(self, x, default):
+        try:
+            battle_code = int(x)
+            return getStoryBattle(battle_code)
+        except:
+            return default
+
+
+# Function to get story battle details
+def getStoryBattle(battleCode: int):
+    chapter = (battleCode & 0xF0) >> 4
+    fight = battleCode & 0xF
+    return f"CH {chapter} BT {fight}"
 
 
 # Add req in this list and assign parameter list
 # Format: reqId -> paramList
 reqDetailsList = {
-    158: reqYesNo,
-    159: reqYesNo,
-    220: charIDs,  # Char ID checks
-    221: charIDs,
-    222: charIDs,
-    223: charIDs,
-    224: charIDs,
-    225: charIDs,
-    226: charIDs,
-    227: charIDs,
-    228: req225,  # Player is CPU
-    287: req284(),  # Player flag >= X
-    362: req359(),  # Player flag == X
-    # 562: storyBattles,  # Story Battle Number
-    566: gamemodes,  # Game mode
+    159: DictionaryRequirement(reqYesNo),
+    220: DictionaryRequirement(charIDs),  # Char ID checks
+    221: DictionaryRequirement(charIDs),
+    222: DictionaryRequirement(charIDs),
+    223: DictionaryRequirement(charIDs),
+    224: DictionaryRequirement(charIDs),
+    225: DictionaryRequirement(charIDs),
+    226: DictionaryRequirement(charIDs),
+    227: DictionaryRequirement(charIDs),
+    228: DictionaryRequirement(req225),  # Player is CPU
+    229: DictionaryRequirement(req225),  # Player is CPU
+    288: ShortFlagGT(),  # Short flag >= X
+    326: ShortFlagLT(),  # Short flag <= X
+    365: ShortFlagEQ(),  # Short flag == X
+    # 566: DictionaryRequirement(gamemodes),  # Game mode
+    668: StoryBattleRequirement(),  # Story battle details
+    1028: DictionaryRequirement(reqYesNo),
 }
-
-def getStoryBattle(battleCode: int):
-    chapter = (battleCode & 0xF0) >> 4
-    fight = battleCode & 0xF
-    return "CH %d BT %d" % (chapter, fight)
