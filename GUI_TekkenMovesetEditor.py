@@ -123,7 +123,7 @@ moveFields = {
     'u6': 'int',
     'u7': 'short',
     # 'u8_2': 'short',
-    '_0x64': 'int',
+    '_0x60': 'int',
     'ordinal_id': 'int',
     '_0x70': 'int',
     '_0x74': 'int',
