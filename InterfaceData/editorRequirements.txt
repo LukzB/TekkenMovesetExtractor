@@ -34,6 +34,10 @@
 49,On hit/block
 51,On hit
 61,Check opponent VULN
+62,Opp doing a damaging move
+63,Opp doing a damaging move + standing
+64,Opp doing a damaging move + crouching
+65,Opp doing a non-damaging move
 66,Opponent Standing
 67,Opponent Crouching
 68,Incoming high attack
@@ -42,6 +46,8 @@
 71,Incoming high/mid attack
 72,Backturned
 73,Not Backturned
+76,Facing direction >= X
+77,Facing direction < X
 92,Opponent facing Forward
 93,Opponent facing Left
 94,Opponent facing Right
@@ -57,6 +63,9 @@
 104,Enemy last active frame - curr frame < X
 105,Enemy last active frame - curr frame >= X
 106,Enemy last active frame - curr frame = X
+107,Enemy move frame - last active frame <= X
+108,Player current frame - move max anim >= X
+109,Player move max anim - current frame > X
 110,Enemy move frame >= X
 111,Enemy move frame < X
 112,Enemy move frame == X
@@ -64,11 +73,15 @@
 114,Enemy move frame >= X
 126,Opponent downed
 127,Opponent on their feet
+128,Opponent downed + distance <= X
 130,Counterhit
 131,Pressed ONLY LP (1)
 132,Pressed ONLY RP (2)
 133,Pressed ONLY LP+RP (1+2)
+134,Throw break related
+135,Throw break related
 137,On death
+138,On opponent death
 139,Opponent HP < 50%
 140,Player HP >= param
 141,Player HP < param
@@ -95,30 +108,39 @@
 225,Player NOT Character ID
 226,Opponent character ID
 227,Opponent NOT character ID
-228,Character controller
+228,Player character controller
 229,Opponent character controller
 274,Kazuya devil >= X
+276,0x80e4 >= X
 281,0x80c5 >= X
 282,0x80c8 >= X
 288,Short flag >= X
 312,Kazuya devil <= X
+314,0x80e4 <= X
 319,0x80c5 <= X
 320,0x80c8 <= X
 326,Short flag <= X
 350,Kazuya devil == X
+352,0x80e4 == X
 358,0x80c5 == X
 359,0x80c8 == X
 365,Short flag == X
 442,Heat available
 466,Heat related
+640,Player speed >= X
+641,Player speed <= X
+642,Player speed == X
 654,RNG-related
 667,Playing Story mode
 668,Story battle number
+672,Game mode
 716,Opponent airborne
 717,Opponent not airborne
 718,Has Item
 723,Juggle
-724,Screw available
+724,Tornado available
+777,Story flags
+778,Not Story mode
 1028,Player is in heat
 1032,Parry High
 1033,Parry Mid
