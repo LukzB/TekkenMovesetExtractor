@@ -3,7 +3,7 @@
 from tkinter import Tk, Frame, Listbox, Label, Scrollbar, StringVar, Toplevel, Menu, messagebox, Text, simpledialog, filedialog
 from tkinter.ttk import Button, Entry, Style
 from Addresses import game_addresses, GameClass
-import additionalReqDetails as ard  # additional req details
+from additionalReqDetails import reqDetailsList as ard  # additional req details
 import webbrowser
 import shutil
 import copy
@@ -122,12 +122,12 @@ moveFields = {
     'u4': 'long',
     'u6': 'int',
     'u7': 'short',
-    'u8_2': 'short',
+    # 'u8_2': 'short',
     '_0x64': 'int',
-    'ordinal_id': 'positive_index',
+    'ordinal_id': 'int',
     '_0x70': 'int',
     '_0x74': 'int',
-    'u9': 'int',
+    # 'u9': 'int',
     'u10': 'int',
     'u11': 'int',
     'u12': 'int',
