@@ -50,7 +50,6 @@ gamemodes = {
     4: "Main Story",
     5: "Char episode",
     6: "Customization",
-    7: "Treasure Battle",
     10: "VS"
 }
 
@@ -162,7 +161,7 @@ reqDetailsList = {
     288: ShortFlagGT(),  # Short flag >= X
     326: ShortFlagLT(),  # Short flag <= X
     365: ShortFlagEQ(),  # Short flag == X
-    # 566: DictionaryRequirement(gamemodes),  # Game mode
     668: StoryBattleRequirement(),  # Story battle details
+    672: DictionaryRequirement(gamemodes),  # Game mode
     1028: DictionaryRequirement(reqYesNo),
 }

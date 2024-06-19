@@ -3,7 +3,7 @@
 from tkinter import Tk, Frame, Listbox, Label, Scrollbar, StringVar, Toplevel, Menu, messagebox, Text, simpledialog, filedialog
 from tkinter.ttk import Button, Entry, Style
 from Addresses import game_addresses, GameClass
-from additionalReqDetails import reqDetailsList as ard  # additional req details
+from additionalReqDetails import reqDetailsList # additional req details
 import webbrowser
 import shutil
 import copy
@@ -34,7 +34,7 @@ def getLabel(itemId, key):
 def appendFurtherDetails(itemId, param, key):
     detail = ""
     if key == 'requirements':  # for requirements
-        req_processor = ard.reqDetailsList.get(itemId)
+        req_processor = reqDetailsList.get(itemId)
         if req_processor:
             desc = req_processor.get(param, "Invalid")
             detail = " : %s" % desc if desc != None else ""
