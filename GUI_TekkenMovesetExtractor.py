@@ -559,8 +559,7 @@ def importPlayer(parent, playerId):
 
     TekkenImporter = importLib.Importer()
     playerAddr = TekkenImporter.getPlayerAddress(playerId - 1)
-    moveset = TekkenImporter.importMoveset(
-        playerAddr, folderPath, charactersPath=charactersPath)
+    moveset = TekkenImporter.importMoveset(playerAddr, folderPath, charactersPath=charactersPath)
     if moveset != None:
         print("\nSuccessfully imported %s !" % (parent.selected_char))
 
