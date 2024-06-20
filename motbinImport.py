@@ -1087,8 +1087,13 @@ class MotbinStruct:
             self.writeInt(move['transition'], 2)  # 0x5C
 
             self.writeInt(move['u7'], 2)  # 0x5E
-            self.writeInt(move['ordinal_id'], 4)  # 0x60
-            self.writeInt(move['_0x64'], 4)  # 0x64
+            # This is for prior version where 0x64 was mapped as 'ordinal_id'
+            if 'ordinal_id' in move and '_0x64' in move:
+                self.writeInt(move['ordinal_id'], 4)  # 0x60
+                self.writeInt(move['_0x64'], 4)  # 0x64
+            if '_0x60' in move and 'ordinal_id' in move:
+                self.writeInt(move['_0x60'] if '_0x60' in move else 0, 4)  # 0x60
+                self.writeInt(move['ordinal_id'] if 'ordinal_id' in move else 0, 4)  # 0x64
             # self.writeInt(move['u8'], 2)
             # self.writeInt(move['u8_2'], 2)
             # self.writeInt(move['u9'], 4)
