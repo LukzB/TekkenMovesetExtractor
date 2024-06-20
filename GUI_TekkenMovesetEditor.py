@@ -1,7 +1,7 @@
 # Python 3.6.5
 
 from tkinter import Tk, Frame, Listbox, Label, Scrollbar, StringVar, Toplevel, Menu, messagebox, Text, simpledialog, filedialog
-from tkinter.ttk import Button, Entry, Style
+from tkinter.ttk import Button, Entry, Style, Combobox
 from Addresses import game_addresses, GameClass
 from additionalReqDetails import reqDetailsList # additional req details
 import webbrowser
@@ -659,6 +659,279 @@ class MassChangeCancelsByMoveIdWindow:
     def __call__(self, move):
         return move['move_id'] == self.moveId
 
+# Silly Portable Converter
+
+class ConverterWindow:
+    def __init__(self, root):
+        window = Toplevel()
+
+        self.window = window
+        self.root = root
+
+        self.window.protocol("WM_DELETE_WINDOW", self.on_close)
+
+        self.mainFrame = Frame(window)
+        self.mainFrame.pack(fill='both', expand=1)
+
+        window.iconbitmap('InterfaceData/renge.ico')
+        window.geometry("200x100")
+        window.maxsize(400, 220)
+        window.minsize(200, 110)
+        self.window.wm_attributes("-topmost", 1)
+
+        rightColumn = createGrid(self.mainFrame, None)
+        rightColumn.grid(row=0, column=0, sticky="nsew")
+
+        # Decimal field
+        decimal_label = Label(rightColumn, text="DEC:")
+        decimal_label.grid(row=1, column=0, padx=10, pady=5, sticky="e")
+        self.decimal_entry = Entry(rightColumn)
+        self.decimal_entry.grid(row=1, column=1, padx=10, pady=5)
+        self.decimal_entry.bind("<Return>", self.convertDecimal)
+
+        # Unsigned Int field
+        unsigned_label = Label(rightColumn, text="INT:")
+        unsigned_label.grid(row=2, column=0, padx=10, pady=5, sticky="e")
+        self.unsigned_entry = Entry(rightColumn)
+        self.unsigned_entry.grid(row=2, column=1, padx=10, pady=5)
+        self.unsigned_entry.bind("<Return>", self.convertUInt)
+
+        # Hexadecimal field
+        hex_label = Label(rightColumn, text="HEX:")
+        hex_label.grid(row=3, column=0, padx=10, pady=5, sticky="e")
+        self.hex_entry = Entry(rightColumn)
+        self.hex_entry.grid(row=3, column=1, padx=10, pady=5)
+        self.hex_entry.bind("<Return>", self.convertHexadecimal)
+
+        self.decimal_entry.bind("<KeyRelease>", self.convertDecimal)
+        self.unsigned_entry.bind("<KeyRelease>", self.convertUInt)
+        self.hex_entry.bind("<KeyRelease>", self.convertHexadecimal)
+
+    def on_close(self):
+        self.root.ConverterWindow = None
+        self.window.destroy()
+        self.window.update()
+
+    def setTitle(self, label=""):
+        title = "TekkenMovesetEditor %s" % (editorVersion)
+        if label != "":
+            title += " - " + label
+        self.window.wm_title(title)
+
+    def __call__(self, move):
+        return move['move_id'] == self.moveId
+
+    def convertDecimal(self, event):
+        try:
+            dec = int(self.decimal_entry.get())
+            uInt = dec & 0xFFFFFFFF
+            hex_val = hex(uInt).upper()[2:]
+            self.updateInputs(dec, uInt, hex_val)
+        except ValueError:
+            pass
+
+    def convertUInt(self, event):
+        try:
+            uInt = abs(int(self.unsigned_entry.get()))
+            dec = uInt
+            hex_val = hex(uInt).upper()[2:]
+            self.updateInputs(dec, uInt, hex_val)
+        except ValueError:
+            pass
+
+    def convertHexadecimal(self, event):
+        hex_val = self.hex_entry.get().lower()
+        if hex_val.startswith("0x"):
+            hex_val = hex_val[2:]
+        try:
+            dec = int(hex_val, 16)
+            uInt = dec & 0xFFFFFFFFFFFFFFFF
+            hex_val = hex(uInt).upper()[2:]
+            self.updateInputs(dec, uInt, hex_val)
+        except ValueError:
+            pass
+
+    def updateInputs(self, dec, uInt, hex_val):
+        self.decimal_entry.delete(0, 'end')
+        self.decimal_entry.insert(0, dec)
+
+        self.unsigned_entry.delete(0, 'end')
+        self.unsigned_entry.insert(0, uInt)
+
+        hex_val_with_prefix = "0x" + hex_val
+        self.hex_entry.delete(0, 'end')
+        self.hex_entry.insert(0, hex_val_with_prefix)
+
+# Search stuff
+
+class SearchDialog(simpledialog.Dialog):
+    def __init__(self, app_instance, parent, title, search_base):
+        self.search_base = search_base
+        self.dropdown_values = {
+            "moves": [
+                "name",
+                "anim_name",
+                "vuln",
+                "hitlevel",
+                "cancel_idx",
+                "transition",
+                "anim_max_len",
+                "hit_condition_idx",
+                "voiceclip_idx",
+                "extra_properties_idx",
+                "move_start_properties_idx",
+                "move_end_properties_idx",
+                "hitbox_location",
+                "first_active_frame",
+                "last_active_frame",
+
+                "first_active_frame1",
+                "last_active_frame1",
+                "hitbox_location1",
+
+                "first_active_frame2",
+                "last_active_frame2",
+                "hitbox_location2",
+
+                "first_active_frame3",
+                "last_active_frame3",
+                "hitbox_location3"
+                ],
+            "cancels": [
+                "command",
+                "extradata_idx",
+                "requirement_idx",
+                "frame_window_start",
+                "frame_window_end",
+                "starting_frame",
+                "move_id"
+                ],
+            "extra_move_properties": [
+                "id",
+                "requirement_idx",
+                "value",
+                "value2",
+                "value3"
+                ],
+            "requirements": [
+                "req", 
+                "param"
+                ],
+            "pushbacks": [
+                "val1",
+                "val2",
+                "val3",
+                "pushbackextra_idx"
+                ],
+            "hit_conditions": [
+                "requirement_idx",
+                "damage",
+                "reaction_list_idx"
+            ],
+
+        }
+        self.app_instance = app_instance
+        super().__init__(parent, title)
+
+    def body(self, master):
+        Label(master, text="Find %s by:" % self.search_base).grid(row=0, column=0, padx=5, pady=5)
+        
+        self.search_type = StringVar(master)
+        self.search_type.set(self.dropdown_values[self.search_base][0])
+        
+        combox = Combobox(master, textvariable=self.search_type, values=self.dropdown_values[self.search_base], state="readonly")
+        combox.grid(row=0, column=1, padx=5, pady=5)
+
+        Label(master, text="Search value:").grid(row=2, column=0, padx=5, pady=5)
+        self.value_entry = Entry(master)
+        self.value_entry.grid(row=2, column=1, padx=5, pady=5)
+        
+        return self.value_entry #focus
+
+    def apply(self):
+        base = self.search_base
+        type = self.search_type.get()
+        value = self.value_entry.get()
+        
+        if value:
+            #Convert if hex
+            if value.startswith('0x'): 
+                try:
+                    value = str(int(value, 16))
+                except ValueError:
+                    print('Invalid hex value in field!')
+                    return
+
+        SearchResultWindow(self.app_instance, base, type, value)
+         
+class SearchResultWindow:
+    def __init__(self, root, base, type, value):
+        window = Toplevel()
+        self.window = window
+        self.root = root
+        # found items - (idx, item)
+        self.found_items = self.find_items(base, type, value)
+
+        window.iconbitmap('InterfaceData/renge.ico')
+        window.geometry("500x400")
+        window.minsize(300, 300)
+        
+        self.setTitle("Search results: %s containing %s with value %s (%d results)" %
+                      (base, type, value, len(self.found_items)))
+        
+        self.printResultList(base, type, value, self.found_items)
+
+    def printResultList(self, base, type, value, found_items):
+        TextArea = Text(self.window, wrap="word")
+
+        scrollbar = Scrollbar(self.window, command=TextArea.yview)
+        scrollbar.pack(side='right', fill='y')
+
+        TextArea.config(yscrollcommand=scrollbar.set)
+
+        if len(found_items) == 0:
+            TextArea.insert(
+                "end", "No %s containing %s %s found" % 
+                (base, type, value))
+        else:
+            result_str = ''
+            group_found_items = []
+            
+            match base:
+                case 'cancels':
+                    result_str += f'Found in {len(found_items)} cancel lists:\n'
+                    result_str += self.stringify_items(found_items).rstrip(', ')
+
+                    group_found_items = self.find_items('group_cancels', type, value)
+
+                    if found_items: 
+                        result_str += f'\n\nFound in {len(found_items)} group cancel lists:\n'
+                        result_str += self.stringify_items(found_items)
+
+                case 'extra_move_properties'|'requirements'|'hit_conditions':
+                    result_str += f'{len(found_items)} {base} found in the following lists:\n'
+                    result_str += self.stringify_items(found_items)
+                case _: 
+                    result_str += f'{len(found_items)} {base} found with specified {type}:\n'
+                    result_str += self.stringify_items(found_items)
+            
+            TextArea.insert("end", result_str + "\n\n")
+
+            TextArea.insert("end", "--- %d entries containing %s %s ---" %
+                            (len(self.found_items) + len(group_found_items), type, value))
+        
+        TextArea.configure(state="disabled")
+        TextArea.pack(padx=10, pady=5, side='left', fill='both', expand=1)
+
+    def find_items(self, search_base, search_type, search_value):
+        list = self.root.movelist.get(search_base, [])
+        return [(i, item) for i, item in enumerate(list) if str(item.get(search_type)) == search_value]
+    
+    def stringify_items(self, items):
+        return ", ".join(f"{i}" for i, _item in items)
+
+    def setTitle(self, title):
+        self.window.wm_title(title)
 
 class Motafile:
     def __init__(self, filename):
@@ -2536,6 +2809,7 @@ class GUI_TekkenMovesetEditor():
         self.GroupCancelEditor = None
         self.MoveCopyingWindow = None
         self.MassChangeCancelsByMoveIdWindow = None
+        self.ConverterWindow = None
 
         moveCreationMenu = [
             ("Create new empty move", self.createMove),
@@ -2625,6 +2899,20 @@ class GUI_TekkenMovesetEditor():
             ("What reactions use this move", self.listReactionsForMove),
             ("Mass-change cancels by move id (MAKE SURE YOU KNOW WHAT YOU'RE DOING!)",
              self.massChangeCancelsByMoveId),
+            ("Convert Values", self.openConverter)
+        ]
+
+        searchMenu = [
+            ("Find Moves", self.findMoves),
+            ("Find Cancels", self.findCancels),
+            ("Find Requirements", self.findReqs),
+            ("Find Extra Properties", self.findExtraProps),
+            ("Find Pushbacks", self.findPushbacks),
+            ("Find Hit Conditions", self.findHitConditions),
+            ("", "separator"),
+            ("Find Cancel Extradata", self.findCancelExtraData),
+            ("", "separator"),
+            ("Find Pushback Extradata", self.findPushbackExtraData),
         ]
 
         gotoMenu = [
@@ -2665,6 +2953,7 @@ class GUI_TekkenMovesetEditor():
             ("Face anims", faceAnimMenu),
             ("Hand anims", handAnimMenu),
             ("Tools", toolsMenu),
+            ("Search", searchMenu),
             ("Go to", gotoMenu),
             ("Help", helpMenu),
         ]
@@ -2985,6 +3274,57 @@ Hand animations can be created in blender, using the following plugins:\ngithub.
             app = MassChangeCancelsByMoveIdWindow(self)
             self.MassChangeCancelsByMoveIdWindow = app
             app.window.mainloop()
+
+    def openConverter(self):
+        if self.ConverterWindow is None:
+            app = ConverterWindow(self)
+            self.ConverterWindow = app
+            app.decimal_entry.focus()
+            app.window.mainloop()
+
+    def findMoves(self):
+        SearchDialog(self, self.window, "Find Moves", "moves")
+
+    def findCancels(self):
+        SearchDialog(self, self.window, "Find Cancels", "cancels")
+
+    def findReqs(self):
+        SearchDialog(self, self.window, "Find Requirements", "requirements")
+
+    def findExtraProps(self):
+        SearchDialog(self, self.window, "Find Extra Properties", "extra_move_properties")
+
+    def findPushbacks(self):
+        SearchDialog(self, self.window, "Find Pushbacks", "pushbacks")
+
+    def findHitConditions(self):
+        SearchDialog(self, self.window, "Find Hit Conditions", "hit_conditions")
+
+    def findCancelExtraData(self):
+        searchValue = simpledialog.askinteger(
+            "Find Cancel-extradata value", "Input Cancel-extradata value to find", minvalue=0)
+        if searchValue:
+            try:
+                found_extradata = self.movelist['cancel_extradata'].index(searchValue)
+            except ValueError as e:
+                messagebox.showinfo(
+                    'No results found...', e.args[0])
+            else:
+                messagebox.showinfo(
+                    'Extradata found!', f'The extradata_idx is {found_extradata}')
+
+    def findPushbackExtraData(self):
+        searchValue = simpledialog.askinteger(
+            "Find Pushback-extradata value", "Input Pushback-extradata value to find", minvalue=0)
+        if searchValue:
+            try:
+                found_extradata = self.movelist['pushback_extras'].index(searchValue)
+            except ValueError as e:
+                messagebox.showinfo(
+                    'No results found...', e.args[0])
+            else:
+                messagebox.showinfo(
+                    'Extradata found!', f'The extradata_idx is {found_extradata}')
 
     def getMoveId(self, moveId):
         key = 'aliases' if self.movelist['version'] != 'Tekken8' else 'original_aliases'
