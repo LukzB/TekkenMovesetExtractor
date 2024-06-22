@@ -2732,7 +2732,7 @@ class Motbin:
             self.throws.append(throw.dict())
 
         if self.TekkenVersion == 't8':
-            print("Reading unknown _0x298...")
+            print("Reading dialogue managers...")
             for i in range(self._0x298_size):
                 _0x298 = Unknown_0x298(self._0x298_ptr + (i * self.Unknown298_size), self)
                 _0x298.setRequirementId((_0x298.requirement_addr - self.requirements_ptr) // self.Requirement_size)
