@@ -730,13 +730,16 @@ class MotbinStruct:
             self.cancel_ptr = self.align()
         cancel_count = len(cancels)
 
+        has_0x800b = any(cancel['command'] == 0x800b for cancel in cancels)
         for cancel in cancels:
-            if cancel['command'] == 0x800b:
-                cancel['command'] = 0x800d
-            elif cancel['command'] == 0x800c:
-                cancel['command'] = 0x800e
-            elif cancel['command'] >= 0x800d and cancel['command'] <= 0x82FF:
-                cancel['command'] += 1
+            # Block no longer needed but keeping it so older movesets don't break
+            if has_0x800b:
+                if cancel['command'] == 0x800b:
+                    cancel['command'] = 0x800d
+                elif cancel['command'] == 0x800c:
+                    cancel['command'] = 0x800e
+                elif cancel['command'] >= 0x800d and cancel['command'] <= 0x82FF:
+                    cancel['command'] += 1
 
             self.writeInt(cancel['command'], 8)
 

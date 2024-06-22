@@ -1885,15 +1885,6 @@ class Cancel:
 
         readOffsetTable(self, 'cancel')
 
-        if self.TekkenVersion == 't8':
-            if self.command == 0x800d:
-                self.command = 0x800b
-            elif self.command == 0x800e:
-                self.command = 0x800c
-            # Adjusting input sequences. Looks like they start from 0x800e instead of 0x800d
-            elif self.command >= 0x800e and self.command <= 0x82FF:
-                self.command -= 1
-
         if self.endian == 'big' and self.TekkenVersion != 't5dr':  # swapping first two ints
             t = self.bToInt(data, 0, 4)
             t2 = self.bToInt(data, 0x4, 4)
