@@ -109,6 +109,7 @@
 0x838e,Trigger cinematic camera
 0x83aa,Create Raven clone
 0x83ab,Remove Raven clone
+0x83be,Pause/resume Heat Timer
 0x83ce,Add scaling (standing)
 0x83cd,Add scaling (airborne)
 0x848b,Attach item(?)

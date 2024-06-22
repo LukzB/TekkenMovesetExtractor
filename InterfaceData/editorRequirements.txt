@@ -131,6 +131,7 @@
 641,Player speed <= X
 642,Player speed == X
 654,RNG-related
+666,Playing Ball mode
 667,Playing Story mode
 668,Story battle number
 672,Game mode
@@ -139,6 +140,9 @@
 718,Has Item
 723,Juggle
 724,Tornado available
+755,Chara ID related?
+766,Chara episode pre-fight?
+767,Chara episode post-fight?
 777,Story flags
 778,Not Story mode
 1028,Player is in heat
