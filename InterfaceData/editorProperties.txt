@@ -11,10 +11,12 @@
 0x800a,Custom camera shake
 0x800b,Ground Ripple
 0x800e,Break Tile
-0x800f,Heavy Ground Ripple
+0x800f,Medium Ground Ripple
+0x8010,Heavy Ground Ripple
 0x8011,Fire burn VFX (self)
 0x8012,Fire burn VFX (opponent)
 0x8017,Play VFX (self)
+0x8018,Hit VFX (self)
 0x8019,Electric VFX (self)
 0x801a,Electric VFX (opponent)
 0x8031,Char Hit Spart VFX (self)
@@ -59,6 +61,7 @@
 0x81fa,Add tracking (self)
 0x81fb,Add tracking (opponent)
 0x81fc,Change VULN
+0x8203,Footstep SFX+VFX
 0x822d,Power Crush
 0x82bc,AI Input?
 0x8238,Skip move frames
@@ -86,8 +89,9 @@
 0x825d,Inflict pushback (opponent)
 0x825f,Align with pushback (opponent)
 0x8260,Align with pushback (opponent, backwards)
+0x826f,Set slide speed
 0x8270,Slide player
-0x8271,Set player sliding direction
+0x8271,Slide player on word axis
 0x8272,Rotate player
 0x8273,Rotate opponent
 0x8275,Push player in Z-axis
@@ -176,12 +180,25 @@
 0x854d,Restore alias 0x801f
 0x854e,Restore alias 0x8020
 0x860a,Both hands pose
-0x806b,Left hand pose
-0x806c,Right hand pose
-0x806e,Both hands pose related
+0x860b,Left hand pose
+0x860c,Right hand pose
+0x860e,Both hands pose related
+0x860f,Play both hands anim
+0x8610,Play left hand anim
+0x8611,Play right hand anim
+0x8612,Left hand anim related
+0x8613,Right hand anim related
+0x8683,Play wing anim
+0x8684,wing anim related
+0x8685,Play wing anim
 0x8695,Camera zoom focal point
 0x8696,Camera zoom VFX
 0x86b0,Heat activation camera
-0x877b,Related to the new 0x2A0 Struct
-0x87f8,Related to the new 0x2A0 Struct
+0x877b,Play cinematic facial anim
+0x87ef,Play sound from player
+0x87f0,Play sound from player
+0x87f1,Play sound from player
+0x87f2,Play sound from opponent
+0x87f3,Play sound from opponent
+0x87f8,Play cinematic voicelcip
 0x87f9,Preset camera zoom
