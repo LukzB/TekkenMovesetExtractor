@@ -1754,7 +1754,7 @@ class ExtrapropEditor(FormEditor):
         self.setDetails()
 
     def setDetails(self):
-        if self.root.movelist['version'] != 'Tekken7':
+        if ['Tekken7', 'Tekken8'].index(self.root.movelist['version']) == -1:
             return
 
         reqId = self.fieldValue['id']

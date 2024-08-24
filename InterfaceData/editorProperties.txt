@@ -23,6 +23,7 @@
 0x8039,Char trail VFX (self)
 0x8046,Stage VFX
 0x8049,Enable Homing VFX
+0x804b,Tile-break VFX (self)
 0x8079,Throw VFX (self)
 0x807a,Throw VFX (opponent)
 0x807c,Block VFX (self)
@@ -54,6 +55,7 @@
 0x812b,opponent short flag
 0x812c,opponent short flag += value
 0x812d,opponent short flag -= value
+0x8139,Show/Hide Heat Meter
 0x814a,Raven clone horizontal offset
 0x814b,Add recoverable health
 0x8151,Activate devil permanently
@@ -61,8 +63,10 @@
 0x81fa,Add tracking (self)
 0x81fb,Add tracking (opponent)
 0x81fc,Change VULN
+0x81fe,Change collision status
 0x8203,Footstep SFX+VFX
 0x822d,Power Crush
+0x822e,Rage Art activate VFX
 0x82bc,AI Input?
 0x8238,Skip move frames
 0x8239,Skip move frames (+N)
@@ -100,18 +104,28 @@
 0x828b,Enable scaled dmg
 0x828c,Inflict scaled dmg (opponent)
 0x828d,Inflict scaled dmg (self)
+0x82a5,Inflict Chip dmg (opponent)
 0x82bc,AI Input(?)
 0x82c1,Player visibilty
 0x82c2,Opponent visibilty
+0x82f0,Toggle Neck Tracking
+0x82e0,Activate Rage
+0x82e2,Spend Rage
 0x830d,Health Bar display/vfx
 0x8338,Use fake frame advantage
 0x8383,Refill/drain heat
 0x838e,Trigger cinematic camera
+0x838f,Trigger Rage Art Stage VFX
+0x8394,Activate Heat Aura VFX
 0x83aa,Create Raven clone
 0x83ab,Remove Raven clone
+0x83ad,Play subtitle text
+0x83bc,Rotate Player
+0x83bd,Rotate Opponent
 0x83be,Pause/resume Heat Timer
 0x83ce,Add scaling (standing)
 0x83cd,Add scaling (airborne)
+0x83d6,Set game speed
 0x848b,Attach item(?)
 0x848c,Detach item(?)
 0x850d,Change default initiator

@@ -21,10 +21,14 @@
 24,Attack to Throw (Backward)
 25,Attack to Throw (Left Side)
 26,Attack to Throw (Right Side)
-27,Airborne Throw Hit (Forward)
-28,Airborne Throw Hit (Backward)
-29,Airborne Throw Hit (Left Side)
-30,Airborne Throw Hit (Right Side)
+27,Airborne Throw Hit Forward (Face-up)
+28,Airborne Throw Hit Backward (Face-up)
+29,Airborne Throw Hit Left Side (Face-up)
+30,Airborne Throw Hit Right Side (Face-up)
+31,Airborne Throw Hit Forward (Face-down)
+32,Airborne Throw Hit Backward (Face-down)
+33,Airborne Throw Hit Left Side (Face-down)
+34,Airborne Throw Hit Right Side (Face-down)
 35,Opponent distance <= param
 36,Opponent distance >= param
 43,On Hit

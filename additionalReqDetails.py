@@ -34,7 +34,7 @@ charIDs = {
     32: 'Azazel',
     33: 'Eddy',
     34: 'Lidia',
-    35: 'DLC3',
+    35: 'Heihachi',
     36: 'DLC4',
     116: 'Dummy',
     117: 'Angel Jin',
@@ -103,7 +103,7 @@ class ShortFlagGT(Requirement):
             return default
         flag = x >> 16
         value = x & 0xFFFF
-        return f"Short flag {flag} >= {value}"
+        return f"flag {flag} >= {value}"
 
 
 class ShortFlagLT(Requirement):
@@ -114,7 +114,7 @@ class ShortFlagLT(Requirement):
             return default
         flag = x >> 16
         value = x & 0xFFFF
-        return f"Short flag {flag} <= {value}"
+        return f"flag {flag} <= {value}"
 
 
 class ShortFlagEQ(Requirement):
@@ -125,7 +125,7 @@ class ShortFlagEQ(Requirement):
             return default
         flag = x >> 16
         value = x & 0xFFFF
-        return f"Short flag {flag} == {value}"
+        return f"flag {flag} == {value}"
 
 
 class StoryBattleRequirement(Requirement):
