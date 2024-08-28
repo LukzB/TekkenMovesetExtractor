@@ -136,7 +136,7 @@
 359,0x80c8 == X
 365,Short flag == X
 442,Heat available
-454,Bryan Snake Eyes == X
+454,Chara install == X
 466,Heat related
 640,Player speed >= X
 641,Player speed <= X

@@ -127,7 +127,7 @@
 0x83aa,Create Raven clone
 0x83ab,Remove Raven clone
 0x83ad,Play subtitle text
-0x83b1,Set Bryan Snake Eyes
+0x83b1,Set chara installs
 0x83bc,Rotate Player
 0x83bd,Rotate Opponent
 0x83be,Pause/resume Heat Timer
