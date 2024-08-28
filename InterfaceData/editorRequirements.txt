@@ -138,6 +138,7 @@
 442,Heat available
 454,Chara install
 466,Heat related
+490,Eddy install == X
 640,Player speed >= X
 641,Player speed <= X
 642,Player speed == X
@@ -151,6 +152,8 @@
 718,Has Item
 723,Juggle
 724,Tornado available
+750,Leroy cane available
+751,Leroy cane not available
 755,Chara ID related?
 766,Chara episode pre-fight?
 767,Chara episode post-fight?

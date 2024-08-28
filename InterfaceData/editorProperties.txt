@@ -120,6 +120,7 @@
 0x82e2,Spend Rage
 0x830d,Health Bar display/vfx
 0x8338,Use fake frame advantage
+0x835b,Spend Leroy cane install
 0x8383,Refill/drain heat
 0x838e,Trigger cinematic camera
 0x838f,Trigger Rage Art Stage VFX
@@ -135,6 +136,7 @@
 0x83cd,Add scaling (airborne)
 0x83d6,Set game speed
 0x83d7,Slowdown VFX
+0x83ee,Set Eddy installs
 0x848b,Attach item(?)
 0x848c,Detach item(?)
 0x850d,Change default initiator
