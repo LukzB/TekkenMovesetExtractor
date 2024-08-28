@@ -19,6 +19,7 @@
 0x8018,Hit VFX (self)
 0x8019,Electric VFX (self)
 0x801a,Electric VFX (opponent)
+0x801b,Heat Smash VFX (self)
 0x8031,Char Hit Spart VFX (self)
 0x8039,Char trail VFX (self)
 0x8046,Stage VFX
