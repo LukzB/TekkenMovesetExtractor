@@ -114,18 +114,24 @@
 227,Opponent NOT character ID
 228,Player character controller
 229,Opponent character controller
+259,0x809b >= X
 274,Kazuya devil >= X
 276,0x80e4 >= X
+280,0x80f0 >= X
 281,0x80c5 >= X
 282,0x80c8 >= X
 288,Short flag >= X
+297,0x809b <= X
 312,Kazuya devil <= X
 314,0x80e4 <= X
+318,0x80f0 <= X
 319,0x80c5 <= X
 320,0x80c8 <= X
 326,Short flag <= X
+335,0x809b == X
 350,Kazuya devil == X
 352,0x80e4 == X
+356,0x80f0 == X
 358,0x80c5 == X
 359,0x80c8 == X
 365,Short flag == X

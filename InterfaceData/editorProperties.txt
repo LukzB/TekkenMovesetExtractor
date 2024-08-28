@@ -30,7 +30,10 @@
 0x807f,Small sparks VFX (self)
 0x8087,Do self (perma) damage
 0x8088,Heal (perma) Health
-0x80c5,Store Value (req 358)
+0x809b,Store value (req 335)
+0x809c,0x809b += value
+0x809d,0x809b -= value
+0x80c5,Store value (req 358)
 0x80c6,0x80c5 += value
 0x80c7,0x80c5 -= value
 0x80c8,Store value (req 359)
@@ -44,6 +47,9 @@
 0x80e4,Store value (req 352)
 0x80e5,0x80e4 += value
 0x80e6,0x80e4 -= value
+0x80f0,Store value (req 356)
+0x80f1,0x80e4 += value
+0x80f2,0x80e4 -= value
 0x8123,opponent Kazuya Devil
 0x8124,opponent devil += value
 0x8125,opponent devil -= value
@@ -56,6 +62,7 @@
 0x812c,opponent short flag += value
 0x812d,opponent short flag -= value
 0x8139,Show/Hide Heat Meter
+0x8146,Inflict Chip dmg (self)
 0x814a,Raven clone horizontal offset
 0x814b,Add recoverable health
 0x8151,Activate devil permanently
