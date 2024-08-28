@@ -134,6 +134,7 @@
 0x83ce,Add scaling (standing)
 0x83cd,Add scaling (airborne)
 0x83d6,Set game speed
+0x83d7,Slowdown VFX
 0x848b,Attach item(?)
 0x848c,Detach item(?)
 0x850d,Change default initiator
