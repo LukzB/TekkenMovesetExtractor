@@ -161,6 +161,7 @@ reqDetailsList = {
     288: ShortFlagGT(),  # Short flag >= X
     326: ShortFlagLT(),  # Short flag <= X
     365: ShortFlagEQ(),  # Short flag == X
+    454: DictionaryRequirement(reqYesNo), # Bryan Snake Eyes
     668: StoryBattleRequirement(),  # Story battle details
     672: DictionaryRequirement(gamemodes),  # Game mode
     1028: DictionaryRequirement(reqYesNo),
