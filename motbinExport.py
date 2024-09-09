@@ -277,11 +277,11 @@ t8_offsetTable = {
     '_0x298_size': {'offset': 0x2A8, 'size': 8},
 
     'mota_start': {'offset': None, 'size': 8},
-    # 114 aliases
+    # 120 aliases
     'original_aliases': {'offset': 0x30, 'size': (60, 2)},
     'current_aliases': {'offset': 0xA8, 'size': (60, 2)},
-    # 38 aliases
-    'unknown_aliases': {'offset': 0x120, 'size': (38, 2)},
+    # 36 aliases
+    'unknown_aliases': {'offset': 0x120, 'size': (36, 2)},
 
     'pushback:val1': {'offset': 0x0, 'size': 2},
     'pushback:val2': {'offset': 0x2, 'size': 2},
