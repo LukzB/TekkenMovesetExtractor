@@ -66,6 +66,7 @@
 0x8146,Inflict Chip dmg (self)
 0x814a,Raven clone horizontal offset
 0x814b,Add recoverable health
+0x814d,Heat-dash related
 0x8151,Activate devil permanently
 0x81ed,Give CH property
 0x81fa,Add tracking (self)
