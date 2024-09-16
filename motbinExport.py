@@ -1427,6 +1427,7 @@ t8_character_name_mappping = {
     31: '[RAVEN]',
     32: '[AZAZEL]',
     33: '[EDDY]',
+    34: '[LIDIA]',
     116: '[DUMMY]',
     117: '[ANGEL_JIN]',
     118: '[TRUE_DEVIL_KAZUYA]',
