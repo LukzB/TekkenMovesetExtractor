@@ -122,6 +122,7 @@
 280,0x80f0 >= X
 281,0x80c5 >= X
 282,0x80c8 >= X
+283,0x80cb >= X
 288,Short flag >= X
 297,0x809b <= X
 312,Kazuya devil <= X
@@ -129,6 +130,7 @@
 318,0x80f0 <= X
 319,0x80c5 <= X
 320,0x80c8 <= X
+321,0x80cb <= X
 326,Short flag <= X
 335,0x809b == X
 350,Kazuya devil == X
@@ -136,6 +138,7 @@
 356,0x80f0 == X
 358,0x80c5 == X
 359,0x80c8 == X
+360,0x80cb == X
 365,Short flag == X
 442,Heat available
 454,Chara install

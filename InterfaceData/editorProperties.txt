@@ -40,6 +40,9 @@
 0x80c8,Store value (req 359)
 0x80c9,0x80c8 += value
 0x80ca,0x80c8 -= value
+0x80cb,Store value (req 360)
+0x80cc,0x80cb += value
+0x80cd,0x80cb -= value
 0x80dc,Kazuya Devil
 0x80dd,devil += value
 0x80de,devil -= value
@@ -223,6 +226,7 @@
 0x8696,Camera zoom VFX
 0x86b0,Heat activation camera
 0x877b,Play cinematic facial anim
+0x877c,Expand muscles
 0x87ef,Play sound from player
 0x87f0,Play sound from player
 0x87f1,Play sound from player
