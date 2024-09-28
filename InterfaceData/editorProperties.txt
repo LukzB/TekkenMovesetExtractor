@@ -226,7 +226,8 @@
 0x8696,Camera zoom VFX
 0x86b0,Heat activation camera
 0x877b,Play cinematic facial anim
-0x877c,Expand muscles
+0x877c,Expand left arm muscles
+0x877d,Expand right arm muscles
 0x87ef,Play sound from player
 0x87f0,Play sound from player
 0x87f1,Play sound from player
