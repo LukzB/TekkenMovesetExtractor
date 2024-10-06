@@ -8,7 +8,7 @@ import os
 import sys
 from copy import deepcopy
 
-importVersion = "1.0.0"
+importVersion = "1.0.1"
 
 requirement_size = 0x14
 cancel_size = 0x28
