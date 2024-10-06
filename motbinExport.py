@@ -4,6 +4,7 @@
 from Addresses import game_addresses, GameClass
 from ByteSwap import SwapAnimBytes, SwapMotaBytes
 from datetime import datetime, timezone
+from Aliases import getTekken8characterName
 import json
 import os
 import sys
@@ -11,7 +12,7 @@ import re
 import string
 from zlib import crc32
 
-exportVersion = "1.0.0"
+exportVersion = "1.0.1"
 
 
 def GetBigEndianAnimEnd(data, searchStart):
@@ -1392,53 +1393,6 @@ animHeaders = {
     't5':   b'\x64\x00\x17\x00\x0B\x00\x0B\x00\x05\x00\x07\x00\x07\x00\x07\x00\x0B\x00\x07\x00\x07\x00\x07\x00\x07\x00\x06\x00\x07\x00\x07\x00\x07\x00\x06\x00\x07\x00\x07\x00\x06\x00\x07\x00\x07\x00\x06\x00\x07\x00',
 }
 
-t8_character_name_mappping = {
-    0: '[PAUL]',
-    1: '[LAW]',
-    2: '[KING]',
-    3: '[YOSHIMITSU]',
-    4: '[HWOARANG]',
-    5: '[XIAYOU]',
-    6: '[JIN]',
-    7: '[BRYAN]',
-    8: '[KAZUYA]',
-    9: '[STEVE]',
-    10: '[JACK8]',
-    11: '[ASUKA]',
-    12: '[DEVIL_JIN]',
-    13: '[FENG]',
-    14: '[LILI]',
-    15: '[DRAGUNOV]',
-    16: '[LEO]',
-    17: '[LARS]',
-    18: '[ALISA]',
-    19: '[CLAUDIO]',
-    20: '[SHAHEEN]',
-    21: '[NINA]',
-    22: '[LEE]',
-    23: '[KUMA]',
-    24: '[PANDA]',
-    25: '[ZAFINA]',
-    26: '[LEROY]',
-    27: '[JUN]',
-    28: '[REINA]',
-    29: '[AZUCENA]',
-    30: '[VICTOR]',
-    31: '[RAVEN]',
-    32: '[AZAZEL]',
-    33: '[EDDY]',
-    34: '[LIDIA]',
-    35: '[HEIHACHI]',
-    116: '[DUMMY]',
-    117: '[ANGEL_JIN]',
-    118: '[TRUE_DEVIL_KAZUYA]',
-    119: '[JACK7]',
-    120: '[SOLDIER]',
-    121: '[DEVIL_JIN_2]',
-    122: '[TEKKEN_MONK]',
-    123: '[SEIRYU]',
-}
-
 t5_character_name_mappping = {
     b'\x95\x97\x8a\xd4 \x90m': '[JIN]',
     b'BAEK DOO SAN': '[BAEK_DOO_SAN]',
@@ -1669,7 +1623,7 @@ class Exporter:
                     return 'UNKNOWN'
                 key = self.TekkenVersion + '_chara_id_offset'
                 chara_id = self.readInt(self.base + playerAddress + game_addresses[key], 4)
-                return t8_character_name_mappping.get(chara_id, '[UNKNOWN]')
+                return getTekken8characterName(chara_id)
             val = self.readInvalidStrPtr(self.base + motbin_ptr + offset)
             for name in characterNameMapping[self.TekkenVersion]:
                 # Try seeing if we know the first part of the name (So that things like [LAW]_STORY_ may work)

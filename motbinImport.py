@@ -2,7 +2,7 @@
 # Python 3.6.5
 
 from Addresses import game_addresses, GameClass, VirtualAllocEx, VirtualFreeEx, GetLastError, MEM_RESERVE, MEM_COMMIT, MEM_DECOMMIT, MEM_RELEASE, PAGE_EXECUTE_READWRITE
-from Aliases import getRequirementAlias, getMoveExtrapropAlias, getCharacteridAlias, ApplyCharacterFixes, fillAliasesDictonnaries, getHitboxAliases, applyGlobalRequirementAliases
+from Aliases import getTekken8characterName, getRequirementAlias, getMoveExtrapropAlias, getCharacteridAlias, ApplyCharacterFixes, fillAliasesDictonnaries, getHitboxAliases, applyGlobalRequirementAliases
 import json
 import os
 import sys
@@ -43,6 +43,9 @@ def readJsonFile(folderName: str):
         f.close()
         return m
 
+def printPtrInfo(p):
+    print("%d/%d bytes left." % (p.size - (p.curr_ptr - p.head_ptr), p.size))
+    return
 
 class Importer:
     def __init__(self, gameName="Polaris-Win64-Shipping.exe"):
@@ -95,15 +98,17 @@ class Importer:
             print("Cannot import because a different character is loaded")
             return None
 
+        motbin_ptr_addr = playerAddr + game_addresses['t8_motbin_offset']
+        current_motbin_ptr = self.readInt(motbin_ptr_addr, 8)
+        global placeholder_address
+        placeholder_address = self.readInt(current_motbin_ptr + 0x10, 8)
+
         moveset = self.loadMoveset(
             folderName=folderName, moveset=moveset, charactersPath=charactersPath)
 
-        motbin_ptr_addr = playerAddr + game_addresses['t8_motbin_offset']
-        current_motbin_ptr = self.readInt(motbin_ptr_addr, 8)
-
         try:
-            old_character_name = self.readString(
-                self.readInt(current_motbin_ptr + 0x8, 8))
+            old_character_name = getTekken8characterName(moveset.m['character_id'])
+            old_character_name = old_character_name[1:-1]
         except:
             old_character_name = "???"
 
@@ -114,9 +119,7 @@ class Importer:
               (current_motbin_ptr, old_character_name))
         print("NEW moveset pointer: 0x%x (%s)" %
               (moveset.motbin_ptr, moveset.m['character_name']))
-        # self.writeInt(current_motbin_ptr + 0x190, moveset.hit_conditions_ptr, 8)
-        # print("Hit condition count: ", len(moveset.m['hit_conditions']))
-        # self.writeInt(current_motbin_ptr + 0x198, len(moveset.m['hit_conditions']), 8)
+
         self.writeInt(motbin_ptr_addr, moveset.motbin_ptr, 8)
 
         moveset.updateCameraMotaStaticPointer(playerAddr)
@@ -148,9 +151,7 @@ class Importer:
         requirements_ptr, requirement_count = p.allocateRequirements()
         cancel_extradata_ptr, cancel_extradata_size = p.allocateCancelExtradata()
         cancel_ptr, cancel_count = p.allocateCancels(m['cancels'])
-        group_cancel_ptr, group_cancel_count = p.allocateCancels(
-            m['group_cancels'], grouped=True)
-
+        group_cancel_ptr, group_cancel_count = p.allocateCancels(m['group_cancels'], grouped=True)
         pushback_extras_ptr, pushback_extras_count = p.allocatePushbackExtras()
         pushback_ptr, pushback_list_count = p.allocatePushbacks()
         reaction_list_ptr, reaction_list_count = p.allocateReactionList()
@@ -166,7 +167,7 @@ class Importer:
         throw_extras_ptr, throw_extras_count = p.allocateThrowExtras()
         throws_ptr, throws_count = p.allocateThrows()
         parry_related_ptr, parry_related_count = p.allocateParryRelated()
-        unknown_0x298_ptr, unknown_0x298_count = p.allocateUnknown298()
+        unknown_0x298_ptr, unknown_0x298_count = p.allocateDialogueHandlers()
 
         p.allocateMota()
 
@@ -179,10 +180,10 @@ class Importer:
         # self.writeInt(p.motbin_ptr, date, 8)
         # self.writeInt(p.motbin_ptr, fulldate, 8)
 
-        self.writeInt(p.motbin_ptr, placeholder_address, 8)
-        self.writeInt(p.motbin_ptr, placeholder_address, 8)
-        self.writeInt(p.motbin_ptr, placeholder_address, 8)
-        self.writeInt(p.motbin_ptr, placeholder_address, 8)
+        self.writeInt(p.motbin_ptr + 0x10, placeholder_address, 8)
+        self.writeInt(p.motbin_ptr + 0x18, placeholder_address, 8)
+        self.writeInt(p.motbin_ptr + 0x20, placeholder_address, 8)
+        self.writeInt(p.motbin_ptr + 0x28, placeholder_address, 8)
 
         self.writeAliases(p.motbin_ptr, m)
 
@@ -251,8 +252,7 @@ class Importer:
         print("%s (ID: %d) successfully imported in memory at 0x%x." %
               (m['character_name'], m['character_id'], p.motbin_ptr))
         # print this to check if any allocated byte has not been used (written on)
-        print("%d/%d bytes left." %
-              (p.size - (p.curr_ptr - p.head_ptr), p.size))
+        printPtrInfo(p)
 
         return p
 
@@ -375,11 +375,11 @@ def getMovesetTotalSize(m, folderName):
     # size = align8Bytes(size)
 
     # size = align8Bytes(size)
-    for move in m['moves']:
-        size += len(move['name']) + 1
+    # for move in m['moves']:
+    #     size += len(move['name']) + 1
 
     size = align8Bytes(size)
-    size += len(m['moves']) * 0x4E8
+    size += len(m['moves']) * move_size
 
     size = align8Bytes(size)
     size += len(m['input_extradata']) * input_extradata_size
@@ -730,17 +730,7 @@ class MotbinStruct:
             self.cancel_ptr = self.align()
         cancel_count = len(cancels)
 
-        has_0x800b = any(cancel['command'] == 0x800b for cancel in cancels)
         for cancel in cancels:
-            # Block no longer needed but keeping it so older movesets don't break
-            if has_0x800b:
-                if cancel['command'] == 0x800b:
-                    cancel['command'] = 0x800d
-                elif cancel['command'] == 0x800c:
-                    cancel['command'] = 0x800e
-                elif cancel['command'] >= 0x800d and cancel['command'] <= 0x82FF:
-                    cancel['command'] += 1
-
             self.writeInt(cancel['command'], 8)
 
             requirements_addr = self.getRequirementFromId(
@@ -982,18 +972,18 @@ class MotbinStruct:
 
         return self.move_end_props_ptr, len(self.m['move_end_props'])
 
-    def allocateUnknown298(self):
-        print("Allocating 0x298...")
+    def allocateDialogueHandlers(self):
+        print("Allocating dialogue managers...")
         self.unknown_0x298_ptr = self.align()
 
-        for unknown298 in self.m['_0x298']:
-            _0x0 = unknown298['_0x0']
-            _0x4 = unknown298['_0x4']
-            _0x6 = unknown298['_0x6']
-            requirement_idx = unknown298['requirement_idx']
+        for handler in self.m['_0x298']:
+            _0x0 = handler['_0x0'] # upper: ID, lower: type (0 = intro, 1 = outro, 2 = fate)
+            _0x4 = handler['_0x4'] # unused
+            _0x6 = handler['_0x6'] # unused
+            requirement_idx = handler['requirement_idx']
             requirements_addr = self.getRequirementFromId(requirement_idx)
-            _0xC = unknown298['_0xC']
-            _0x10 = unknown298['_0x10']
+            _0xC = handler['_0xC']
+            _0x10 = handler['_0x10']
             self.writeInt(_0x0, 4)
             self.writeInt(_0x4, 2)
             self.writeInt(_0x6, 2)
@@ -1055,8 +1045,7 @@ class MotbinStruct:
         moves = self.m['moves']
         moveCount = len(moves)
 
-        self.move_names_table = {move['name']: self.writeString(
-            move['name']) for move in moves}
+        # self.move_names_table = {move['name']: self.writeString(move['name']) for move in moves}
 
         forbiddenMoveIds = []
 

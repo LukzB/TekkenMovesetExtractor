@@ -6,6 +6,55 @@ from T5Aliases import t5_requirements
 from T5DRAliases import t5dr_requirements
 from T4Aliases import t4_requirements
 
+t8_character_name_mappping = {
+    0: '[PAUL]',
+    1: '[LAW]',
+    2: '[KING]',
+    3: '[YOSHIMITSU]',
+    4: '[HWOARANG]',
+    5: '[XIAYOU]',
+    6: '[JIN]',
+    7: '[BRYAN]',
+    8: '[KAZUYA]',
+    9: '[STEVE]',
+    10: '[JACK8]',
+    11: '[ASUKA]',
+    12: '[DEVIL_JIN]',
+    13: '[FENG]',
+    14: '[LILI]',
+    15: '[DRAGUNOV]',
+    16: '[LEO]',
+    17: '[LARS]',
+    18: '[ALISA]',
+    19: '[CLAUDIO]',
+    20: '[SHAHEEN]',
+    21: '[NINA]',
+    22: '[LEE]',
+    23: '[KUMA]',
+    24: '[PANDA]',
+    25: '[ZAFINA]',
+    26: '[LEROY]',
+    27: '[JUN]',
+    28: '[REINA]',
+    29: '[AZUCENA]',
+    30: '[VICTOR]',
+    31: '[RAVEN]',
+    32: '[AZAZEL]',
+    33: '[EDDY]',
+    34: '[LIDIA]',
+    35: '[HEIHACHI]',
+    116: '[DUMMY]',
+    117: '[ANGEL_JIN]',
+    118: '[TRUE_DEVIL_KAZUYA]',
+    119: '[JACK7]',
+    120: '[SOLDIER]',
+    121: '[DEVIL_JIN_2]',
+    122: '[TEKKEN_MONK]',
+    123: '[SEIRYU]',
+}
+
+def getTekken8characterName(charId: int):
+    return t8_character_name_mappping.get(charId, 'UNKNOWN')
 
 def disableProp(type, id, value):
     return 0, 0, 0
