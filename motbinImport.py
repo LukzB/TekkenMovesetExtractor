@@ -497,6 +497,11 @@ class MotbinStruct:
         self.curr_ptr += bytes_length
         return valueAddr
 
+    # Automatically writes a fallback value if not present
+    def safeWriteInt(self, obj, key, size, fallback = 0):
+        value = obj[key] if key in obj else fallback
+        return self.writeInt(value, size)
+
     def align(self):
         offset = (8 - (self.curr_ptr % 8))
         if not self.isDataFittable(offset):
@@ -935,12 +940,12 @@ class MotbinStruct:
 
         for handler in self.m['dialogues']:
             requirements_addr = self.getRequirementFromId(handler['requirement_idx'])
-            self.writeInt(handler['type'], 2)
-            self.writeInt(handler['id'], 2)
-            self.writeInt(handler['_0x4'], 4)
+            self.safeWriteInt(handler, 'type', 2)
+            self.safeWriteInt(handler, 'id', 2)
+            self.safeWriteInt(handler, '_0x4', 4)
             self.writeInt(requirements_addr, 8)
-            self.writeInt(handler['voiceclip_key'], 4)
-            self.writeInt(handler['facial_anim_idx'], 4)
+            self.safeWriteInt(handler, 'voiceclip_key', 4)
+            self.safeWriteInt(handler, 'facial_anim_idx', 4, -1)
 
         return self.dialogues_ptr, len(self.m['dialogues'])
 
