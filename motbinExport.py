@@ -1428,12 +1428,15 @@ t8_character_name_mappping = {
     32: '[AZAZEL]',
     33: '[EDDY]',
     34: '[LIDIA]',
+    35: '[HEIHACHI]',
     116: '[DUMMY]',
     117: '[ANGEL_JIN]',
     118: '[TRUE_DEVIL_KAZUYA]',
     119: '[JACK7]',
     120: '[SOLDIER]',
     121: '[DEVIL_JIN_2]',
+    122: '[TEKKEN_MONK]',
+    123: '[SEIRYU]',
 }
 
 t5_character_name_mappping = {
