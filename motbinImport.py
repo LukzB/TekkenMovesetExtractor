@@ -27,7 +27,7 @@ projectile_size = 0xD8
 throw_extras_size = 0xC
 throws_size = 0x10
 parry_related_size = 0x4
-unknown298_size = 0x18
+dialogues_size = 0x18
 
 placeholder_address = 0x146FD2500
 
@@ -167,7 +167,7 @@ class Importer:
         throw_extras_ptr, throw_extras_count = p.allocateThrowExtras()
         throws_ptr, throws_count = p.allocateThrows()
         parry_related_ptr, parry_related_count = p.allocateParryRelated()
-        unknown_0x298_ptr, unknown_0x298_count = p.allocateDialogueHandlers()
+        dialogues_ptr, dialogues_count = p.allocateDialogueHandlers()
 
         p.allocateMota()
 
@@ -244,8 +244,8 @@ class Importer:
         self.writeInt(p.motbin_ptr + 0x290, throws_ptr, 8)
         self.writeInt(p.motbin_ptr + 0x298, throws_count, 8)
 
-        self.writeInt(p.motbin_ptr + 0x2A0, unknown_0x298_ptr, 8)
-        self.writeInt(p.motbin_ptr + 0x2A8, unknown_0x298_count, 8)
+        self.writeInt(p.motbin_ptr + 0x2A0, dialogues_ptr, 8)
+        self.writeInt(p.motbin_ptr + 0x2A8, dialogues_count, 8)
 
         # p.applyMotaOffsets()
 
@@ -400,7 +400,7 @@ def getMovesetTotalSize(m, folderName):
     size += len(m['parry_related']) * parry_related_size
 
     size = align8Bytes(size)
-    size += len(m['_0x298']) * unknown298_size
+    size += len(m['dialogues']) * dialogues_size
     size = align8Bytes(size)
     # for i in range(12):
     #    try:
@@ -451,8 +451,8 @@ class MotbinStruct:
         self.projectile_ptr = 0
         self.throw_extras_ptr = 0
         self.throws_ptr = 0
-        self.unknown_0x298_ptr = 0
-        self.unknown_0x298_count = 0
+        self.dialogues_ptr = 0
+        self.dialogues_count = 0
 
         self.mota_list = []
         self.move_names_table = {}
@@ -884,15 +884,6 @@ class MotbinStruct:
 
         for value in self.m['parry_related']:
             self.writeInt(value, 4)
-            # bytes = value.to_bytes(4)
-            # try:
-           # self.writeInt(value >> 16, 2)
-       #     self.writeInt(value & 0xFFFF, 2)
-            # self.writeBytes(bytes[0:2])
-            # self.writeBytes(bytes[2:4])
-     #   except:
-     #       print("ISSUE VALUE:", value)
-     #       raise
 
         return self.parry_related_ptr, len(self.m['parry_related'])
 
@@ -900,29 +891,15 @@ class MotbinStruct:
         print("Allocating extra move properties...")
         self.extra_move_properties_ptr = self.align()
 
-        for extra_property in self.m['extra_move_properties']:
-            type = extra_property['type']
-            id = extra_property['id']
-            value = extra_property['value']
-            _0x4 = extra_property['_0x4'] if '_0x4' in extra_property else 0
-            requirement_idx = extra_property['requirement_idx']
-            value2 = extra_property['value2'] if 'value2' in extra_property else 0
-            value3 = extra_property['value3'] if 'value3' in extra_property else 0
-            value4 = extra_property['value4'] if 'value4' in extra_property else 0
-            value5 = extra_property['value5'] if 'value5' in extra_property else 0
-            # Alias funciton not needed for now
-            # type, id, value, _0x4, requirement_idx, value2, value3, value4, value5 = getMoveExtrapropAlias(
-            #     self.m['version'], type, id, value, _0x4, requirement_idx, value2, value3, value4, value5)
-            requirements_addr = self.getRequirementFromId(requirement_idx)
-            self.writeInt(type, 4)
-            self.writeInt(_0x4, 4)
-            self.writeInt(requirements_addr, 8)
-            self.writeInt(id, 4)
-            self.writeInt(value, 4)
-            self.writeInt(value2, 4)
-            self.writeInt(value3, 4)  # voiceline ID??
-            self.writeInt(value4, 4)
-            self.writeInt(value5, 4)
+        for prop in self.m['extra_move_properties']:
+            keys = ['type', '_0x4', 'requirement_idx', 'id', 'value', 'value2', 'value3', 'value4', 'value5']
+            for key in keys:
+                value = prop[key] if key in prop else 0
+                size = 4
+                if key == 'requirement_idx':
+                    value = self.getRequirementFromId(value)
+                    size = 8
+                self.writeInt(value, size)
 
         return self.extra_move_properties_ptr, len(self.m['extra_move_properties'])
 
@@ -930,22 +907,12 @@ class MotbinStruct:
         print("Allocating move start properties...")
         self.move_start_props_ptr = self.align()
 
-        for move_start_prop in self.m['move_start_props']:
-            _id = move_start_prop['id']
-            value = move_start_prop['value']
-            requirement_idx = move_start_prop['requirement_idx']
-            value2 = move_start_prop['value2']
-            value3 = move_start_prop['value3']
-            value4 = move_start_prop['value4']
-            value5 = move_start_prop['value5']
-            requirements_addr = self.getRequirementFromId(requirement_idx)
+        for prop in self.m['move_start_props']:
+            keys = ['id', 'value', 'value2', 'value3', 'value4', 'value5']
+            requirements_addr = self.getRequirementFromId(prop['requirement_idx'])
             self.writeInt(requirements_addr, 8)
-            self.writeInt(_id, 4)
-            self.writeInt(value, 4)
-            self.writeInt(value2, 4)
-            self.writeInt(value3, 4)
-            self.writeInt(value4, 4)
-            self.writeInt(value5, 4)
+            for key in keys:
+                self.writeInt(prop[key] if key in prop else 0, 4)
 
         return self.move_start_props_ptr, len(self.m['move_start_props'])
 
@@ -953,45 +920,29 @@ class MotbinStruct:
         print("Allocating move end properties...")
         self.move_end_props_ptr = self.align()
 
-        for move_end_prop in self.m['move_end_props']:
-            _id = move_end_prop['id']
-            value = move_end_prop['value']
-            requirement_idx = move_end_prop['requirement_idx']
-            requirements_addr = self.getRequirementFromId(requirement_idx)
-            value2 = move_end_prop['value2']
-            value3 = move_end_prop['value3']
-            value4 = move_end_prop['value4']
-            value5 = move_end_prop['value5']
+        for prop in self.m['move_end_props']:
+            keys = ['id', 'value', 'value2', 'value3', 'value4', 'value5']
+            requirements_addr = self.getRequirementFromId(prop['requirement_idx'])
             self.writeInt(requirements_addr, 8)
-            self.writeInt(_id, 4)
-            self.writeInt(value, 4)
-            self.writeInt(value2, 4)
-            self.writeInt(value3, 4)
-            self.writeInt(value4, 4)
-            self.writeInt(value5, 4)
+            for key in keys:
+                self.writeInt(prop[key] if key in prop else 0, 4)
 
         return self.move_end_props_ptr, len(self.m['move_end_props'])
 
     def allocateDialogueHandlers(self):
         print("Allocating dialogue managers...")
-        self.unknown_0x298_ptr = self.align()
+        self.dialogues_ptr = self.align()
 
-        for handler in self.m['_0x298']:
-            _0x0 = handler['_0x0'] # upper: ID, lower: type (0 = intro, 1 = outro, 2 = fate)
-            _0x4 = handler['_0x4'] # unused
-            _0x6 = handler['_0x6'] # unused
-            requirement_idx = handler['requirement_idx']
-            requirements_addr = self.getRequirementFromId(requirement_idx)
-            _0xC = handler['_0xC']
-            _0x10 = handler['_0x10']
-            self.writeInt(_0x0, 4)
-            self.writeInt(_0x4, 2)
-            self.writeInt(_0x6, 2)
+        for handler in self.m['dialogues']:
+            requirements_addr = self.getRequirementFromId(handler['requirement_idx'])
+            self.writeInt(handler['type'], 2)
+            self.writeInt(handler['id'], 2)
+            self.writeInt(handler['_0x4'], 4)
             self.writeInt(requirements_addr, 8)
-            self.writeInt(_0xC, 4)
-            self.writeInt(_0x10, 4)
+            self.writeInt(handler['voiceclip_key'], 4)
+            self.writeInt(handler['facial_anim_idx'], 4)
 
-        return self.unknown_0x298_ptr, len(self.m['_0x298'])
+        return self.dialogues_ptr, len(self.m['dialogues'])
 
     def allocateAnimations(self):
         print("Allocating animations is not available in this build, skipping...")
@@ -1068,28 +1019,16 @@ class MotbinStruct:
             self.writeInt(move['vuln'], 4)  # 0x20
             self.writeInt(move['hitlevel'], 4)  # 0x24
             self.writeInt(self.getCancelFromId(move['cancel_idx']), 8)  # 0x28
-
             self.writeInt(0, 8)  # 0x30
             self.writeInt(0, 8)  # 0x38
             self.writeInt(move['u2'], 8)  # 0x40
             self.writeInt(move['u3'], 8)  # 0x48
             self.writeInt(move['u4'], 8)  # 0x50
             self.writeInt(move['u6'], 4)  # 0x58
-
             self.writeInt(move['transition'], 2)  # 0x5C
-
             self.writeInt(move['u7'], 2)  # 0x5E
-            # This is for prior version where 0x64 was mapped as 'ordinal_id'
-            if 'ordinal_id' in move and '_0x64' in move:
-                self.writeInt(move['ordinal_id'], 4)  # 0x60
-                self.writeInt(move['_0x64'], 4)  # 0x64
-            if '_0x60' in move and 'ordinal_id' in move:
-                self.writeInt(move['_0x60'] if '_0x60' in move else 0, 4)  # 0x60
-                self.writeInt(move['ordinal_id'] if 'ordinal_id' in move else 0, 4)  # 0x64
-            # self.writeInt(move['u8'], 2)
-            # self.writeInt(move['u8_2'], 2)
-            # self.writeInt(move['u9'], 4)
-
+            self.writeInt(move['_0x60'] if '_0x60' in move else 0, 4)  # 0x60
+            self.writeInt(move['ordinal_id'] if 'ordinal_id' in move else 0, 4)  # 0x64
             on_hit_addr = self.getHitConditionFromId(move['hit_condition_idx'])
             self.writeInt(on_hit_addr, 8)  # 0x68
             self.writeInt(move['_0x70'], 4)  # 0x70
@@ -1115,16 +1054,8 @@ class MotbinStruct:
             self.writeInt(extra_properties_addr, 8)  # 0x90
             self.writeInt(move_start_properties_addr, 8)  # 0x98
             self.writeInt(move_end_properties_addr, 8)  # 0xA0
-
-            # self.writeInt(0, 8)  # ['u13'], ptr
-            # self.writeInt(0, 8)  # ['u14'], ptr
             self.writeInt(move['u15'], 4)  # 0xA8
             self.writeInt(move['_0xAC'], 4)  # 0xAC
-
-            hitbox = getHitboxAliases(
-                self.m['version'], move['hitbox_location'])
-
-            # self.writeInt(hitbox, 4)
             self.writeInt(move['first_active_frame'], 4)  # 0xB0
             self.writeInt(move['last_active_frame'], 4)  # 0xB4
             self.writeInt(move['first_active_frame1'], 4)  # 0xB8
@@ -1134,8 +1065,6 @@ class MotbinStruct:
             # 0xC4 to 0xE8
             for value in move['unk1']:
                 self.writeInt(value, 4)
-            # for _ in range(0, 9):
-            #     self.writeInt(0, 4)
 
             self.writeInt(move['first_active_frame2'], 4)  # 0xE8
             self.writeInt(move['last_active_frame2'], 4)  # 0xEC
@@ -1144,10 +1073,6 @@ class MotbinStruct:
             # 0xF4 to 0x114
             for value in move['unk2']:
                 self.writeInt(value, 4)
-
-            # 0xF4 to 0x214
-            # for _ in range(0, 72):
-            #     self.writeInt(0, 4)
 
             # 0x118 to 0x148
             self.writeInt(move['first_active_frame3'], 4)  # 0x118
@@ -1167,24 +1092,6 @@ class MotbinStruct:
             for value in move['unk5']:
                 self.writeInt(value, 4)
 
-            # 0x218 - 0x228
-            # for _ in range(0, 4):
-            #     self.writeInt(0, 4)
-
-            # 0x228 - 0x384
-            # for _ in range(0, 8):
-            #     for j in range(0, 5):
-            #         self.writeInt(0, 4)
-            #     for j in range(0, 3):
-            #         self.writeInt(-1, 4)
-            #     for j in range(0, 3):
-            #         self.writeInt(0xBF800000, 4)
-
-            # self.writeInt(0, 4) # 0x388
-            # self.writeInt(0, 4) # 0x38C
-            # self.writeInt(0, 4) # 0x390
-            # self.writeInt(0, 4) # 0x394
-            # self.writeInt(0, 4) # 0x398
             self.writeInt(move['u18'], 4)  # 0x39C
 
         for move_id in forbiddenMoveIds:
@@ -1203,7 +1110,7 @@ class MotbinStruct:
         for i, requirement in enumerate(self.m['requirements']):
             req, param = requirement['req'], requirement['param']
 
-            if req == 217:  # Is current char specific ID
+            if req == 220:  # Is current char specific ID
                 charId = currentChar if param == movesetCharId else currentChar + 10
                 self.importer.writeInt(
                     self.requirements_ptr + (i * 8) + 4, charId, 4)  # force valid

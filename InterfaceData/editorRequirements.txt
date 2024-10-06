@@ -144,6 +144,9 @@
 454,Chara install
 466,Heat related
 490,Eddy install == X
+498,Heihachi install active
+505,Opp chara ID multiple checks
+506,Opp chara ID multiple checks
 640,Player speed >= X
 641,Player speed <= X
 642,Player speed == X
@@ -172,6 +175,9 @@
 767,Chara episode post-fight?
 777,Story flags
 778,Not Story mode
+801,(DLC) Playing Story mode
+802,(DLC) Story battle number
+806,Heihachi story flags
 1028,Player is in heat
 1032,Parry High
 1033,Parry Mid

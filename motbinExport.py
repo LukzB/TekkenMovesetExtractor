@@ -122,7 +122,7 @@ t8StructSizes = {
     'ThrowExtra_size': 0xC,
     'Throw_size': 0x10,
     'UnknownParryRelated_size': 0x4,
-    'Unknown298_size': 0x18
+    'DialogueManager_size': 0x18
 }
 
 tag2StructSizes = {
@@ -274,8 +274,8 @@ t8_offsetTable = {
     'throw_extras_size': {'offset': 0x288, 'size': 8},
     'throws_ptr': {'offset': 0x290, 'size': 8},
     'throws_size': {'offset': 0x298, 'size': 8},
-    '_0x298_ptr': {'offset': 0x2A0, 'size': 8},
-    '_0x298_size': {'offset': 0x2A8, 'size': 8},
+    'dialogues_ptr': {'offset': 0x2A0, 'size': 8},
+    'dialogues_size': {'offset': 0x2A8, 'size': 8},
 
     'mota_start': {'offset': None, 'size': 8},
     # 120 aliases
@@ -451,12 +451,12 @@ t8_offsetTable = {
     'othermoveprop:value4': {'offset': 0x18, 'size': 4},
     'othermoveprop:value5': {'offset': 0x1C, 'size': 4},
 
-    '_unk_0x298:_0x0': { 'offset': 0x0, 'size': 4 },
-    '_unk_0x298:_0x4': { 'offset': 0x4, 'size': 2 },
-    '_unk_0x298:_0x6': { 'offset': 0x6, 'size': 2 },
-    '_unk_0x298:requirement_addr': { 'offset': 0x8, 'size': 8 },
-    '_unk_0x298:_0xC': { 'offset': 0xC, 'size': 4 },
-    '_unk_0x298:_0x10': { 'offset': 0x10, 'size': 4 },
+    'dialogues:type': { 'offset': 0x0, 'size': 2 },
+    'dialogues:id': { 'offset': 0x2, 'size': 2 },
+    'dialogues:_0x4': { 'offset': 0x4, 'size': 4 },
+    'dialogues:requirement_addr': { 'offset': 0x8, 'size': 8 },
+    'dialogues:voiceclip_key': { 'offset': 0xC, 'size': 4 },
+    'dialogues:facial_anim_idx': { 'offset': 0x10, 'size': 4 },
 }
 
 t7_offsetTable = {
@@ -2284,23 +2284,23 @@ class UnknownParryRelated:
     def dict(self):
         return self.value
 
-class Unknown_0x298:
+class DialogueManager:
     def __init__(self, addr, parent):
-        data = initTekkenStructure(self, parent, addr, parent.Unknown298_size)
+        data = initTekkenStructure(self, parent, addr, parent.DialogueManager_size)
 
-        readOffsetTable(self, '_unk_0x298')
+        readOffsetTable(self, 'dialogues')
 
     def setRequirementId(self, requirement_idx):
         self.requirement_idx = requirement_idx
 
     def dict(self):
         return {
-            '_0x0': self._0x0,
+            'type': self.type,
+            'id': self.id,
             '_0x4': self._0x4,
-            '_0x6': self._0x6,
             'requirement_idx': self.requirement_idx,
-            '_0xC': self._0xC,
-            '_0x10': self._0x10,
+            'voiceclip_key': self.voiceclip_key,
+            'facial_anim_idx': self.facial_anim_idx,
         }
 
 
@@ -2369,7 +2369,7 @@ class Motbin:
         self.throw_extras = []
         self.throws = []
         self.parry_related = []
-        self._0x298 = []
+        self.dialogue_managers = []
 
     def getCharacterNameFromBytes(self):
         oldCharName = self.character_name
@@ -2460,7 +2460,7 @@ class Motbin:
             'throw_extras': self.throw_extras,
             'throws': self.throws,
             'parry_related': self.parry_related,
-            **({'_0x298': self._0x298 if hasattr(self, '_0x298') else {} }),
+            **({'dialogues': self.dialogue_managers if hasattr(self, 'dialogue_managers') else [] }),
         }
 
     def calculateHash(self, movesetData):
@@ -2691,10 +2691,10 @@ class Motbin:
 
         if self.TekkenVersion == 't8':
             print("Reading dialogue managers...")
-            for i in range(self._0x298_size):
-                _0x298 = Unknown_0x298(self._0x298_ptr + (i * self.Unknown298_size), self)
-                _0x298.setRequirementId((_0x298.requirement_addr - self.requirements_ptr) // self.Requirement_size)
-                self._0x298.append(_0x298.dict())
+            for i in range(self.dialogues_size):
+                dlgMngr = DialogueManager(self.dialogues_ptr + (i * self.DialogueManager_size), self)
+                dlgMngr.setRequirementId((dlgMngr.requirement_addr - self.requirements_ptr) // self.Requirement_size)
+                self.dialogue_managers.append(dlgMngr.dict())
         
         print("Reading movelist...")
         for i in range(self.movelist_size):
