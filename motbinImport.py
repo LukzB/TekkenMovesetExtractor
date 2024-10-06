@@ -693,9 +693,7 @@ class MotbinStruct:
                 "param4"
             ]
             for key in keys:
-                # if the value doesn't exist, simply write a 0 there
-                value = requirement[key] if key in requirement else 0
-                self.writeInt(value, 4)
+                self.safeWriteInt(requirement, key, 4)
 
         return self.requirements_ptr, requirement_count
 
@@ -787,7 +785,6 @@ class MotbinStruct:
             for pushback in reaction_list['pushback_indexes']:
                 self.writeInt(self.getPushbackFromId(pushback), 8)
 
-            # self.skip(0x8) unused
             self.writeInt(reaction_list['front_direction'], 2)
             self.writeInt(reaction_list['back_direction'], 2)
             self.writeInt(reaction_list['left_side_direction'], 2)
@@ -917,7 +914,7 @@ class MotbinStruct:
             requirements_addr = self.getRequirementFromId(prop['requirement_idx'])
             self.writeInt(requirements_addr, 8)
             for key in keys:
-                self.writeInt(prop[key] if key in prop else 0, 4)
+                self.safeWriteInt(prop, key, 0)
 
         return self.move_start_props_ptr, len(self.m['move_start_props'])
 
@@ -930,7 +927,7 @@ class MotbinStruct:
             requirements_addr = self.getRequirementFromId(prop['requirement_idx'])
             self.writeInt(requirements_addr, 8)
             for key in keys:
-                self.writeInt(prop[key] if key in prop else 0, 4)
+                self.safeWriteInt(prop, key, 0)
 
         return self.move_end_props_ptr, len(self.m['move_end_props'])
 
