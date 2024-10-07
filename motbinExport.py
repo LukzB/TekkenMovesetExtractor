@@ -2586,7 +2586,7 @@ class Motbin:
 
         if self.input_extradata_size != 0:
             print("Reading input extradata...")
-            for i in range(self.input_extradata_size + 1):
+            for i in range(self.input_extradata_size):
                 input_extradata = InputExtradata(self.input_extradata_ptr + (i * self.InputExtradata_size), self)
                 self.input_extradata.append(input_extradata.dict())
 

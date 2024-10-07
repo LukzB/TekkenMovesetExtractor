@@ -597,7 +597,7 @@ class MotbinStruct:
         return self.move_start_props_ptr + (idx * other_move_props_size)
 
     def getMoveEndPropertiesFromId(self, idx):
-        if self.move_start_props_ptr == 0 or idx == -1:
+        if self.move_end_props_ptr == 0 or idx == -1:
             return 0
         return self.move_end_props_ptr + (idx * other_move_props_size)
 
@@ -914,7 +914,7 @@ class MotbinStruct:
             requirements_addr = self.getRequirementFromId(prop['requirement_idx'])
             self.writeInt(requirements_addr, 8)
             for key in keys:
-                self.safeWriteInt(prop, key, 0)
+                self.safeWriteInt(prop, key, 4)
 
         return self.move_start_props_ptr, len(self.m['move_start_props'])
 
@@ -927,7 +927,7 @@ class MotbinStruct:
             requirements_addr = self.getRequirementFromId(prop['requirement_idx'])
             self.writeInt(requirements_addr, 8)
             for key in keys:
-                self.safeWriteInt(prop, key, 0)
+                self.safeWriteInt(prop, key, 4)
 
         return self.move_end_props_ptr, len(self.m['move_end_props'])
 
