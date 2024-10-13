@@ -455,8 +455,8 @@ t8_offsetTable = {
     'dialogues:id': { 'offset': 0x2, 'size': 2 },
     'dialogues:_0x4': { 'offset': 0x4, 'size': 4 },
     'dialogues:requirement_addr': { 'offset': 0x8, 'size': 8 },
-    'dialogues:voiceclip_key': { 'offset': 0xC, 'size': 4 },
-    'dialogues:facial_anim_idx': { 'offset': 0x10, 'size': 4 },
+    'dialogues:voiceclip_key': { 'offset': 0x10, 'size': 4 },
+    'dialogues:facial_anim_idx': { 'offset': 0x14, 'size': 4 },
 }
 
 t7_offsetTable = {
