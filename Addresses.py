@@ -220,6 +220,81 @@ class GameClass:
             currAddr += step
         
         return None
+
+    def call_game_func(self, func_addr, param_addr, param_size, allocate_memory=False):
+        remote_param_addr = param_addr  # Default to using the given address
+
+        if allocate_memory:
+            # Allocate memory in the target process for `param_size`
+            remote_param_addr = VirtualAllocEx(self.handle, 0, param_size, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE)
+            if not remote_param_addr:
+                print("Error: Failed to allocate memory in target process.")
+                return None
+
+            # Write the parameter to the allocated memory
+            bytes_written = ctypes.c_size_t(0)
+            if not WriteProcessMemory(self.handle, remote_param_addr, param_addr, param_size, ctypes.byref(bytes_written)) or bytes_written.value != param_size:
+                print("Error: Failed to write parameter to target process memory.")
+                VirtualFreeEx(self.handle, remote_param_addr, 0, MEM_DECOMMIT)
+                return None
+
+        # Create the remote thread to execute the function
+        thread_id = ctypes.c_ulong()
+        thread_handle = kernel32.CreateRemoteThread(self.handle, None, 0, ctypes.c_void_p(func_addr), ctypes.c_void_p(remote_param_addr), 0, ctypes.byref(thread_id))
+        if not thread_handle:
+            print("Error: Failed to create remote thread.")
+            if allocate_memory:
+                VirtualFreeEx(self.handle, remote_param_addr, 0, MEM_DECOMMIT)
+            return None
+
+        # Wait for the function to complete
+        kernel32.WaitForSingleObject(thread_handle, 0xFFFFFFFF)  # INFINITE
+        # Retrieve the return value from the thread
+        exit_code = ctypes.c_ulong(0)
+        if kernel32.GetExitCodeThread(thread_handle, ctypes.byref(exit_code)):
+            result = exit_code.value
+        else:
+            print("Error: Failed to get the return value from the thread.")
+            result = None
+
+        # Free the allocated memory if necessary
+        if allocate_memory:
+            VirtualFreeEx(self.handle, remote_param_addr, 0, MEM_DECOMMIT)
+
+        return result
+
+        '''
+        # Step 1: Create the remote thread to call the function
+        thread_id = ctypes.c_ulong()
+        h_thread = kernel32.CreateRemoteThread(
+            self.PROCESS.handle, None, 0,
+            ctypes.c_void_p(func_addr), ctypes.c_void_p(param_addr), 0,
+            ctypes.byref(thread_id)
+        )
+        if not h_thread:
+            raise Exception("Failed to create remote thread.")
+        
+        # Step 2: Wait for the thread to finish
+        kernel32.WaitForSingleObject(h_thread, -1)
+        
+        # Step 3: Retrieve the return value
+        return_value = None
+
+        if return_addr:
+            # If return value is stored in memory, read from return_addr
+            return_value = self.readInt(return_addr, 8)
+        else:
+            # If return value is in RAX, get it from the thread's context
+            context = ctypes.create_string_buffer(0x4d0)  # CONTEXT structure size
+            kernel32.GetThreadContext(h_thread, ctypes.byref(context))
+            return_value = ctypes.cast(context[136:144], ctypes.POINTER(ctypes.c_uint64)).contents.value  # Offset for RAX
+
+        # Close the handle to the thread
+        kernel32.CloseHandle(h_thread)
+        
+        return return_value
+    '''
+    # End of class
         
 def bToInt(data, offset, length, endian='little'):
     return int.from_bytes(data[offset:offset + length], endian)
