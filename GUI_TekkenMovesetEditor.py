@@ -71,9 +71,6 @@ fieldLabels = {
     'moves': {
         'u8': 'moveID_val1',
         'u8_2': 'moveID_val2',
-        'u10': 'airborne_start',
-        'u11': 'airborne_end',
-        'u12': 'ground_fall',
         'u15': 'facing/extras?',
         'u16': 'collision?',
         'u17': 'distance',
@@ -82,7 +79,7 @@ fieldLabels = {
     'pushbacks': {
         'val1': 'duration',
         'val2': 'displacement',
-        'val3': 'num of loops'
+        'val3': 'num of extras'
     },
     'pushback_extras': {
         'value': 'horizontal offset'
@@ -92,7 +89,7 @@ fieldLabels = {
     },
     'reaction_list': {
         'standing': 'default',
-        'vertical_pushback': 'vertical_pushback / front_ch_rot',
+        'vertical_pushback': 'verti pushback / front_ch_rot',
     }
 }
 
@@ -111,28 +108,34 @@ moveFields = {
     'hitbox_location': 'hex',
     'first_active_frame': 'int',
     'last_active_frame': 'int',
-    'hitbox_location1': 'hex',
-    'first_active_frame1': 'int',
-    'last_active_frame1': 'int',
-    'hitbox_location2': 'hex',
-    'first_active_frame2': 'int',
-    'last_active_frame2': 'int',
+    'hitbox1_location': 'hex',
+    'hitbox1_first_active_frame': 'int',
+    'hitbox1_last_active_frame': 'int',
+    'hitbox2_location': 'hex',
+    'hitbox2_first_active_frame': 'int',
+    'hitbox2_last_active_frame': 'int',
+    'hitbox3_location': 'hex',
+    'hitbox3_first_active_frame': 'int',
+    'hitbox3_last_active_frame': 'int',
+    'hitbox4_location': 'hex',
+    'hitbox4_first_active_frame': 'int',
+    'hitbox4_last_active_frame': 'int',
     'u2': 'long',
     'u3': 'long',
     'u4': 'long',
     'u6': 'int',
-    'u7': 'short',
+    '_0xCE': 'short',
     # 'u8_2': 'short',
-    '_0x60': 'int',
+    '_0xD0': 'int',
     'ordinal_id': 'int',
-    '_0x70': 'int',
-    '_0x74': 'int',
+    '_0x118': 'int',
+    '_0x11C': 'int',
     # 'u9': 'int',
-    'u10': 'int',
-    'u11': 'int',
-    'u12': 'int',
+    'airborne_start': 'int',
+    'airborne_end': 'int',
+    'ground_fall': 'int',
     'u15': 'int',
-    '_0xAC': 'int',
+    '_0x154': 'int',
     'u16': 'short',
     'u18': 'short',
     'u17': 'int'
@@ -245,7 +248,9 @@ cancelExtradataFields = {
 }
 
 voiceclipFields = {
-    'value': 'int',
+    'val1': 'int',
+    'val2': 'int',
+    'val3': 'int',
 }
 
 fieldsTypes = {
@@ -788,13 +793,13 @@ class SearchDialog(simpledialog.Dialog):
                 "first_active_frame",
                 "last_active_frame",
 
-                "first_active_frame1",
-                "last_active_frame1",
-                "hitbox_location1",
+                "hitbox1_first_active_frame",
+                "hitbox1_last_active_frame",
+                "hitbox1_location",
 
-                "first_active_frame2",
-                "last_active_frame2",
-                "hitbox_location2",
+                "hitbox2_first_active_frame",
+                "hitbox2_last_active_frame",
+                "hitbox2_location",
 
                 "first_active_frame3",
                 "last_active_frame3",
@@ -1557,8 +1562,9 @@ class VoiceclipEditor(FormEditor):
         self.setLabel("Voiceclip %d" % (itemId))
 
         self.editMode = None
-        self.fieldInput['value'].config(state='enabled')
-        self.setField('value', itemData, True)
+        for field in voiceclipFields:
+            self.fieldInput[field].config(state='enabled')
+            self.setField(field, itemData[field], True)
         self.editMode = True
         self.disableSaveButton()
 
@@ -1746,6 +1752,10 @@ class ExtrapropEditor(FormEditor):
         self.enableDetailsArea()
 
         self.initFields()
+
+        self.registerFieldButtons([
+            ('requirement_idx', self.root.setRequirementList),
+        ])
 
     def onchange(self, field, sv):
         if self.editMode == None:

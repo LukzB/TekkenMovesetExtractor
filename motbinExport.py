@@ -114,7 +114,7 @@ t8StructSizes = {
     'HitCondition_size': 0x18,
     'ExtraMoveProperty_size': 0x28,
     'OtherMoveProperty_size': 0x20,
-    'Move_size': 0x3A0,
+    'Move_size': 0x448,
     'Voiceclip_size': 0xC,
     'InputExtradata_size': 0x8,
     'InputSequence_size': 0x10,
@@ -357,65 +357,95 @@ t8_offsetTable = {
     'extramoveprop:value4': {'offset': 0x20, 'size': 4},
     'extramoveprop:value5': {'offset': 0x24, 'size': 4},
 
-    'move:name_key': {'offset': 0x0, 'size': 4},
-    'move:anim_key': {'offset': 0x4, 'size': 4},
+    'move:encrypted_name_key': {'offset': 0x0, 'size': 8},
+    'move:encrypted_name_key_key': {'offset': 0x8, 'size': 8},
+    'move:name_key_related': {'offset': 0x10, 'size': (4, 4)},
+    'move:encrypted_anim_key': {'offset': 0x20, 'size': 8},
+    'move:encrypted_anim_key_key': {'offset': 0x28, 'size': 8},
+    'move:anim_key_related': {'offset': 0x30, 'size': (4, 4)},
     'move:anim_name': {'offset': None, 'size': 'stringPtr'},
     'move:name': {'offset': None, 'size': 'stringPtr'},
-    'move:anim_addr_enc1': {'offset': 0x18, 'size': 4},
-    'move:anim_addr_enc2': {'offset': 0x1C, 'size': 4},
+    'move:anim_addr_enc1': {'offset': 0x50, 'size': 4},
+    'move:anim_addr_enc2': {'offset': 0x54, 'size': 4},
     # 'move:anim_addr': {'offset': None, 'size': 8},
-    'move:vuln': {'offset': 0x20, 'size': 4},
-    'move:hitlevel': {'offset': 0x24, 'size': 4},
-    'move:cancel_addr': {'offset': 0x28, 'size': 8},
-    # 'move:u1': { 'offset': 0x38, 'size': 8 },
-    'move:u2': {'offset': 0x40, 'size': 8},
-    'move:u3': {'offset': 0x48, 'size': 8},
-    'move:u4': {'offset': 0x50, 'size': 8},
-    'move:u6': {'offset': 0x58, 'size': 4},
-    'move:transition': {'offset': 0x5C, 'size': 2},
-    'move:u7': {'offset': 0x5E, 'size': 2},
-    'move:_0x60': {'offset': 0x60, 'size': 4},
-    'move:ordinal_id': {'offset': 0x64, 'size': 4},
-    # 'move:u8': {'offset': 0x68, 'size': 2},
-    'move:hit_condition_addr': {'offset': 0x68, 'size': 8},
-    'move:_0x70': {'offset': 0x70, 'size': 4},
-    'move:_0x74': {'offset': 0x74, 'size': 4},
-    'move:anim_max_len': {'offset': 0x78, 'size': 4},
-    'move:u10': {'offset': 0x7C, 'size': 4},
-    'move:u11': {'offset': 0x80, 'size': 4},
-    'move:u12': {'offset': 0x84, 'size': 4},
-    'move:voiceclip_ptr': {'offset': 0x88, 'size': 8},
-    'move:extra_properties_ptr': {'offset': 0x90, 'size': 8},
-    'move:move_start_properties_ptr': {'offset': 0x98, 'size': 8},
-    'move:move_end_properties_ptr': {'offset': 0xA0, 'size': 8},
-    'move:u15': {'offset': 0xA8, 'size': 4},
-    'move:_0xAC': {'offset': 0xAC, 'size': 4},
-    'move:startup': {'offset': 0xb0, 'size': 4},
-    'move:recovery': {'offset': 0xb4, 'size': 4},
-    'move:startup1': {'offset': 0xb8, 'size': 4},
-    'move:recovery1': {'offset': 0xbc, 'size': 4},
-    'move:hitbox_location1': {'offset': 0xc0, 'size': 4},
-    'move:unk1': {'offset': 0xc4, 'size': (9, 4)},
-    'move:startup2': {'offset': 0xe8, 'size': 4},
-    'move:recovery2': {'offset': 0xec, 'size': 4},
-    'move:hitbox_location2': {'offset': 0xf0, 'size': 4},
-    'move:unk2': {'offset': 0xf4, 'size': (9, 4)},
-    'move:startup3': {'offset': 0x118, 'size': 4},
-    'move:recovery3': {'offset': 0x11c, 'size': 4},
-    'move:hitbox_location3': {'offset': 0x120, 'size': 4},
-    'move:unk3': {'offset': 0x124, 'size': (9, 4)},
-    'move:unk4': {'offset': 0x148, 'size': (51, 4)},
-    # 'move:u5': { 'offset': 0x10, 'size': 8 },
-    # 'move:u8_2': {'offset': 0x5a, 'size': 2},
-    # 'move:u9': {'offset': 0x5c, 'size': 2},
-    'move:hitbox1': {'offset': 0xC0, 'size': 4},
-    'move:hitbox2': {'offset': 0xF0, 'size': 4},
-    # 'move:u13': { 'offset': 0x10, 'size': 8 },
-    # 'move:u14': { 'offset': 0x10, 'size': 8 },
-    'move:u16': {'offset': 0x214, 'size': 2},
-    'move:u17': {'offset': 0x216, 'size': 2},
-    'move:unk5': {'offset': 0x218, 'size': (97, 4)},
-    'move:u18': {'offset': 0x39C, 'size': 4},
+    'move:encrypted_vuln': {'offset': 0x58, 'size': 8},
+    'move:encrypted_vuln_key': {'offset': 0x60, 'size': 8},
+    'move:vuln_related': {'offset': 0x68, 'size': (4, 4)},
+    'move:encrypted_hit_level': {'offset': 0x78, 'size': 8},
+    'move:encrypted_hit_level_key': {'offset': 0x80, 'size': 8},
+    'move:hit_level_related': {'offset': 0x88, 'size': (4, 4)},
+    'move:cancel_addr': {'offset': 0x98, 'size': 8},
+    'move:cancel1_addr': {'offset': 0xA0, 'size': 8},
+    'move:u1': { 'offset': 0xA8, 'size': 8 },
+    'move:u2': {'offset': 0xB0, 'size': 8},
+    'move:u3': {'offset': 0xB8, 'size': 8},
+    'move:u4': {'offset': 0xC0, 'size': 8},
+    'move:u6': {'offset': 0xC8, 'size': 4},
+    'move:transition': {'offset': 0xCC, 'size': 2},
+    'move:_0xCE': {'offset': 0xCE, 'size': 2},
+    'move:encrypted__0xD0': {'offset': 0xD0, 'size': 8},
+    'move:encrypted__0xD0_key': {'offset': 0xD8, 'size': 8},
+    'move:_0xD0_related': {'offset': 0xE0, 'size': (4, 4)},
+    'move:encrypted_ordinal_id': {'offset': 0xF0, 'size': 8},
+    'move:encrypted_ordinal_id_key': {'offset': 0xF8, 'size': 8},
+    'move:ordinal_id_related': {'offset': 0x100, 'size': (4, 4)},
+    'move:hit_condition_addr': {'offset': 0x110, 'size': 8},
+    'move:_0x118': {'offset': 0x118, 'size': 4},
+    'move:_0x11C': {'offset': 0x11C, 'size': 4},
+    'move:anim_max_len': {'offset': 0x120, 'size': 4},
+    'move:airborne_start': {'offset': 0x124, 'size': 4},
+    'move:airborne_end': {'offset': 0x128, 'size': 4},
+    'move:ground_fall': {'offset': 0x12C, 'size': 4},
+    'move:voiceclip_ptr': {'offset': 0x130, 'size': 8},
+    'move:extra_properties_ptr': {'offset': 0x138, 'size': 8},
+    'move:move_start_properties_ptr': {'offset': 0x140, 'size': 8},
+    'move:move_end_properties_ptr': {'offset': 0x148, 'size': 8},
+    'move:u15': {'offset': 0x150, 'size': 4},
+    'move:_0x154': {'offset': 0x154, 'size': 4},
+    'move:startup': {'offset': 0x158, 'size': 4},
+    'move:recovery': {'offset': 0x15C, 'size': 4},
+    'move:hitbox1_startup': {'offset': 0x160, 'size': 4},
+    'move:hitbox1_recovery': {'offset': 0x164, 'size': 4},
+    'move:hitbox1': {'offset': 0x168, 'size': 4},
+    'move:hitbox1_related1': {'offset': 0x16C, 'size': 4},
+    'move:hitbox1_related_floats': {'offset': 0x170, 'size': (4, 4)},
+    'move:hitbox1_related2': {'offset': 0x180, 'size': 4},
+    'move:hitbox1_related3': {'offset': 0x184, 'size': 4},
+    'move:hitbox1_related4': {'offset': 0x188, 'size': 4},
+    'move:hitbox1_related5': {'offset': 0x18C, 'size': 4},
+    'move:hitbox2_startup': {'offset': 0x190, 'size': 4},
+    'move:hitbox2_recovery': {'offset': 0x194, 'size': 4},
+    'move:hitbox2': {'offset': 0x198, 'size': 4},
+    'move:hitbox2_related_floats': {'offset': 0x1A0, 'size': (9, 4)},
+    'move:hitbox3_startup': {'offset': 0x1C0, 'size': 4},
+    'move:hitbox3_recovery': {'offset': 0x1C4, 'size': 4},
+    'move:hitbox3': {'offset': 0x1C8, 'size': 4},
+    'move:hitbox3_related_floats': {'offset': 0x1D0, 'size': (9, 4)},
+    'move:hitbox4_startup': {'offset': 0x1F0, 'size': 4},
+    'move:hitbox4_recovery': {'offset': 0x1F4, 'size': 4},
+    'move:hitbox4': {'offset': 0x1F8, 'size': 4},
+    'move:hitbox4_related_floats': {'offset': 0x200, 'size': (9, 4)},
+    'move:hitbox5_startup': {'offset': 0x220, 'size': 4},
+    'move:hitbox5_recovery': {'offset': 0x224, 'size': 4},
+    'move:hitbox5': {'offset': 0x228, 'size': 4},
+    'move:hitbox5_related_floats': {'offset': 0x230, 'size': (9, 4)},
+    'move:hitbox6_startup': {'offset': 0x250, 'size': 4},
+    'move:hitbox6_recovery': {'offset': 0x254, 'size': 4},
+    'move:hitbox6': {'offset': 0x258, 'size': 4},
+    'move:hitbox6_related_floats': {'offset': 0x260, 'size': (9, 4)},
+    'move:hitbox7_startup': {'offset': 0x280, 'size': 4},
+    'move:hitbox7_recovery': {'offset': 0x284, 'size': 4},
+    'move:hitbox7': {'offset': 0x288, 'size': 4},
+    'move:hitbox7_related_floats': {'offset': 0x290, 'size': (9, 4)},
+    'move:hitbox8_startup': {'offset': 0x2B0, 'size': 4},
+    'move:hitbox8_recovery': {'offset': 0x2B4, 'size': 4},
+    'move:hitbox8': {'offset': 0x2B8, 'size': 4},
+    'move:hitbox8_related_floats': {'offset': 0x2C0, 'size': (9, 4)},
+    # 'move:_0x2E4': {'offset': 0x2E4, 'size': (8, (3, 4), (3, 4), (5, 4))},
+    # 'move:u16': {'offset': 0x214, 'size': 2},
+    # 'move:u17': {'offset': 0x216, 'size': 2},
+    'move:unk5': {'offset': 0x2E4, 'size': (88, 4)},
+    'move:u18': {'offset': 0x444, 'size': 4},
 
     'voiceclip:val1': {'offset': 0x0, 'size': 4},
     'voiceclip:val2': {'offset': 0x4, 'size': 4},
@@ -1456,6 +1486,12 @@ characterNameMapping = {
     },
 }
 
+def get_offset(dict, key):
+    # Retrieve the offset based on the key
+    if key in dict:
+        return dict[key]['offset']
+    else:
+        return None  # Return None if the key does not exist in the dictionary
 
 def readOffsetTable(self, key=''):
     if key == '':
@@ -1606,6 +1642,9 @@ class Exporter:
 
     def bToInt(self, data, offset, length, ed=None):
         return int.from_bytes(data[offset:offset + length], ed if ed != None else self.endian)
+    
+    def call_game_func(self, func_addr, param_addr, return_addr=None):
+        return self.T.call_game_func(func_addr, param_addr, return_addr, 8)
 
     def getMotbinPtr(self, playerAddress):
         key = self.TekkenVersion + '_motbin_offset'
@@ -2063,70 +2102,108 @@ class Move:
         if self.TekkenVersion == 't8':
             self.hitbox_location = (self.hitbox2 << 16) | self.hitbox1
 
+        # Decrypting values
+        if self.TekkenVersion == "t8":
+            self.name_key = parent.decryptValue(addr + get_offset(t8_offsetTable, 'move:encrypted_name_key'))
+            self.anim_key = parent.decryptValue(addr + get_offset(t8_offsetTable, 'move:encrypted_anim_key'))
+            self.vuln = parent.decryptValue(addr + get_offset(t8_offsetTable, 'move:encrypted_vuln'))
+            self.hitlevel = parent.decryptValue(addr + get_offset(t8_offsetTable, 'move:encrypted_hit_level'))
+            self._0xD0 = parent.decryptValue(addr + get_offset(t8_offsetTable, 'move:encrypted__0xD0'))
+            self.ordinal_id = parent.decryptValue(addr + get_offset(t8_offsetTable, 'move:encrypted_ordinal_id'))
+
     # def getAliasedId(self, moveId: int, aliases: list):
     #     if aliases.index(moveId) != -1:
     #     return
     
     def dict(self):
         return {
-            'name': self.name,
+            'name_key': self.name_key,
+            'anim_key': self.anim_key,
+            'encrypted_name_key': self.encrypted_name_key,
+            'encrypted_name_key_key': self.encrypted_name_key_key,
+            'name_key_related': self.name_key_related,
+            'encrypted_anim_key': self.encrypted_anim_key,
+            'encrypted_anim_key_key': self.encrypted_anim_key_key,
+            'anim_key_related': self.anim_key_related,
             'anim_name': self.anim_name,
-            **({'name_key': self.name_key} if self.name_key is not None else {}),
-            **({'anim_key': self.anim_key} if self.anim_key is not None else {}),
-            **({'anim_addr_enc1': self.anim_addr_enc1} if self.anim_addr_enc1 is not None else {}),
-            **({'anim_addr_enc2': self.anim_addr_enc2} if self.anim_addr_enc2 is not None else {}),
+            'name': self.name,
+            'anim_addr_enc1': self.anim_addr_enc1,
+            'anim_addr_enc2': self.anim_addr_enc2,
+            'encrypted_vuln': self.encrypted_vuln,
+            'encrypted_vuln_key': self.encrypted_vuln_key,
             'vuln': self.vuln,
+            'vuln_related': self.vuln_related,
             'hitlevel': self.hitlevel,
+            'encrypted_hitlevel': self.encrypted_hit_level,
+            'encrypted_hitlevel_key': self.encrypted_hit_level_key,
+            'hitlevel_related': self.hit_level_related,
             'cancel_idx': self.cancel_idx,
+            'cancel1_addr': self.cancel1_addr,
+            'u1': self.u1,
+            'u2': self.u2,
+            'u3': self.u3,
+            'u4': self.u4,
+            'u6': self.u6,
             'transition': self.transition,
             'anim_max_len': self.anim_max_len,
+            '_0xCE': self._0xCE,
+            '_0xD0': self._0xD0,
+            'encrypted__0xD0': self.encrypted__0xD0,
+            'encrypted__0xD0_key': self.encrypted__0xD0_key,
+            '_0xD0_related': self._0xD0_related,
+            'ordinal_id': self.ordinal_id,
+            'encrypted_ordinal_id': self.encrypted_ordinal_id,
+            'encrypted_ordinal_id_key': self.encrypted_ordinal_id_key,
+            'ordinal_id_related': self.ordinal_id_related,
             'hit_condition_idx': self.hit_condition_idx,
+            '_0x118': self._0x118,
+            '_0x11C': self._0x11C,
+            'airborne_start': self.airborne_start,
+            'airborne_end': self.airborne_end,
+            'ground_fall': self.ground_fall,
             'voiceclip_idx': self.voiceclip_idx,
             'extra_properties_idx': self.extra_properties_idx,
             'move_start_properties_idx': self.move_start_properties_idx,
             'move_end_properties_idx': self.move_end_properties_idx,
             'hitbox_location': self.hitbox_location,
+            'u15': self.u15,
+            '_0x154': self._0x154,
             'first_active_frame': self.startup,
             'last_active_frame': self.recovery,
-            'first_active_frame1': self.startup1,
-            'last_active_frame1': self.recovery1,
-            'hitbox_location1': self.hitbox_location1,
-            'unk1': self.unk1,
-            'first_active_frame2': self.startup2,
-            'last_active_frame2': self.recovery2,
-            'hitbox_location2': self.hitbox_location2,
-            'unk2': self.unk2,
-            'first_active_frame3': self.startup3,
-            'last_active_frame3': self.recovery3,
-            'hitbox_location3': self.hitbox_location3,
-            'unk3': self.unk3,
-            'unk4': self.unk4,
+            'hitbox1_first_active_frame': self.hitbox1_startup,
+            'hitbox1_last_active_frame': self.hitbox1_recovery,
+            'hitbox1_location': self.hitbox1,
+            'hitbox1_related_floats': self.hitbox1_related_floats,
+            'hitbox2_first_active_frame': self.hitbox2_startup,
+            'hitbox2_last_active_frame': self.hitbox2_recovery,
+            'hitbox2_location': self.hitbox2,
+            'hitbox2_related_floats': self.hitbox2_related_floats,
+            'hitbox3_first_active_frame': self.hitbox3_startup,
+            'hitbox3_last_active_frame': self.hitbox3_recovery,
+            'hitbox3_location': self.hitbox3,
+            'hitbox3_related_floats': self.hitbox3_related_floats,
+            'hitbox4_first_active_frame': self.hitbox4_startup,
+            'hitbox4_last_active_frame': self.hitbox4_recovery,
+            'hitbox4_location': self.hitbox4,
+            'hitbox4_related_floats': self.hitbox4_related_floats,
+            'hitbox5_first_active_frame': self.hitbox5_startup,
+            'hitbox5_last_active_frame': self.hitbox5_recovery,
+            'hitbox5_location': self.hitbox5,
+            'hitbox5_related_floats': self.hitbox5_related_floats,
+            'hitbox6_first_active_frame': self.hitbox6_startup,
+            'hitbox6_last_active_frame': self.hitbox6_recovery,
+            'hitbox6_location': self.hitbox6,
+            'hitbox6_related_floats': self.hitbox6_related_floats,
+            'hitbox7_first_active_frame': self.hitbox7_startup,
+            'hitbox7_last_active_frame': self.hitbox7_recovery,
+            'hitbox7_location': self.hitbox7,
+            'hitbox7_related_floats': self.hitbox7_related_floats,
+            'hitbox8_first_active_frame': self.hitbox8_startup,
+            'hitbox8_last_active_frame': self.hitbox8_recovery,
+            'hitbox8_location': self.hitbox8,
+            'hitbox8_related_floats': self.hitbox8_related_floats,
             'unk5': self.unk5,
-
-            # 'u1': self.u1, #pointer
-            'u2': self.u2,
-            'u3': self.u3,
-            'u4': self.u4,
-            # 'u5': self.u5, #pointer
-            'u6': self.u6,
-            'u7': self.u7,
-            # 'u8': self.u8,
-            # 'u8_2': self.u8_2,
-            '_0x60': self._0x60,
-            'ordinal_id': self.ordinal_id,
-            '_0x70': self._0x70,
-            '_0x74': self._0x74,
-            # 'u9': self.u9,
-            'u10': self.u10,
-            'u11': self.u11,
-            'u12': self.u12,
-            # 'u13': self.u13, #pointer
-            # 'u14': self.u14, #pointer
-            'u15': self.u15,
-            '_0xAC': self._0xAC,
-            'u16': self.u16,
-            'u18': self.u18,
-            'u17': self.u17
+            'u18': self.u18
         }
 
     def setCancelIdx(self, cancel_idx):
@@ -2315,6 +2392,9 @@ class Motbin:
         self.extraction_date = datetime.now(timezone.utc).__str__()
         self.extraction_path = ''
 
+        if self.TekkenVersion == 't8':
+            self.decrypt_func_addr = game_addresses[self.TekkenVersion + '_decryp_func_offset'] + self.T.moduleAddr
+
         try:
             readOffsetTable(self, '')
 
@@ -2371,6 +2451,9 @@ class Motbin:
         self.parry_related = []
         self.dialogue_managers = []
 
+    def decryptValue(self, addr):
+        return self.T.call_game_func(self.decrypt_func_addr, addr, 8)
+    
     def getCharacterNameFromBytes(self):
         oldCharName = self.character_name
         if self.TekkenVersion in characterNameMapping:
@@ -2507,7 +2590,7 @@ class Motbin:
             movesetData['last_calculated_hash'] = movesetData['original_hash']
             movesetData['mota_type'] = 780 if self.version == 'Tekken7' else (
                 1 << 2)  # allow hand mota by default
-            json.dump(movesetData, f, indent=4)
+            json.dump(movesetData, f, indent=None)
 
         if self.TekkenVersion != 't8':
             print("Saving animations...")

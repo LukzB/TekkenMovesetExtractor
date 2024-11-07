@@ -679,6 +679,13 @@ class GUI_TekkenMovesetExtractor(Tk):
         self.createExportButtons()
         self.createCharacterList()
 
+        if getattr(sys, 'frozen', False):
+            bundle_dir = sys._MEIPASS
+        else:
+            bundle_dir = os.path.dirname(os.path.abspath(__file__))
+        icon_path = os.path.join(bundle_dir, 'InterfaceData', 'natsumi.ico')
+        self.iconbitmap(icon_path)
+
         self.protocol("WM_DELETE_WINDOW", on_close)
 
         try:
