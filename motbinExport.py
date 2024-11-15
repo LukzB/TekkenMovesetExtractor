@@ -11,6 +11,7 @@ import sys
 import re
 import string
 from zlib import crc32
+from concurrent.futures import ThreadPoolExecutor
 
 exportVersion = "1.0.1"
 
@@ -2775,25 +2776,29 @@ class Motbin:
                 self.dialogue_managers.append(dlgMngr.dict())
         
         print("Reading movelist...")
-        for i in range(self.movelist_size):
-            move = Move(self.movelist_head_ptr + (i * self.Move_size), self, i)
-            move.setCancelIdx((move.cancel_addr - self.cancel_head_ptr) // self.Cancel_size)
-            move.setHitConditionIdx((move.hit_condition_addr - self.hit_conditions_ptr) // self.HitCondition_size)
-            if move.extra_properties_ptr != 0:
-                move.setExtraPropertiesIdx((move.extra_properties_ptr - self.extra_move_properties_ptr) // self.ExtraMoveProperty_size)
-            if self.TekkenVersion == 't8':
-                if move.move_start_properties_ptr != 0:
-                    move.setMoveStartPropertiesIdx((move.move_start_properties_ptr - self.move_start_props_ptr) // self.OtherMoveProperty_size)
-                if move.move_end_properties_ptr != 0:
-                    move.setMoveEndPropertiesIdx((move.move_end_properties_ptr - self.move_end_props_ptr) // self.OtherMoveProperty_size)
-            if move.voiceclip_ptr != 0:
-                move.setVoiceclipId((move.voiceclip_ptr - self.voiceclip_list_ptr) // self.Voiceclip_size)
-            self.moves.append(move.dict())
-
-            if move.anim not in self.anims and self.TekkenVersion != 't8':
-                self.anims.append(move.anim)
-
+        self.moves = [None] * self.movelist_size
+        with ThreadPoolExecutor(5) as executor:
+            executor.map(self.process_move, range(self.movelist_size))
         self.save()
+
+    def process_move(self, i):
+        move = Move(self.movelist_head_ptr + (i * self.Move_size), self, i)
+        move.setCancelIdx((move.cancel_addr - self.cancel_head_ptr) // self.Cancel_size)
+        move.setHitConditionIdx((move.hit_condition_addr - self.hit_conditions_ptr) // self.HitCondition_size)
+        if move.extra_properties_ptr != 0:
+            move.setExtraPropertiesIdx((move.extra_properties_ptr - self.extra_move_properties_ptr) // self.ExtraMoveProperty_size)
+        if self.TekkenVersion == 't8':
+            if move.move_start_properties_ptr != 0:
+                move.setMoveStartPropertiesIdx((move.move_start_properties_ptr - self.move_start_props_ptr) // self.OtherMoveProperty_size)
+            if move.move_end_properties_ptr != 0:
+                move.setMoveEndPropertiesIdx((move.move_end_properties_ptr - self.move_end_props_ptr) // self.OtherMoveProperty_size)
+        if move.voiceclip_ptr != 0:
+            move.setVoiceclipId((move.voiceclip_ptr - self.voiceclip_list_ptr) // self.Voiceclip_size)
+        self.moves[i] = move.dict()
+
+        if move.anim not in self.anims and self.TekkenVersion != 't8':
+            self.anims.append(move.anim)
+
 
 
 if __name__ == "__main__":
