@@ -261,39 +261,9 @@ class GameClass:
         if allocate_memory:
             VirtualFreeEx(self.handle, remote_param_addr, 0, MEM_DECOMMIT)
 
+        kernel32.CloseHandle(thread_handle)
+
         return result
-
-        '''
-        # Step 1: Create the remote thread to call the function
-        thread_id = ctypes.c_ulong()
-        h_thread = kernel32.CreateRemoteThread(
-            self.PROCESS.handle, None, 0,
-            ctypes.c_void_p(func_addr), ctypes.c_void_p(param_addr), 0,
-            ctypes.byref(thread_id)
-        )
-        if not h_thread:
-            raise Exception("Failed to create remote thread.")
-        
-        # Step 2: Wait for the thread to finish
-        kernel32.WaitForSingleObject(h_thread, -1)
-        
-        # Step 3: Retrieve the return value
-        return_value = None
-
-        if return_addr:
-            # If return value is stored in memory, read from return_addr
-            return_value = self.readInt(return_addr, 8)
-        else:
-            # If return value is in RAX, get it from the thread's context
-            context = ctypes.create_string_buffer(0x4d0)  # CONTEXT structure size
-            kernel32.GetThreadContext(h_thread, ctypes.byref(context))
-            return_value = ctypes.cast(context[136:144], ctypes.POINTER(ctypes.c_uint64)).contents.value  # Offset for RAX
-
-        # Close the handle to the thread
-        kernel32.CloseHandle(h_thread)
-        
-        return return_value
-    '''
     # End of class
         
 def bToInt(data, offset, length, endian='little'):
