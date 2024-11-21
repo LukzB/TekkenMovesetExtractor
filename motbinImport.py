@@ -13,7 +13,7 @@ importVersion = "1.0.1"
 requirement_size = 0x14
 cancel_size = 0x28
 cancel_extradata_size = 0x4
-move_size = 0x3A0
+move_size = 0x448
 reaction_list_size = 0x70
 hit_condition_size = 0x18
 pushback_size = 0x10
@@ -46,6 +46,49 @@ def readJsonFile(folderName: str):
 def printPtrInfo(p):
     print("%d/%d bytes left." % (p.size - (p.curr_ptr - p.head_ptr), p.size))
     return
+
+def TK_encrypt_field(raw_value: int, encryption_key: int) -> int:
+    """
+    Encrypts a raw value using the provided encryption key.
+    It's a recreation attempt of the game's Encryption method
+    
+    Args:
+        raw_value (int): The raw unencrypted value (32-bit unsigned int).
+        encryption_key (int): The encryption key (64-bit unsigned int).
+        
+    Returns:
+        int: The encrypted value.
+    """
+    # Rotate the key based on the lower 5 bits of the raw value
+    rotated_key = encryption_key
+    rotation_count = raw_value & 0x1F
+    for _ in range(rotation_count):
+        rotated_key = ((rotated_key << 1) | (rotated_key >> 63)) & 0xFFFFFFFFFFFFFFFF  # Rotate left by 1
+
+    # Compute the initial obfuscated value
+    temp_value = raw_value ^ (rotated_key & 0xFFFFFFE0) ^ 0x1D
+    shifted_value = temp_value
+    accumulated_value = 0
+
+    # Process the value byte-by-byte, applying obfuscation
+    for byte_offset in range(0, 32, 8):
+        temp_key = encryption_key
+        rotation_steps = byte_offset + 8
+        
+        # Rotate the key for the current byte offset
+        for _ in range(rotation_steps):
+            temp_key = ((temp_key << 1) | (temp_key >> 63)) & 0xFFFFFFFFFFFFFFFF  # Rotate left by 1
+
+        # Update the accumulated value with XOR operations
+        accumulated_value ^= (shifted_value & 0xFF) ^ (temp_key & 0xFFFFFFFF)
+        shifted_value >>= 8  # Shift the intermediate value for the next byte
+
+    # Ensure the accumulated value is non-zero
+    if accumulated_value == 0:
+        accumulated_value = 1
+
+    # Construct the final encrypted value
+    return temp_value + (accumulated_value << 32)
 
 class Importer:
     def __init__(self, gameName="Polaris-Win64-Shipping.exe"):
@@ -990,6 +1033,26 @@ class MotbinStruct:
                     self.mota_list.append(0)
                     # print("Warning: impossible to import MOTA %d" % (i))
 
+    def allocateEncrypted(self, move, key, rawIdx):
+        rawValue = move[key]
+        encKey = move['encrypted_%s_key' % key]
+        encryptedVal = TK_encrypt_field(rawValue, encKey)
+        self.writeInt(encryptedVal, 8)
+        self.writeInt(encKey, 8)
+        for j, related in enumerate(move['%s_related' % key]):
+            if j == rawIdx:
+                self.writeInt(rawValue, 4)
+            else:    
+                self.writeInt(related, 4)
+        return
+
+    def allocateHitBoxes(self, move, hitboxIdx):
+        self.writeInt(move['hitbox%d_first_active_frame' % hitboxIdx], 4) 
+        self.writeInt(move['hitbox%d_last_active_frame' % hitboxIdx], 4) 
+        self.writeInt(move['hitbox%d_location' % hitboxIdx], 4)
+        for value in move['hitbox%d_related_floats' % hitboxIdx]:
+            self.writeInt(value, 4)
+
     def allocateMoves(self):
         self.allocateAnimations()
 
@@ -1011,38 +1074,39 @@ class MotbinStruct:
             # anim_dict = self.animation_table.get(move['anim_name'], None)
             # anim_name = anim_dict['name_ptr']
             # anim_ptr = anim_dict['data_ptr']
+            # Just replicating what the game does
+            rawIdx = (i % 8) - 4
 
-            self.writeInt(move['name_key'], 4)  # 0x0
-            self.writeInt(move['anim_key'], 4)  # 0x4
-            self.writeInt(placeholder_address, 8)  # 0x8
-            self.writeInt(placeholder_address, 8)  # 0x10
-            self.writeInt(move['anim_addr_enc1'], 4)  # 0x18
-            self.writeInt(move['anim_addr_enc2'], 4)  # 0x1C
-            self.writeInt(move['vuln'], 4)  # 0x20
-            self.writeInt(move['hitlevel'], 4)  # 0x24
-            self.writeInt(self.getCancelFromId(move['cancel_idx']), 8)  # 0x28
-            self.writeInt(0, 8)  # 0x30
-            self.writeInt(0, 8)  # 0x38
-            self.writeInt(move['u2'], 8)  # 0x40
-            self.writeInt(move['u3'], 8)  # 0x48
-            self.writeInt(move['u4'], 8)  # 0x50
-            self.writeInt(move['u6'], 4)  # 0x58
-            self.writeInt(move['transition'], 2)  # 0x5C
-            self.writeInt(move['u7'], 2)  # 0x5E
-            self.writeInt(move['_0x60'] if '_0x60' in move else 0, 4)  # 0x60
-            self.writeInt(move['ordinal_id'] if 'ordinal_id' in move else 0, 4)  # 0x64
-            on_hit_addr = self.getHitConditionFromId(move['hit_condition_idx'])
-            self.writeInt(on_hit_addr, 8)  # 0x68
-            self.writeInt(move['_0x70'], 4)  # 0x70
-            self.writeInt(move['_0x74'], 4)  # 0x74
-            self.writeInt(move['anim_max_len'], 4)  # 0x78
+            self.allocateEncrypted(move, 'name_key', rawIdx) # 0x0 - 0x20
+            self.allocateEncrypted(move, 'anim_key', rawIdx) # 0x20 - 0x40
+            self.writeInt(placeholder_address, 8)  # 0x40
+            self.writeInt(placeholder_address, 8)  # 0x48
+            self.writeInt(move['anim_addr_enc1'], 4)  # 0x50
+            self.writeInt(move['anim_addr_enc2'], 4)  # 0x54
+            self.allocateEncrypted(move, 'vuln', rawIdx) # 0x58 - 0x78
+            self.allocateEncrypted(move, 'hitlevel', rawIdx) # 0x78 - 0x98
+            self.writeInt(self.getCancelFromId(move['cancel_idx']), 8)  # 0x98
+            self.writeInt(0, 8)  # 0xA0
+            self.writeInt(0, 8)  # 0xA8
+            self.writeInt(move['u2'], 8)  # 0xB0
+            self.writeInt(move['u3'], 8)  # 0xB8
+            self.writeInt(move['u4'], 8)  # 0xC0
+            self.writeInt(move['u6'], 4)  # 0xC8
+            self.writeInt(move['transition'], 2)  # 0xCC
+            self.writeInt(move['_0xCE'], 2)  # 0xCE
+            self.allocateEncrypted(move, '_0xD0', rawIdx) # 0xD0 - 0xF0
+            self.allocateEncrypted(move, 'ordinal_id', rawIdx) # 0xF0 - 0x110
+            self.writeInt(self.getHitConditionFromId(move['hit_condition_idx']), 8)  # 0x110
+            self.writeInt(move['_0x118'], 4)  # 0x118
+            self.writeInt(move['_0x11C'], 4)  # 0x11C
+            self.writeInt(move['anim_max_len'], 4)  # 0x120
 
             if self.m['version'] == "Tag2" or self.m['version'] == "Revolution":
                 move['u15'] = convertU15(move['u15'])
 
-            self.writeInt(move['u10'], 4)  # 0x7C airborne_start
-            self.writeInt(move['u11'], 4)  # 0x80 airborne_end
-            self.writeInt(move['u12'], 4)  # 0x84 ground_fall
+            self.writeInt(move['airborne_start'], 4)  # 0x124
+            self.writeInt(move['airborne_end'], 4)  # 0x128
+            self.writeInt(move['ground_fall'], 4)  # 0x12c
 
             voiceclip_addr = self.getVoiceclipFromId(move['voiceclip_idx'])
             extra_properties_addr = self.getExtraMovePropertiesFromId(
@@ -1052,49 +1116,26 @@ class MotbinStruct:
             move_end_properties_addr = self.getMoveEndPropertiesFromId(
                 move['move_end_properties_idx'])
 
-            self.writeInt(voiceclip_addr, 8)  # 0x88
-            self.writeInt(extra_properties_addr, 8)  # 0x90
-            self.writeInt(move_start_properties_addr, 8)  # 0x98
-            self.writeInt(move_end_properties_addr, 8)  # 0xA0
-            self.writeInt(move['u15'], 4)  # 0xA8
-            self.writeInt(move['_0xAC'], 4)  # 0xAC
-            self.writeInt(move['first_active_frame'], 4)  # 0xB0
-            self.writeInt(move['last_active_frame'], 4)  # 0xB4
-            self.writeInt(move['first_active_frame1'], 4)  # 0xB8
-            self.writeInt(move['last_active_frame1'], 4)  # 0xBC
-            self.writeInt(move['hitbox_location1'], 4)  # 0xC0
-
-            # 0xC4 to 0xE8
-            for value in move['unk1']:
-                self.writeInt(value, 4)
-
-            self.writeInt(move['first_active_frame2'], 4)  # 0xE8
-            self.writeInt(move['last_active_frame2'], 4)  # 0xEC
-            self.writeInt(move['hitbox_location2'], 4)  # 0xF0
-
-            # 0xF4 to 0x114
-            for value in move['unk2']:
-                self.writeInt(value, 4)
-
-            # 0x118 to 0x148
-            self.writeInt(move['first_active_frame3'], 4)  # 0x118
-            self.writeInt(move['last_active_frame3'], 4)  # 0x11C
-            self.writeInt(move['hitbox_location3'], 4)  # 0x120
-            for value in move['unk3']:
-                self.writeInt(value, 4)
-
-            # 0x148 to 0x214
-            for value in move['unk4']:
-                self.writeInt(value, 4)
-
-            self.writeInt(move['u16'], 2)  # 0x214
-            self.writeInt(move['u17'], 2)  # 0x216
-
-            # 0x218 - 0x39C
-            for value in move['unk5']:
-                self.writeInt(value, 4)
-
-            self.writeInt(move['u18'], 4)  # 0x39C
+            self.writeInt(voiceclip_addr, 8)  # 0x130
+            self.writeInt(extra_properties_addr, 8)  # 0x138
+            self.writeInt(move_start_properties_addr, 8)  # 0x140
+            self.writeInt(move_end_properties_addr, 8)  # 0x148
+            self.writeInt(move['u15'], 4)  # 0x150
+            self.writeInt(move['_0x154'], 4)  # 0x154
+            self.writeInt(move['first_active_frame'], 4)  # 0x158
+            self.writeInt(move['last_active_frame'], 4)  # 0x15C
+            self.allocateHitBoxes(move, 1) # 0x160 - 0x190
+            self.allocateHitBoxes(move, 2) # 0x190 - 0x1C0
+            self.allocateHitBoxes(move, 3) # 0x1C0 - 0x1F0
+            self.allocateHitBoxes(move, 4) # 0x1F0 - 0x220
+            self.allocateHitBoxes(move, 5) # 0x220 - 0x250
+            self.allocateHitBoxes(move, 6) # 0x250 - 0x280
+            self.allocateHitBoxes(move, 7) # 0x280 - 0x2B0
+            self.allocateHitBoxes(move, 8) # 0x2B0 - 0x2E0
+            self.writeInt(move['u17'], 4) # 0x2E0
+            for val in move['unk5']:
+                self.writeInt(val, 4)  # 0x2E4 - 0x444
+            self.writeInt(move['u18'], 4)  # 0x444
 
         for move_id in forbiddenMoveIds:
             self.forbidCancel(move_id, groupedCancels=True)
