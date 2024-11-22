@@ -1038,6 +1038,7 @@ class MotbinStruct:
         encKey = move['encrypted_%s_key' % key]
         encryptedVal = TK_encrypt_field(rawValue, encKey)
         self.writeInt(encryptedVal, 8)
+        # self.writeInt(move['encrypted_%s' % key], 8)
         self.writeInt(encKey, 8)
         for j, related in enumerate(move['%s_related' % key]):
             if j == rawIdx:
