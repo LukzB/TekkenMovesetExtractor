@@ -59,28 +59,37 @@ def TK_encrypt_field(raw_value: int, encryption_key: int) -> int:
     Returns:
         int: The encrypted value.
     """
-    # Rotate the key based on the lower 5 bits of the raw value
+    # Mask to ensure values stay within 64-bit or 32-bit unsigned ranges
+    UINT64_MASK = (1 << 64) - 1
+    UINT32_MASK = (1 << 32) - 1
+
+    # Rotate the key based on the lower 5 bits of the raw_value
     rotated_key = encryption_key
-    rotation_count = raw_value & 0x1F
-    for _ in range(rotation_count):
-        rotated_key = ((rotated_key << 1) | (rotated_key >> 63)) & 0xFFFFFFFFFFFFFFFF  # Rotate left by 1
+    if (raw_value & 0x1F) != 0:
+        rotation_count = raw_value & 0x1F
+        while rotation_count > 0:
+            rotated_key = ((rotated_key >> 63) | (rotated_key << 1)) & UINT64_MASK  # Rotate left by 1
+            rotation_count -= 1
 
     # Compute the initial obfuscated value
-    temp_value = raw_value ^ (rotated_key & 0xFFFFFFE0) ^ 0x1D
+    temp_value = (raw_value ^ (rotated_key & 0xFFFFFFE0) ^ 0x1D) & UINT32_MASK
     shifted_value = temp_value
+
+    # Initialize accumulated value
     accumulated_value = 0
 
     # Process the value byte-by-byte, applying obfuscation
     for byte_offset in range(0, 32, 8):
         temp_key = encryption_key
-        rotation_steps = byte_offset + 8
-        
+        rotation_steps = byte_offset + 8  # Number of rotations for this byte offset
+
         # Rotate the key for the current byte offset
-        for _ in range(rotation_steps):
-            temp_key = ((temp_key << 1) | (temp_key >> 63)) & 0xFFFFFFFFFFFFFFFF  # Rotate left by 1
+        while rotation_steps > 0:
+            temp_key = ((temp_key >> 63) | (temp_key << 1)) & UINT64_MASK  # Rotate left by 1
+            rotation_steps -= 1
 
         # Update the accumulated value with XOR operations
-        accumulated_value ^= (shifted_value & 0xFF) ^ (temp_key & 0xFFFFFFFF)
+        accumulated_value ^= (shifted_value ^ (temp_key & UINT32_MASK)) & UINT32_MASK
         shifted_value >>= 8  # Shift the intermediate value for the next byte
 
     # Ensure the accumulated value is non-zero
@@ -88,7 +97,9 @@ def TK_encrypt_field(raw_value: int, encryption_key: int) -> int:
         accumulated_value = 1
 
     # Construct the final encrypted value
-    return temp_value + (accumulated_value << 32)
+    encrypted_value = (temp_value & UINT32_MASK) | ((accumulated_value & UINT32_MASK) << 32)
+    return encrypted_value
+
 
 class Importer:
     def __init__(self, gameName="Polaris-Win64-Shipping.exe"):
