@@ -69,27 +69,38 @@ itemNames = {
 
 fieldLabels = {
     'moves': {
-        'u8': 'moveID_val1',
-        'u8_2': 'moveID_val2',
+        'move_start_properties_idx': 'start_props_idx',
+        'move_end_properties_idx': 'end_props_idx',
+        'hitbox1_location': 'hitbox1',
+        'hitbox1_first_active_frame': 'hitbox1 first',
+        'hitbox1_last_active_frame': 'hitbox1 last',
+        'hitbox2_location': 'hitbox2',
+        'hitbox2_first_active_frame': 'hitbox2 first',
+        'hitbox2_last_active_frame': 'hitbox2 last',
+        'hitbox3_location': 'hitbox3',
+        'hitbox3_first_active_frame': 'hitbox3 first',
+        'hitbox3_last_active_frame': 'hitbox3 last',
+        '_0xD0': 'moveID_val1',
+        'ordinal_id': 'moveID_val2',
         'u15': 'facing/extras?',
-        'u16': 'collision?',
-        'u17': 'distance',
+        # 'u16': 'collision?',
+        # 'u17': 'distance',
         'anim_max_len': 'anim_len',
     },
     'pushbacks': {
         'val1': 'duration',
         'val2': 'displacement',
-        'val3': 'num of extras'
+        'val3': 'non-linear frames'
     },
     'pushback_extras': {
-        'value': 'horizontal offset'
+        'value': 'displacement'
     },
     'extra_move_properties': {
         'type': 'starting_frame',
     },
     'reaction_list': {
         'standing': 'default',
-        'vertical_pushback': 'verti pushback / front_ch_rot',
+        # 'vertical_pushback': 'verti pushback / front_ch_rot',
     }
 }
 
@@ -117,12 +128,12 @@ moveFields = {
     'hitbox3_location': 'hex',
     'hitbox3_first_active_frame': 'int',
     'hitbox3_last_active_frame': 'int',
-    'hitbox4_location': 'hex',
-    'hitbox4_first_active_frame': 'int',
-    'hitbox4_last_active_frame': 'int',
-    'u2': 'long',
-    'u3': 'long',
-    'u4': 'long',
+    # 'hitbox4_location': 'hex',
+    # 'hitbox4_first_active_frame': 'int',
+    # 'hitbox4_last_active_frame': 'int',
+    # 'u2': 'long',
+    # 'u3': 'long',
+    # 'u4': 'long',
     'u6': 'int',
     '_0xCE': 'short',
     # 'u8_2': 'short',
@@ -136,9 +147,9 @@ moveFields = {
     'ground_fall': 'int',
     'u15': 'int',
     '_0x154': 'int',
-    'u16': 'short',
-    'u18': 'short',
-    'u17': 'int'
+    # 'u16': 'short',
+    'u17': 'int',
+    'u18': 'int',
 }
 
 cancelFields = {
@@ -1770,7 +1781,10 @@ class ExtrapropEditor(FormEditor):
         reqId = self.fieldValue['id']
         description = getLabel(reqId, 'extra_move_properties')
 
-        text = '(INSTANT) ' if self.fieldValue['type'] == 32769 else ''
+        instant = 32769
+        text = '(INSTANT) ' if self.fieldValue['type'] == instant else ''
+        if self.fieldValue['type'] > instant:
+            text = '(INSTANT + %d) ' % (self.fieldValue['type'] - instant)
 
         if description != None:
             text += '%x: %s' % (reqId, description)
