@@ -43,6 +43,7 @@ t8_character_name_mappping = {
     33: '[EDDY]',
     34: '[LIDIA]',
     35: '[HEIHACHI]',
+    36: '[CLIVE]',
     116: '[DUMMY]',
     117: '[ANGEL_JIN]',
     118: '[TRUE_DEVIL_KAZUYA]',
