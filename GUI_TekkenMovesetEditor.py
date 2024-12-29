@@ -19,7 +19,7 @@ editorVersion = "0.32-BETA"
 
 GROUP_CANCEL_START = 0x8012
 GROUP_CANCEL_END = 0x8013
-INPUT_SEQ_START = 0x800f
+INPUT_SEQ_START = 0x8014 # Assuming it ot be 0x8014
 
 requirementLabels = {}
 propertyLabels = {}
