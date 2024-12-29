@@ -17,8 +17,9 @@ from zlib import crc32
 charactersPath = "./extracted_chars/"
 editorVersion = "0.32-BETA"
 
-GROUP_CANCEL_START = 0x800d
-GROUP_CANCEL_END = 0x800e
+GROUP_CANCEL_START = 0x8012
+GROUP_CANCEL_END = 0x8013
+INPUT_SEQ_START = 0x800f
 
 requirementLabels = {}
 propertyLabels = {}
@@ -487,7 +488,7 @@ def getCommandStr(commandBytes):
 
     if directionBits < 0x8000:
         direction = getDirectionalinput(directionBits)
-    elif directionBits < 0x800f:
+    elif directionBits < INPUT_SEQ_START:
         direction = {
             (32768): "[AUTO]",
             (32769): " Double tap F",
@@ -499,7 +500,7 @@ def getCommandStr(commandBytes):
             (32782): " group cancel end",
         }.get(directionBits, "UNKNOWN")
     elif directionBits <= 0x8FFF:
-        direction = " input_sequence[%d]" % (directionBits - 0x800f)
+        direction = " input_sequence[%d]" % (directionBits - INPUT_SEQ_START)
 
     if (inputBits & (1 << 29)):  # if "Partial Input" mode, replace (+) with pipe (|)
         inputs = inputs[0] + inputs[1:].replace('+', ' | ', inputs.count('+'))
