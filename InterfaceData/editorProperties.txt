@@ -20,6 +20,7 @@
 0x8019,Electric VFX (self)
 0x801a,Electric VFX (opponent)
 0x801b,Heat Smash VFX (self)
+0x8025,Play VFX (self)
 0x8031,Char Hit Spart VFX (self)
 0x8039,Char trail VFX (self)
 0x8046,Stage VFX
@@ -72,14 +73,18 @@
 0x814d,Heat-dash related
 0x8151,Activate devil permanently
 0x81ed,Give CH property
+0x81f1,Detach position
+0x81f5,Detach height (smooth)
+0x81f6,Detach height (instant)
 0x81fa,Add tracking (self)
 0x81fb,Add tracking (opponent)
 0x81fc,Change VULN
+0x81fd,Detach characters
 0x81fe,Change collision status
 0x8203,Footstep SFX+VFX
 0x822d,Power Crush
 0x822e,Rage Art activate VFX
-0x82bc,AI Input?
+0x82bc,Reset combo meter
 0x8238,Skip move frames
 0x8239,Skip move frames (+N)
 0x823a,Skip move frames (-N)
@@ -120,8 +125,13 @@
 0x82bc,AI Input(?)
 0x82c1,Player visibilty
 0x82c2,Opponent visibilty
+0x82c5,Spend Tornado
+0x82d4,Show Yoshi main sword
+0x82d5,Show Yoshi second sword
+0x82d6,Yoshi main sword VFX
+0x82d7,Yoshi second sword VFX
 0x82f0,Toggle Neck Tracking
-0x82e0,Activate Rage
+0x82e0,Activate Rage if available
 0x82e2,Spend Rage
 0x830d,Health Bar display/vfx
 0x8338,Use fake frame advantage

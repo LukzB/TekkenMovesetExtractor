@@ -35,13 +35,16 @@ charIDs = {
     33: 'Eddy',
     34: 'Lidia',
     35: 'Heihachi',
-    36: 'DLC4',
+    36: 'Clive',
+    37: 'Anna',
     116: 'Dummy',
     117: 'Angel Jin',
     118: 'True Devil Kazuya',
     119: 'Jack-7',
     120: 'Soldier',
-    121: 'Devil Jin (v2)'
+    121: 'Devil Jin (v2)',
+    122: 'Tekken Monk',
+    123: 'Seiryu',
 }
 
 gamemodes = {
@@ -162,6 +165,8 @@ reqDetailsList = {
     326: ShortFlagLT(),  # Short flag <= X
     365: ShortFlagEQ(),  # Short flag == X
     454: DictionaryRequirement(reqYesNo), # Bryan Snake Eyes
+    473: DictionaryRequirement(reqYesNo), # Perma devil
+    498: DictionaryRequirement(reqYesNo), # Heihachi Warrior Instinct
     668: StoryBattleRequirement(),  # Story battle details
     672: DictionaryRequirement(gamemodes),  # Game mode
     1028: DictionaryRequirement(reqYesNo),

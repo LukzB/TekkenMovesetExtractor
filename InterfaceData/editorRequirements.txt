@@ -103,6 +103,7 @@
 158,If not Ki-charged
 159,Player is in rage
 184,Near Wall
+192,Wallbreak available
 219,Something wallsplat related
 220,Player character ID
 221,Player NOT character ID
@@ -143,14 +144,32 @@
 442,Heat available
 454,Chara install
 466,Heat related
+473,Kazuya perma devil
 490,Eddy install == X
 498,Heihachi install active
-505,Opp chara ID multiple checks
-506,Opp chara ID multiple checks
+499,Player chara ID (4-way check)
+500,Player Not chara ID (4-way check)
+501,Opp chara ID (4-way check)
+502,Opp Not chara ID (4-way check)
+503,Player chara ID (4-way check)
+504,Player Not chara ID (4-way check)
+505,Opp chara ID (4-way check)
+506,Opp Not chara ID (4-way check)
 640,Player speed >= X
 641,Player speed <= X
 642,Player speed == X
-654,RNG-related
+648,Opp curr move == X
+649,Opp next move == X
+652,RNG (2-way)
+653,RNG (3-way)
+654,RNG (4-way)
+655,RNG (5-way)
+656,RNG (6-way)
+657,RNG (7-way)
+658,RNG (8-way)
+659,RNG (9-way)
+660,RNG (10-way)
+661,RNG (weighted)
 666,Playing Ball mode
 667,Playing Story mode
 668,Story battle number
@@ -163,6 +182,7 @@
 693,Opp playing a female
 694,Opp playing Jack-7/8
 695,Opp playing a Bear
+696,Pre-round animation
 716,Opponent airborne
 717,Opponent not airborne
 718,Has Item
@@ -175,8 +195,17 @@
 767,Chara episode post-fight?
 777,Story flags
 778,Not Story mode
+790,Opp first active frame < X
+791,Opp first active frame >= X
+792,Opp first active frame == X
+793,Opp last active frame < X
+794,Opp last active frame >= X
+795,Opp last active frame == X
+799,Special-style related?
+800,Special-style related?
 801,(DLC) Playing Story mode
 802,(DLC) Story battle number
+803,(DLC) Story NOT battle number
 806,Heihachi story flags
 1028,Player is in heat
 1032,Parry High
