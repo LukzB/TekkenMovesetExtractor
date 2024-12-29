@@ -920,24 +920,23 @@ class SearchResultWindow:
             result_str = ''
             group_found_items = []
             
-            match base:
-                case 'cancels':
-                    result_str += f'Found in {len(found_items)} cancel lists:\n'
-                    result_str += self.stringify_items(found_items).rstrip(', ')
+        if base == 'cancels':
+            result_str += f'Found in {len(found_items)} cancel lists:\n'
+            result_str += self.stringify_items(found_items).rstrip(', ')
+            group_found_items = self.find_items('group_cancels', type, value)
 
-                    group_found_items = self.find_items('group_cancels', type, value)
+            if found_items:
+                result_str += f'\n\nFound in {len(found_items)} group cancel lists:\n'
+                result_str += self.stringify_items(found_items)
 
-                    if found_items: 
-                        result_str += f'\n\nFound in {len(found_items)} group cancel lists:\n'
-                        result_str += self.stringify_items(found_items)
+        elif base in ['extra_move_properties', 'requirements', 'hit_conditions']:
+            result_str += f'{len(found_items)} {base} found in the following lists:\n'
+            result_str += self.stringify_items(found_items)
 
-                case 'extra_move_properties'|'requirements'|'hit_conditions':
-                    result_str += f'{len(found_items)} {base} found in the following lists:\n'
-                    result_str += self.stringify_items(found_items)
-                case _: 
-                    result_str += f'{len(found_items)} {base} found with specified {type}:\n'
-                    result_str += self.stringify_items(found_items)
-            
+        else:
+            result_str += f'{len(found_items)} {base} found with specified {type}:\n'
+            result_str += self.stringify_items(found_items)
+                    
             TextArea.insert("end", result_str + "\n\n")
 
             TextArea.insert("end", "--- %d entries containing %s %s ---" %
