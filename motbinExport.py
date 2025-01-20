@@ -1595,6 +1595,14 @@ class Exporter:
         if not os.path.isdir(folder_destination):
             os.mkdir(folder_destination)
 
+    
+    def getPlayerAddr(self, playerId):
+        if (self.TekkenVersion + '_p1_addr') in game_addresses.addr:
+            baseAddr = game_addresses[self.TekkenVersion + '_p1_addr']
+            newAddr = self.T.readPointerPath(baseAddr, [0x30 + playerId * 8, 0])
+            return newAddr
+        return
+    
     def getP1Addr(self):
         if (self.TekkenVersion + '_p1_addr') in game_addresses.addr:
             return game_addresses[self.TekkenVersion + '_p1_addr']

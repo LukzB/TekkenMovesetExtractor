@@ -1233,7 +1233,11 @@ class MoveSelector:
         movelist_offset = game_addresses['movelist_offset']
         move_size = game_addresses['move_size']
 
-        playerAddr = game_addresses[('%s_p1_addr' % pKey)] + (self.playMovePid * game_addresses[('%s_playerstruct_size' % pKey)])
+        playerAddr = game_addresses[('%s_p1_addr' % pKey)]
+        if pKey == 't8':
+            playerAddr = T.T.readPointerPath(playerAddr, [0x30 + self.playMovePid * 8, 0])
+        else:
+            playerAddr = playerAddr + (self.playMovePid * game_addresses[('%s_playerstruct_size' % pKey)])
         motbinOffset = game_addresses[('%s_motbin_offset' % pKey)]
         curr_frame_timer_offset = game_addresses['curr_frame_timer_offset']
         next_move_offset = game_addresses['next_move_offset']
@@ -1278,7 +1282,11 @@ class MoveSelector:
         TekkenGame.applyModuleAddress(game_addresses)
 
         addrKey = 't7' if self.root.isNotT8 else 't8'
-        playerAddress = game_addresses['%s_p1_addr' % addrKey] + (playerId * game_addresses['%s_playerstruct_size' % addrKey])
+        playerAddress = game_addresses['%s_p1_addr' % addrKey]
+        if addrKey == 't8':
+            playerAddress = TekkenGame.readPointerPath(playerAddress, [0x30 + playerId * 8, 0])
+        else:
+            playerAddress = playerAddress + (playerId * game_addresses['%s_playerstruct_size' % addrKey])
         offset = game_addresses['player_curr_move_offset']
 
         currMoveId = TekkenGame.readInt(playerAddress + offset, 4)
