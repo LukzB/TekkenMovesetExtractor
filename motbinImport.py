@@ -136,9 +136,7 @@ class Importer:
         if playerAddr == 0:
             return None
 
-        if playerid == 1:
-            playerAddr += game_addresses['t8_playerstruct_size']
-
+        playerAddr = self.T.readPointerPath(playerAddr, [0x30 + playerid * 8, 0])
         return playerAddr
 
     def importMoveset(self, playerAddr, folderName, moveset=None, charactersPath='extracted_chars/'):
