@@ -1,5 +1,5 @@
 # For updating purposes
-version     = 17 # Must be different for it to register it as an update
+version     = 18 # Must be different for it to register it as an update
 repo_link   = https://raw.githubusercontent.com/LukzB/TekkenMovesetExtractor/tekken-8-import/
 
 # Tekken 8 addresses and offsets. Changes with updates
