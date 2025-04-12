@@ -85,6 +85,7 @@
 0x822d,Power Crush
 0x822e,Rage Art activate VFX
 0x82bc,Reset combo meter
+0x82be,Add to combo counter
 0x8238,Skip move frames
 0x8239,Skip move frames (+N)
 0x823a,Skip move frames (-N)
@@ -118,6 +119,11 @@
 0x8275,Push player in Z-axis
 0x8276,Push player in X-axis
 0x8278,Push player in Y-axis (height)
+0x827b,Spawn projectile
+0x827c,Spawn height related?
+0x827d,Projectile horizontal spawn distance
+0x827c,Projectile vertical spawn distance
+0x827d,Projectile lateral spawn distance
 0x828b,Enable scaled dmg
 0x828c,Inflict scaled dmg (opponent)
 0x828d,Inflict scaled dmg (self)
@@ -151,6 +157,7 @@
 0x83cd,Add scaling (airborne)
 0x83d6,Set game speed
 0x83d7,Slowdown VFX
+0x83e6,Armor break
 0x83ee,Set Multi-level installs
 0x83f9,Set Heihachi Warrior Instinct
 0x848b,Attach item(?)
