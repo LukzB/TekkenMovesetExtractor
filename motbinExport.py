@@ -462,7 +462,7 @@ t8_offsetTable = {
     'projectile:u1': {'offset': 0x0, 'size': (35, 4)},
     'projectile:hit_condition_addr': {'offset': 0x90, 'size': 8},
     'projectile:cancel_addr': {'offset': 0x98, 'size': 8},
-    'projectile:u2': {'offset': 0xA0, 'size': (14, 4)},
+    'projectile:u2': {'offset': 0xA0, 'size': (16, 4)},
 
     'throwextra:u1': {'offset': 0x0, 'size': 4},
     'throwextra:u2': {'offset': 4, 'size': (4, 2)},
