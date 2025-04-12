@@ -110,6 +110,7 @@ fieldLabels = {
 
 moveFields = {
     'name': 'text',
+    'name_key': 'hex',
     'vuln': 'int',
     'hitlevel': 'int',
     'cancel_idx': 'positive_index',
@@ -2058,6 +2059,8 @@ class MoveEditor(FormEditor):
         self.easternFrame = Frame(self.container)
         self.easternFrame.pack(side='right', fill='both', expand=True)
 
+        self.disabledFields = ["name_key"]
+
         self.initFields()
 
         self.registerFieldButtons([
@@ -2108,7 +2111,7 @@ class MoveEditor(FormEditor):
         for field in moveData:
             if field in moveFields:
                 self.setField(field, moveData[field], True)
-                self.fieldInput[field].config(state='enabled')
+                self.fieldInput[field].config(state='enabled' if field not in self.disabledFields else 'readonly')
         self.editMode = True
         self.disableSaveButton()
 
