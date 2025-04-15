@@ -97,7 +97,7 @@ player_curr_move_offset      = 0x548                          # Used by editor t
 next_move_offset             = 0x2410                         # Used by editor to force sa move to play
 curr_frame_timer_offset      = 0x390                          # Used by editor to force a move to play
 code_injection_addr          = +0x74ABFF                      # Address that writes on player+motbin_offset; used for online play. 
-playerid_ptr                 = +0x34CE508, 0x0                # Used to find whether local player is 1P or 2P; used for online play
+playerid_ptr                 = +0x09AB4540, 0x0                # Used to find whether local player is 1P or 2P; used for online play
 #Finding playerid_starting_ptr: Go in training mode as 2p; scan for value on 1. Change to 1P; scan for value on 0. Repeat many times to lower matches to a few hundreds. Do combo; grabs and change outfit & character to keep lowering matches.
 #Scan repeatedly value between 0 and 1 during loading to filter out the remaining garbage. Then pause the process (slow to 0.00); set all remaining variables to a fringe unique value (e.g. 216246545) and search for the following pointer path that leads to the fringe value
 

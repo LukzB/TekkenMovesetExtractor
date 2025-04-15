@@ -33,6 +33,8 @@ monitorVerificationFrequency = 1  # seconds
 runningMonitors = [None, None]
 creatingMonitor = [False, False]
 codeInjection = None
+p1char = ""
+p2char = ""
 
 
 def createShortcut(path, target='', wDir='', icon='', args=''):
@@ -227,6 +229,7 @@ def allocateMovesetWritingInjection(movesetAddr, movesetAddr2, importer):
     except:
         importer.writeInt(playerLocation, 0, 8)  # can't write those yet
         importer.writeInt(playerLocation + 8, 0, 8)
+        print("crash on write")
 
     importer.writeInt(newMovesetLocation, 0 if movesetAddr ==
                       None else movesetAddr, 8)
@@ -237,6 +240,7 @@ def allocateMovesetWritingInjection(movesetAddr, movesetAddr2, importer):
         playerid = importer.readInt(game_addresses['playerid_ptr'], 4)
     except:
         playerid = 0
+        print ("crash on read")
     finally:
         importer.writeInt(playerIdLocation, playerid, 4)
 
@@ -262,6 +266,7 @@ class Monitor:
             self.moveset = self.Importer.loadMoveset(folderName=(
                 charactersPath + self.selected_char), charactersPath=charactersPath)
         except Exception as e:
+            print ("crash on init, error code 0x01")
             print(e, file=sys.stderr)
             self.exit()
 
@@ -275,6 +280,7 @@ class Monitor:
         try:
             self.monitor()
         except Exception as e:
+            print("crash on start, error code 0x02")
             print(e, file=sys.stderr)
             self.exit()
 
@@ -319,6 +325,7 @@ class Monitor:
         global codeInjection
 
         if codeInjection == None or self.moveset == None:
+            print ("crash on inject")
             return
 
         offset = ((playerId - 1) * 8)
@@ -350,21 +357,23 @@ class Monitor:
 
     def getPlayerAddress(self):
         self.playerAddr = self.Importer.getPlayerAddress(0)
-
+            
         if self.playerAddr == None:
             return  # player not loaded yet
+        try:
+            invertPlayers = self.Importer.readInt(
+                game_addresses['playerid_ptr'], 4)
 
-        invertPlayers = self.Importer.readInt(
-            game_addresses['playerid_ptr'], 4)
+            playerId = self.playerId + invertPlayers
+            if playerId == 3:
+                playerId = 1
+            if playerId == 2:
+                self.playerAddr += game_addresses['t8_playerstruct_size']
 
-        playerId = self.playerId + invertPlayers
-        if playerId == 3:
-            playerId = 1
-        if playerId == 2:
-            self.playerAddr += game_addresses['t8_playerstruct_size']
-
-        self.playerSideId = playerId
-
+            self.playerSideId = playerId
+        except Exception as e:
+            print (e, file=sys.stderr)
+            print ("failed to invert players")
         return self.playerAddr
 
     def getCharacterId(self):
@@ -376,15 +385,15 @@ class Monitor:
         self.moveset.applyCharacterIDAliases(self.playerAddr)
 
     def monitor(self):
+        loading = None
         self.getPlayerAddress()
         self.writeMovesetToCode(self.playerSideId)
+        print(self.playerId)
 
         if self.playerAddr != None:
             try:
                 moveset_addr = self.Importer.readInt(
                     self.playerAddr + game_addresses['t8_motbin_offset'], 8)
-                self.moveset.copyMotaOffsets(moveset_addr)
-                self.moveset.updateCameraMotaStaticPointer(self.playerAddr)
             except Exception as e:
                 pass
             self.Importer.writeInt(
@@ -410,21 +419,46 @@ class Monitor:
                 if charaId != prev_charaId:
                     self.applyCharacterAliases()
                     prev_charaId = charaId
-
                 lastPlayerAddr = playerAddr
-                self.moveset.updateCameraMotaStaticPointer(self.playerAddr)
+                if self.playerAddr != None:
+                    try:
+                        moveset_addr = self.Importer.readInt(
+                            self.playerAddr + game_addresses['t8_motbin_offset'], 8)
+                    except Exception as e:
+                        pass
+                    self.Importer.writeInt(
+                        self.playerAddr + game_addresses['t8_motbin_offset'], self.moveset.motbin_ptr, 8)
+                if self.playerAddr == None:
+                    loading = 1
+                    return
+                elif loading == 1 and self.playerAddr != None:
+                    customptr = self.Importer.readInt(self.moveset.motbin_ptr, 8)
+                    motbin_ptr_addr = playerAddr + game_addresses['t8_motbin_offset']
+                    current_motbin_ptr = self.Importer.readInt(motbin_ptr_addr, 8)
+                    if current_motbin_ptr != customptr:
+                        print("Moveset reloaded")
+                        playerAddr = self.Importer.getPlayerAddress(self.playerId - 1)
+                        if self.playerId == 1:
+                            folderPath = charactersPath + p1char
+                            moveset = self.Importer.importMoveset(playerAddr, folderPath, charactersPath=charactersPath)
+                        if self.playerId == 2:
+                            folderPath = charactersPath + p2char
+                            moveset = self.Importer.importMoveset(playerAddr, folderPath, charactersPath=charactersPath)
+                    loading = 0
                 time.sleep(monitorVerificationFrequency)
             except Exception as e:
+                print(e, file=sys.stderr)
                 try:
                     # Read on self to see if process still exists
                     self.Importer.readInt(self.moveset.motbin_ptr, 8)
+                    print (self.Importer.readInt(self.moveset.motbin_ptr, 8))
                     time.sleep(monitorVerificationFrequency)
+                    print (e, file=sys.stderr)
                 except Exception as e:
                     print(e, file=sys.stderr)
                     print("Monitor %d closing because process can't be read" %
                           (self.playerId), file=sys.stderr)
                     self.exit(errcode=1)
-
         self.exit()
 
     def exit(self, errcode=1):
@@ -436,6 +470,7 @@ class Monitor:
             try:
                 self.resetCodeInjection()
             except:
+                print ("exit crash")
                 pass
         sys.exit(errcode)
 
@@ -443,19 +478,28 @@ class Monitor:
 def startMonitor(parent, playerId):
     if parent.selected_char == None:
         raise Exception("No character selected")
+    if playerId == 1:
+        p1char = parent.selected_char
+    if playerId == 2:
+        p2char = parent.selected_char
+
     print("Starting monitor for p%d..." % (playerId))
     monitorId = playerId - 1
 
     creatingMonitor[monitorId] = True
     TekkenImporter = importLib.Importer()
+    try:
+        newMonitor = Monitor(playerId, TekkenImporter, parent)
+        newThread = threading.Thread(target=newMonitor.start)
+        newThread.start()
+        runningMonitors[monitorId] = newMonitor
+        creatingMonitor[monitorId] = False
 
-    newMonitor = Monitor(playerId, TekkenImporter, parent)
-    newThread = threading.Thread(target=newMonitor.start)
-
-    newThread.start()
-    runningMonitors[monitorId] = newMonitor
-    creatingMonitor[monitorId] = False
-
+    except Exception as e:
+        self.setMonitorButton(monitorId, False)
+        creatingMonitor[monitorId] = False
+        print (e, file=sys.stderr)
+        print ("crashing on start monitor, error code 0x4")
 
 folderNameOrder = [
     't7',
@@ -559,6 +603,10 @@ def importPlayer(parent, playerId):
         print("No character selected")
         return
     folderPath = charactersPath + parent.selected_char
+    if playerId == 1:
+        p1char = parent.selected_char
+    if playerId == 2:
+        p2char = parent.selected_char
 
     TekkenImporter = importLib.Importer()
     playerAddr = TekkenImporter.getPlayerAddress(playerId - 1)
@@ -880,7 +928,7 @@ class GUI_TekkenMovesetExtractor(Tk):
             self.selected_char = None
 
     def toggleMonitor(self, parent, playerId):
-        return
+        #return
         monitorId = playerId - 1
 
         if creatingMonitor[monitorId] == True:
@@ -895,6 +943,7 @@ class GUI_TekkenMovesetExtractor(Tk):
                 startMonitor(self, playerId)
                 self.setMonitorButton(monitorId, True)
             except Exception as e:
+                print("crashed on toggling monitor, error code 0x03")
                 print(e, file=sys.stderr)
                 self.setMonitorButton(monitorId, False)
                 creatingMonitor[monitorId] = False
