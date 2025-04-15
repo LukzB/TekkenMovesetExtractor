@@ -940,7 +940,7 @@ class GUI_TekkenMovesetExtractor(Tk):
                 startMonitor(self, playerId)
                 self.setMonitorButton(monitorId, True)
             except Exception as e:
-                print("crashed on toggling monitor, error code 0x03")
+                print("crashed on toggling monitor, please make sure you've loaded into a game with the character before attempting to set their moveset!")
                 print(e, file=sys.stderr)
                 self.setMonitorButton(monitorId, False)
                 creatingMonitor[monitorId] = False
