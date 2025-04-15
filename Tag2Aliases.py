@@ -16,8 +16,8 @@ tag2_requirements = {
     59: { 't7_id': 62, 'desc': '(HEIHACHI) sOKI_00 -> sOKI_C00' },
     63: { 't7_id': 66, 'desc': '(HEIHACHI) Co_fumu_01 -> Standing' },
     64: { 't7_id': 67, 'desc': 'MAPPING' },
-    68: { 't7_id': 71, 'desc': '(HEIHACHI) cOKI_00 -> sOKI_00' },
-    69: { 't7_id': 72, 'desc': '(HEIHACHI) Tco_dwupR50 -> Co_DUkmB00' },
+    68: { 't7_id': 71, 'desc': 'Incoming high attack' },
+    69: { 't7_id': 72, 'desc': 'Incoming mid attack' },
     70: { 't7_id': 73, 'desc': '(ALISA) Aa_chain_kam -> DA_Aa_ChainDash' },
     74: { 't7_id': 77, 'desc': '(ASUKA) Jn_apasyou -> Jn_ganmen_n' },
     77: { 't7_id': 80, 'desc': '(HEIHACHI) sJUMP_00B -> sTRN_L00B' },
@@ -28,8 +28,11 @@ tag2_requirements = {
     84: { 't7_id': 87, 'desc': '(HEIHACHI) sDw_AIR00_ -> UNKNOWN-MOVE' },
     93: { 't7_id': 96, 'desc': '(ASUKA) Jn_apasyou -> Jn_ganmen_n' },
     98: { 't7_id': 100, 'desc': '(HEIHACHI) sOKI_00 -> cOKI_00' },
-    99: { 't7_id': 101, 'desc': '(LIN_XIAOYU) Fu_sabakR1y -> Fu_sabakR1yG' },
-    101: { 't7_id': 103, 'desc': 'MAPPING' },
+    99: { 't7_id': 101, 'desc': 'lower than X frames before attack is active' },
+    100: { 't7_id': 102, 'desc': 'X or greater frames before attack is active' },
+    101: { 't7_id': 103, 'desc': 'lower than X frames before attack stops being active' },
+    102: { 't7_id': 104, 'desc': 'X frames or greater before attack stops being active' },
+    103: { 't7_id': 105, 'desc': 'X frames before attack stops being active' },
     105: { 't7_id': 107, 'desc': '(HEIHACHI) sOKI_00 -> sOKI_C00' },
     111: { 't7_id': 113, 'desc': '(ZAFINA) Qt_fKAM01 -> Qt_fKAM_st' },
     112: { 't7_id': 114, 'desc': 'MAPPING' },
@@ -67,13 +70,13 @@ tag2_requirements = {
     199: { 't7_id': 216, 'desc': '(HEIHACHI) sOKI_00 -> sOKI_C00' },
     200: { 't7_id': 217, 'desc': 'Player character id'},
     201: { 't7_id': 218, 'desc': 'Player NOT character id'},
-    202: { 't7_id': 219, 'desc': 'Opponent character id' },
-    203: { 't7_id': 220, 'desc': 'Opponent NOT character id' },
-    204: { 't7_id': 221, 'desc': 'Partner character id'},
-    205: { 't7_id': 222, 'desc': 'Partner NOT character id'},
+    202: { 't7_id': 9999, 'desc': 'Opponent character id' },
+    203: { 't7_id': 9999, 'desc': 'Opponent NOT character id' },
+    204: { 't7_id': 9999, 'desc': 'Partner character id'},
+    205: { 't7_id': 9999, 'desc': 'Partner NOT character id'},
     206: { 't7_id': 9999, 'desc': 'Unknown U/F+4, 3'},
-    208: { 't7_id': 223, 'desc': 'Opponent partner character id' },
-    209: { 't7_id': 224, 'desc': 'Opponent partner NOT character id' },
+    208: { 't7_id': 9999, 'desc': 'Opponent partner character id' },
+    209: { 't7_id': 9999, 'desc': 'Opponent partner NOT character id' },
     214: { 't7_id': 225, 'desc': '(HEIHACHI) sJUMP_00_ -> Co_sJP_RP' },
     228: { 't7_id': 232, 'desc': '(NINA) sDm_KAOBntR -> R_bintrp' },
     228: { 't7_id': 234, 'desc': '(NINA) sDm_KAOBntR -> R_bintrp' },
@@ -606,39 +609,8 @@ tag2_extra_move_properties = {
 
 tag2_character_fixes = {
     "[Kunimitsu]": {
-        'extraproperty': [
-            {
-                'type': 0x8001,
-                'id': 0x82ea,
-                'value_alias': {
-                    0x31: 0x12 #fixes f4, 4 camera
-                }
-            }
-        ],
         'moves': [
             { 'name': 'Kt_6lklprp', 'hitbox_location': 0x08091009 }  #fix SEN 1 2 hitbox
-        ]
-    },
-    "[ANGEL]": {
-        'extraproperty': [
-            {
-                'type': 0x8010,
-                'id': 0x82ea,
-                'value_alias': {
-                    0x32: 0 #fixes f4, 4 camera
-                }
-            }
-        ]
-    },
-    "[Jinpachi]": {
-        'extraproperty': [
-            {
-                'type': 1,
-                'id': 0x82ea,
-                'value_alias': {
-                    0x31: 0x4 #fixes fly 1 1 2 2 camera
-                }
-            }
         ]
     },
     "[Alisa]": {
@@ -656,13 +628,7 @@ tag2_character_fixes = {
             {
                 'id': 0x8036, #Fix D/F+1+2 throw crash
                 'copy_nearest': True
-            },
-            {
-                'id': 0x82e9, #Fix D/F+1+2 camera
-                'value_alias': {
-                    0x3b: 0x10
-                }
-            },
+            }
         ]
     },
 }

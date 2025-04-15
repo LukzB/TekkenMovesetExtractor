@@ -74,8 +74,16 @@ rev_requirements = {
     173: { 't7_id': 189, 'desc': '(ALISA) Aa_sDASHB -> Aa_wDASH_air' },
     174: { 't7_id': 190, 'desc': '(ALISA) wDm_AirF_WB -> wDm_GndF_00' },
     200: { 't7_id': 216, 'desc': '(ALISA) sDw_AIR00_ -> wDm_AirF_00' },
-    201: { 't7_id': 217, 'desc': '(ALISA) Co_jpRlk00_ -> ___________' },
-    203: { 't7_id': 219, 'desc': '(HEIHACHI) He_sDASHF -> ThrC_moveCK' },
+    
+    201: { 't7_id': 217, 'desc': 'Player character id'},
+    202: { 't7_id': 218, 'desc': 'Player NOT character id'},
+    203: { 't7_id': 9999, 'desc': 'Opponent character id' },
+    204: { 't7_id': 9999, 'desc': 'Opponent NOT character id' },
+    205: { 't7_id': 9999, 'desc': 'Partner character id'},
+    206: { 't7_id': 9999, 'desc': 'Partner NOT character id'},
+    209: { 't7_id': 9999, 'desc': 'Opponent partner character id' },
+    210: { 't7_id': 9999, 'desc': 'Opponent partner NOT character id' },
+    
     209: { 't7_id': 225, 'desc': '(ALISA) sJUMP_00_ -> Co_sJP_RP' },
     216: { 't7_id': 232, 'desc': '(NINA) sDm_KAOBntR -> R_bintrp' },
     235: { 't7_id': 251, 'desc': '(ALISA) Aa_sKAM00_ -> Aa_sSTEPB' },
@@ -172,6 +180,3 @@ rev_requirements = {
     33503: { 't7_id': 33998, 'desc': '(ALISA) dm_hara_00L -> sGrd_hara_J' },
     33510: { 't7_id': 34108, 'desc': '(ALISA) ym_y00 -> wDm_GndF_00' },
 }
-
-def getRevExtraprop(type, id, value):
-    return 0, 0, 0

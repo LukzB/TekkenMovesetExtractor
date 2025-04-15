@@ -1,2 +1,7 @@
-extracted_chars/
+extracted_chars*/
 *.pyc
+.vscode
+dist
+build
+*.spec
+*script*

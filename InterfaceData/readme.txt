@@ -1,10 +1,5 @@
-Export a moveset by loading up the target character, then clicking the wanted export button.
-Movesets loaded using "Import to P1/P2" will be unloaded after the next loading screen.
-If you want the moveset to stay constantly, use the "Online Player" buttons, and BEFORE the loading screen.
-Both online players must load the same moveset on the same players.
+1.0.32.37: [EDITOR] Add tool to mass change cancels depending on move ID
+1.0.32.38: Update for new patch addresses
 
-1.0.16 Changelog:
-- [EDITOR] Fixed insertion/deletion of group cancels
-- [EDITOR] Added descriptions for known requirements & extra move properties 
-
---- by kilo ( https://www.youtube.com/c/kiloutre ) ---
+If you find a bug, let me know on github.
+- by kilo ( youtube.com/c/kiloutre - @kiloutre ) -

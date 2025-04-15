@@ -1,0 +1,244 @@
+0,Always true
+1,Practice mode move demo
+2,Attack to Throw
+3,Throw Hits Forward (Standing)
+4,Throw Hits Backward (Standing)
+5,Throw Hits Left Side (Standing)
+6,Throw Hits Right Side (Standing)
+7,Throw Hits Forward (Crouching)
+8,Throw Hits Backward (Crouching)
+9,Throw Hits Left Side (Crouching)
+10,Throw Hits Right Side (Crouching)
+11,Throw Hits Forward (Face Up)
+12,Throw Hits Backward (Face Up)
+13,Throw Hits Left Side (Face Up)
+14,Throw Hits Right Side (Face Up)
+15,Throw Hits Forward (Face Down)
+16,Throw Hits Backward (Face Down)
+17,Throw Hits Left Side (Face Down)
+18,Throw Hits Right Side (Face Down)
+23,Attack to Throw (Forward)
+24,Attack to Throw (Backward)
+25,Attack to Throw (Left Side)
+26,Attack to Throw (Right Side)
+27,Airborne Throw Hit Forward (Face-up)
+28,Airborne Throw Hit Backward (Face-up)
+29,Airborne Throw Hit Left Side (Face-up)
+30,Airborne Throw Hit Right Side (Face-up)
+31,Airborne Throw Hit Forward (Face-down)
+32,Airborne Throw Hit Backward (Face-down)
+33,Airborne Throw Hit Left Side (Face-down)
+34,Airborne Throw Hit Right Side (Face-down)
+35,Opponent distance <= param
+36,Opponent distance >= param
+43,On Hit
+44,On Hit
+47,On block
+48,On whiff
+49,On hit/block
+51,On hit
+61,Check opponent VULN
+62,Opp doing a damaging move
+63,Opp doing a damaging move + standing
+64,Opp doing a damaging move + crouching
+65,Opp doing a non-damaging move
+66,Opponent Standing
+67,Opponent Crouching
+68,Incoming high attack
+69,Incoming mid attack
+70,Incoming low attack
+71,Incoming high/mid attack
+72,Backturned
+73,Not Backturned
+76,Facing direction >= X
+77,Facing direction < X
+92,Opponent facing Forward
+93,Opponent facing Left
+94,Opponent facing Right
+95,Opponent facing Back
+96,Opponent facing Forward
+97,Opponent facing Left
+98,Opponent facing Right
+99,Opponent facing Back
+100,Enemy within 1792 units & last active frame not reached & attack is high
+101,Enemy first active frame - curr frame < X
+102,Enemy first active frame - curr frame >= X
+103,Enemy first active frame - curr frame = X
+104,Enemy last active frame - curr frame < X
+105,Enemy last active frame - curr frame >= X
+106,Enemy last active frame - curr frame = X
+107,Enemy move frame - last active frame <= X
+108,Player current frame - move max anim >= X
+109,Player move max anim - current frame > X
+110,Enemy move frame >= X
+111,Enemy move frame < X
+112,Enemy move frame == X
+113,Enemy move frame >= X
+114,Enemy move frame >= X
+126,Opponent downed
+127,Opponent on their feet
+128,Opponent downed + distance <= X
+130,Counterhit
+131,Pressed ONLY LP (1)
+132,Pressed ONLY RP (2)
+133,Pressed ONLY LP+RP (1+2)
+134,Throw break related
+135,Throw break related
+137,On death
+138,On opponent death
+139,Opponent HP < 50%
+140,Player HP >= param
+141,Player HP < param
+142,Opponent HP >= param
+143,Opponent HP > param
+144,Player HP %age >= param
+145,Player HP %age < param
+146,Opponent HP <= param
+147,Player HP <= param
+148,Standing on left side
+149,Standing on right side
+150,On ground (right side)
+151,On ground (left side)
+157,If Ki-charged
+158,If not Ki-charged
+159,Player is in rage
+184,Near Wall
+192,Wallbreak available
+219,Something wallsplat related
+220,Player character ID
+221,Player NOT character ID
+222,Opponent character ID
+223,Opponent NOT character ID
+224,Player character ID
+225,Player NOT Character ID
+226,Opponent character ID
+227,Opponent NOT character ID
+228,Player character controller
+229,Opponent character controller
+236,Playing Eddy
+238,Playing Eddy
+259,0x809b >= X
+274,Kazuya devil >= X
+276,0x80e4 >= X
+280,0x80f0 >= X
+281,0x80c5 >= X
+282,0x80c8 >= X
+283,0x80cb >= X
+288,Short flag >= X
+297,0x809b <= X
+312,Kazuya devil <= X
+314,0x80e4 <= X
+318,0x80f0 <= X
+319,0x80c5 <= X
+320,0x80c8 <= X
+321,0x80cb <= X
+326,Short flag <= X
+335,0x809b == X
+350,Kazuya devil == X
+352,0x80e4 == X
+356,0x80f0 == X
+358,0x80c5 == X
+359,0x80c8 == X
+360,0x80cb == X
+365,Short flag == X
+442,Heat available
+454,Chara install
+466,Heat related
+473,Kazuya perma devil
+490,Eddy install == X
+498,Heihachi install active
+499,Player chara ID (4-way check)
+500,Player Not chara ID (4-way check)
+501,Opp chara ID (4-way check)
+502,Opp Not chara ID (4-way check)
+503,Player chara ID (4-way check)
+504,Player Not chara ID (4-way check)
+505,Opp chara ID (4-way check)
+506,Opp Not chara ID (4-way check)
+640,Player speed >= X
+641,Player speed <= X
+642,Player speed == X
+648,Opp curr move == X
+649,Opp next move == X
+652,RNG (2-way)
+653,RNG (3-way)
+654,RNG (4-way)
+655,RNG (5-way)
+656,RNG (6-way)
+657,RNG (7-way)
+658,RNG (8-way)
+659,RNG (9-way)
+660,RNG (10-way)
+661,RNG (weighted)
+666,Playing Ball mode
+667,Playing Story mode
+668,Story battle number
+672,Game mode
+687,Playing a Bear
+689,Playing a male
+690,Playing a female
+691,Playing Jack-7/8
+692,Opp playing a male
+693,Opp playing a female
+694,Opp playing Jack-7/8
+695,Opp playing a Bear
+696,Pre-round animation
+716,Opponent airborne
+717,Opponent not airborne
+718,Has Item
+723,Juggle
+724,Tornado available
+750,Leroy cane available
+751,Leroy cane not available
+755,Chara ID related?
+766,Chara episode pre-fight?
+767,Chara episode post-fight?
+777,Story flags
+778,Not Story mode
+790,Opp first active frame < X
+791,Opp first active frame >= X
+792,Opp first active frame == X
+793,Opp last active frame < X
+794,Opp last active frame >= X
+795,Opp last active frame == X
+799,Special-style related?
+800,Special-style related?
+801,(DLC) Playing Story mode
+802,(DLC) Story battle number
+803,(DLC) Story NOT battle number
+806,Heihachi story flags
+1028,Player is in heat
+1032,Parry High
+1033,Parry Mid
+1034,Parry Low
+1035,Parry High and Mid
+1036,Parry Group
+1038,Parry High
+1039,Parry Mid
+1040,Parry Low
+1041,Parry High and Mid
+1042,Parry Group
+1049,Power Crush Attack Absorption
+1061,Parry High
+1062,Parry Mid
+1063,Parry Low
+1064,Parry High and Mid
+1065,Parry Group
+1067,Parry High
+1068,Parry Mid
+1069,Parry Low
+1070,Parry High and Mid
+1071,Parry Group
+1078,Parry High (airborne)
+1079,Parry Mid (airborne)
+1080,Parry Low (airborne)
+1081,Parry High and Mid (airborne)
+1082,Parry High
+1083,Parry Mid
+1084,Parry Low
+1085,Parry High and Mid
+1090,Parry High
+1091,Parry Mid
+1092,Parry Low
+1093,Parry High and Mid
+1100,Requirements end

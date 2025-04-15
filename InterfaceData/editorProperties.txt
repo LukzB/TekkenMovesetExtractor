@@ -1,0 +1,255 @@
+0x0,Properties end
+0x8001,Lightest camera shake
+0x8002,Light camera shake
+0x8003,Moderate camera shake
+0x8004,Heavy camera shake
+0x8005,Custom camera shake
+0x8006,Lightest camera shake
+0x8007,Light camera shake
+0x8008,Moderate camera shake
+0x8009,Heavy camera shake
+0x800a,Custom camera shake
+0x800b,Ground Ripple
+0x800e,Break Tile
+0x800f,Medium Ground Ripple
+0x8010,Heavy Ground Ripple
+0x8011,Fire burn VFX (self)
+0x8012,Fire burn VFX (opponent)
+0x8017,Play VFX (self)
+0x8018,Hit VFX (self)
+0x8019,Electric VFX (self)
+0x801a,Electric VFX (opponent)
+0x801b,Heat Smash VFX (self)
+0x8025,Play VFX (self)
+0x8031,Char Hit Spart VFX (self)
+0x8039,Char trail VFX (self)
+0x8046,Stage VFX
+0x8049,Enable Homing VFX
+0x804b,Tile-break VFX (self)
+0x8079,Throw VFX (self)
+0x807a,Throw VFX (opponent)
+0x807c,Block VFX (self)
+0x807f,Small sparks VFX (self)
+0x8087,Do self (perma) damage
+0x8088,Heal (perma) Health
+0x809b,Store value (req 335)
+0x809c,0x809b += value
+0x809d,0x809b -= value
+0x80c5,Store value (req 358)
+0x80c6,0x80c5 += value
+0x80c7,0x80c5 -= value
+0x80c8,Store value (req 359)
+0x80c9,0x80c8 += value
+0x80ca,0x80c8 -= value
+0x80cb,Store value (req 360)
+0x80cc,0x80cb += value
+0x80cd,0x80cb -= value
+0x80dc,Kazuya Devil
+0x80dd,devil += value
+0x80de,devil -= value
+0x80df,devil |= value
+0x80e0,devil &= value
+0x80e4,Store value (req 352)
+0x80e5,0x80e4 += value
+0x80e6,0x80e4 -= value
+0x80f0,Store value (req 356)
+0x80f1,0x80e4 += value
+0x80f2,0x80e4 -= value
+0x8123,opponent Kazuya Devil
+0x8124,opponent devil += value
+0x8125,opponent devil -= value
+0x8126,opponent devil |= value
+0x8127,opponent devil &= value
+0x8128,short flag
+0x8129,short flag += value
+0x812a,short flag -= value
+0x812b,opponent short flag
+0x812c,opponent short flag += value
+0x812d,opponent short flag -= value
+0x8139,Show/Hide Heat Meter
+0x8146,Inflict Chip dmg (self)
+0x814a,Raven clone horizontal offset
+0x814b,Add recoverable health
+0x814d,Heat-dash related
+0x8151,Activate devil permanently
+0x81ed,Give CH property
+0x81f1,Detach position
+0x81f5,Detach height (smooth)
+0x81f6,Detach height (instant)
+0x81fa,Add tracking (self)
+0x81fb,Add tracking (opponent)
+0x81fc,Change VULN
+0x81fd,Detach characters
+0x81fe,Change collision status
+0x8203,Footstep SFX+VFX
+0x822d,Power Crush
+0x822e,Rage Art activate VFX
+0x82bc,Reset combo meter
+0x82be,Add to combo counter
+0x8238,Skip move frames
+0x8239,Skip move frames (+N)
+0x823a,Skip move frames (-N)
+0x823b,Skip move frames (=N+0x1000)
+0x823c,Skip move frames (=N+0x2000)
+0x823f,Skip move frames (=N+0x4000)
+0x8240,Skip move frames (=N+0x8000)
+0x8244,Force move on opponent
+0x8245,Force move on opponent
+0x8246,Set player speed
+0x8247,Player speed += value
+0x8248,Set opponent speed
+0x8249,Opponent speed += value
+0x824a,Set max player speed
+0x824b,Set min player speed
+0x824c,Change animation
+0x8251,Eased Horizontal Movement
+0x8252,Eased Vertical Movement
+0x8254,Break floor
+0x8258,Inflict pushback (self)
+0x825a,Align with pushback (self)
+0x825b,Align with pushback (self, backwards)
+0x825d,Inflict pushback (opponent)
+0x825f,Align with pushback (opponent)
+0x8260,Align with pushback (opponent, backwards)
+0x826f,Set slide speed
+0x8270,Slide player
+0x8271,Slide player on word axis
+0x8272,Rotate player
+0x8273,Rotate opponent
+0x8275,Push player in Z-axis
+0x8276,Push player in X-axis
+0x8278,Push player in Y-axis (height)
+0x827b,Spawn projectile
+0x827c,Spawn height related?
+0x827d,Projectile horizontal spawn distance
+0x827c,Projectile vertical spawn distance
+0x827d,Projectile lateral spawn distance
+0x828b,Enable scaled dmg
+0x828c,Inflict scaled dmg (opponent)
+0x828d,Inflict scaled dmg (self)
+0x82a5,Inflict Chip dmg (opponent)
+0x82bc,AI Input(?)
+0x82c1,Player visibilty
+0x82c2,Opponent visibilty
+0x82c5,Spend Tornado
+0x82d4,Show Yoshi main sword
+0x82d5,Show Yoshi second sword
+0x82d6,Yoshi main sword VFX
+0x82d7,Yoshi second sword VFX
+0x82f0,Toggle Neck Tracking
+0x82e0,Activate Rage if available
+0x82e2,Spend Rage
+0x830d,Health Bar display/vfx
+0x8338,Use fake frame advantage
+0x835b,Spend Leroy cane install
+0x8383,Refill/drain heat
+0x838e,Trigger cinematic camera
+0x838f,Trigger Rage Art Stage VFX
+0x8394,Activate Heat Aura VFX
+0x83aa,Create Raven clone
+0x83ab,Remove Raven clone
+0x83ad,Play subtitle text
+0x83b1,Set chara installs
+0x83bc,Rotate Player
+0x83bd,Rotate Opponent
+0x83be,Pause/resume Heat Timer
+0x83ce,Add scaling (standing)
+0x83cd,Add scaling (airborne)
+0x83d6,Set game speed
+0x83d7,Slowdown VFX
+0x83e6,Armor break
+0x83ee,Set Multi-level installs
+0x83f9,Set Heihachi Warrior Instinct
+0x848b,Attach item(?)
+0x848c,Detach item(?)
+0x850d,Change default initiator
+0x850e,Change default standing
+0x850f,Change default crouching
+0x8510,Change default death
+0x8511,Change default FUFT
+0x8512,Change alias 0x8005
+0x8513,Change alias 0x8006
+0x8514,Change alias 0x8007
+0x8515,Change alias 0x8008
+0x8516,Change alias 0x8009
+0x8517,Change alias 0x800a
+0x8518,Change alias 0x800b
+0x8519,Change alias 0x800c
+0x851a,Change default SSL
+0x851b,Change default SSR
+0x851c,Change default quickduck neutral
+0x851d,Change default quickduck forward
+0x851e,Change default quickduck backward
+0x851f,Change alias 0x8012
+0x8520,Change default roll forward
+0x8521,Change default forward jump
+0x8522,Change alias 0x8015
+0x8523,Change alias 0x8016
+0x8524,Change alias 0x8017
+0x8525,Change alias 0x8018
+0x8526,Change alias 0x8019
+0x8527,Change alias 0x801a
+0x8528,Change alias 0x801b
+0x8529,Change alias 0x801c
+0x852a,Change alias 0x801d
+0x852b,Change alias 0x801e
+0x852c,Change alias 0x801f
+0x852d,Change alias 0x8020
+0x852e,Restore default alias
+0x852f,Restore standing alias
+0x8530,Restore crouching alias
+0x8531,Restore death alias
+0x8532,Restore FUFT alias
+0x8533,Restore alias 0x8005
+0x8534,Restore alias 0x8006
+0x8535,Restore alias 0x8007
+0x8536,Restore alias 0x8008
+0x8537,Restore alias 0x8009
+0x8538,Restore alias 0x800a
+0x8539,Restore alias 0x800b
+0x853a,Restore alias 0x800c
+0x853b,Restore SSL alias
+0x853c,Restore SSR alias
+0x853d,Restore quickduck neutral alias
+0x853e,Restore quickduck forward alias
+0x853f,Restore quickduck backward alias
+0x8540,Restore alias 0x8012
+0x8541,Restore roll forward alias
+0x8542,Restore forward jump alias
+0x8543,Restore alias 0x8015
+0x8544,Restore alias 0x8016
+0x8545,Restore alias 0x8017
+0x8546,Restore alias 0x8018
+0x8547,Restore alias 0x8019
+0x8548,Restore alias 0x801a
+0x8549,Restore alias 0x801b
+0x854a,Restore alias 0x801c
+0x854b,Restore alias 0x801d
+0x854c,Restore alias 0x801e
+0x854d,Restore alias 0x801f
+0x854e,Restore alias 0x8020
+0x860a,Both hands pose
+0x860b,Left hand pose
+0x860c,Right hand pose
+0x860e,Both hands pose related
+0x860f,Play both hands anim
+0x8610,Play left hand anim
+0x8611,Play right hand anim
+0x8612,Left hand anim related
+0x8613,Right hand anim related
+0x8683,Play wing anim
+0x8684,wing anim related
+0x8685,Play wing anim
+0x8695,Camera zoom focal point
+0x8696,Camera zoom VFX
+0x86b0,Heat activation camera
+0x877b,Play cinematic facial anim
+0x877c,Expand left arm muscles
+0x877d,Expand right arm muscles
+0x87ef,Play sound from player
+0x87f0,Play sound from player
+0x87f1,Play sound from player
+0x87f2,Play sound from opponent
+0x87f3,Play sound from opponent
+0x87f8,Play cinematic voicelcip
+0x87f9,Preset camera zoom

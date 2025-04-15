@@ -1,9 +1,65 @@
 
 from Tag2Aliases import tag2_requirements, tag2_extra_move_properties, tag2_character_fixes, getTag2CharIDAliases, tag2_odd_hitbox_aliases, tag2_even_hitbox_aliases
-from RevAliases import rev_requirements, getRevExtraprop
+from RevAliases import rev_requirements
 from T6Aliases import t6_requirements, t6_extra_move_properties
-from T5Aliases import t5_requirements, getT5Extraprop
-from T4Aliases import t4_requirements, getT4Extraprop
+from T5Aliases import t5_requirements
+from T5DRAliases import t5dr_requirements
+from T4Aliases import t4_requirements
+
+t8_character_name_mappping = {
+    0: '[PAUL]',
+    1: '[LAW]',
+    2: '[KING]',
+    3: '[YOSHIMITSU]',
+    4: '[HWOARANG]',
+    5: '[XIAYOU]',
+    6: '[JIN]',
+    7: '[BRYAN]',
+    8: '[KAZUYA]',
+    9: '[STEVE]',
+    10: '[JACK8]',
+    11: '[ASUKA]',
+    12: '[DEVIL_JIN]',
+    13: '[FENG]',
+    14: '[LILI]',
+    15: '[DRAGUNOV]',
+    16: '[LEO]',
+    17: '[LARS]',
+    18: '[ALISA]',
+    19: '[CLAUDIO]',
+    20: '[SHAHEEN]',
+    21: '[NINA]',
+    22: '[LEE]',
+    23: '[KUMA]',
+    24: '[PANDA]',
+    25: '[ZAFINA]',
+    26: '[LEROY]',
+    27: '[JUN]',
+    28: '[REINA]',
+    29: '[AZUCENA]',
+    30: '[VICTOR]',
+    31: '[RAVEN]',
+    32: '[AZAZEL]',
+    33: '[EDDY]',
+    34: '[LIDIA]',
+    35: '[HEIHACHI]',
+    36: '[CLIVE]',
+    37: '[ANNA]',
+    116: '[DUMMY]',
+    117: '[ANGEL_JIN]',
+    118: '[TRUE_DEVIL_KAZUYA]',
+    119: '[JACK7]',
+    120: '[SOLDIER]',
+    121: '[DEVIL_JIN_2]',
+    122: '[TEKKEN_MONK]',
+    123: '[SEIRYU]',
+}
+
+def getTekken8characterName(charId: int):
+    return t8_character_name_mappping.get(charId, 'UNKNOWN')
+
+def disableProp(type, id, value):
+    return 0, 0, 0
 
 versionAliases = {
     'Tag2': {
@@ -16,11 +72,12 @@ versionAliases = {
     },
     'Revolution': {
         'requirements': rev_requirements,
-        'extraprop_func': getRevExtraprop #todo
+        'extraprop_func': disableProp #todo
     },
     'Tekken6': {
         'requirements': t6_requirements,
-        'extra_move_properties': t6_extra_move_properties
+        #'extra_move_properties': t6_extra_move_properties
+        'extraprop_func': disableProp #todo
     },
     'Tekken3D': {
         'requirements': t6_requirements,
@@ -28,23 +85,21 @@ versionAliases = {
     },
     'Tekken5': {
         'requirements': t5_requirements,
-        'extraprop_func': getT5Extraprop #todo
+        'extraprop_func': disableProp #todo
+    },
+    'Tekken5DR': {
+        'requirements': t5dr_requirements,
+        'extraprop_func': disableProp #todo
     },
     'Tekken4': {
         'requirements': t4_requirements,
-        'extraprop_func': getT4Extraprop #todo
+        'extraprop_func': disableProp #todo
     },
-    'Tekken7': {}
+    'Tekken7': {},
+    'Tekken8': {}
 }
 
 globalRequirementsReplace = {
-    218: 'copy_nearest', #Character ID
-    219: 'copy_nearest', #Character ID
-    220: 'copy_nearest', #Character ID
-    221: 'copy_nearest', #Character ID
-    222: 'copy_nearest', #Character ID
-    223: 'copy_nearest', #Character ID
-    224: 'copy_nearest', #Character ID
     9999: 'copy_nearest', #Used to disable certain requirements reliably
 }
 
@@ -78,7 +133,7 @@ def getRequirementAlias(version, req, param):
                 param = alias['param_alias'].get(param, param)
     return req, param
 
-def getMoveExtrapropAlias(version, type, id, value):
+def getMoveExtrapropAlias(version, type, id, value, _0x4, requirement_idx, value2, value3, value4, value5):
     if 'extraprop_func' in versionAliases[version]:
         return versionAliases[version]['extraprop_func'](type, id, value)
     if 'extra_move_properties' in versionAliases[version]:
@@ -87,7 +142,7 @@ def getMoveExtrapropAlias(version, type, id, value):
             id = alias['t7_id']
             if 'force_value' in alias:
                 value = alias['value']
-    return type, id, value
+    return type, id, value, _0x4, requirement_idx, value2, value3, value4, value5
 
 class ExtraPropertyFix:
     def __init__(self, alias):
@@ -154,7 +209,7 @@ class GlobalRequirementFix:
         self.value = globalRequirementsReplace[req]
     
     def searchReq(self, requirement_list, starting_index):
-        if starting_index > 0 and requirement_list[starting_index - 1]['req'] != 881:
+        if starting_index > 0 and requirement_list[starting_index - 1]['req'] != 1100:
             return requirement_list[starting_index - 1]
                 
         index = starting_index
@@ -163,7 +218,7 @@ class GlobalRequirementFix:
                 return requirement_list[index]
             index += 1
             
-        return { 'req': 881, 'param': 0 }
+        return { 'req': 1100, 'param': 0, 'param2': 0, 'param3': 0, 'param4': 0 }
         
     def applyFix(self, requirement_list, index):
         if requirement_list[index]['req'] != self.req:

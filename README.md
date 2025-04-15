@@ -1,3 +1,17 @@
+# THIS PROJECT IS OBSOLETE #
+
+Moveset extraction, importation and edition should now be done on the new, better project :
+
+https://github.com/Kiloutre/TKMovesets
+
+https://github.com/Kiloutre/TKMovesets
+
+https://github.com/Kiloutre/TKMovesets
+
+# THIS PROJECT IS OBSOLETE #
+
+___
+
 Special thanks to: **Dantarion, Zen, Robi0990 and DennisStanistan**, who heavily helped in the reverse engineering part of this project!
 
 # Download
@@ -38,6 +52,29 @@ R13 in these list is always cemu_base, and cemu_p1_addr will always be the secon
 Once both cemu_base and cemu_p1_addr are at the right value in `game_addresses.txt`, export characters by clicking the Export buttons in the interface.
 cemu_p1_addr only needs to be found once, unless you change the Tag2 version you're using (different region, etc)
 
+# Finding player addresses and structure sizes in Tekken 7
+
+(You might have to enabled MEM_MAPPED in cheat engine's scanning options to successfully work with emulators)
+Each Tekken 7 patch changes the addresses of the game_addresses.txt file. If i don't update the tool myself, you will need correct addresses for the tool to properly function:
+- `t7_p1_addr` and `t7_playerstruct_size` are required for basic import/export. More are needed to get access to the  tool's 'Set Online' functions, but they are hard to get so i will be the one to do it usually. `t7_base` is not needed as far as i know.
+
+Finding the `t7_p1_addr` is similar to Tag2.
+
+First, get your character crouching then pause the game. Using cheat engine, scan for the value `32770` (crouching move id) in the `4 bytes` value type. Make your character stand up, then search for `32769` (standing move id).
+
+Scroll at the bottom of the newfound address list: there should be only one address higher than 140000000, which is the address we're interested in. Right click on it and click "Find out what accesses this address" (make sure your game is unpaused afterward).
+
+![Finding p1_addr](https://i.imgur.com/7jmKv6s.png)
+
+In the new window that opened, you will see a list of instructions that access this address. For example, `cmp [rbx + 0000344]`. `rbx` here is what we're interested in: in order to see its value, you will have to click the corresponding instruction.
+
+The value of `rbx` here is going to be what you must fill in `t7_p1_addr`.
+In order to get `t7_playerstruct_size`: repeat the process for p2, and then substract p1 to p2. For example in my game, p1 is `0x1434E00D0` and p2 is `0x1434E36C0`.
+
+`0x1434E36C0 - 0x1434E00D0 = 0x35F0`
+
+Thus, `t7_playerstruct_size` is `0x3F50`.
+
 # Importing through the GUI
 
 Movesets are imported in memory, so you should have the game running if you want to import a moveset.
@@ -58,7 +95,8 @@ If you wish to play online with a friend, both players should use monitors so th
 
 - Python 3.6.5 specifically, newever version don't work with the current code.
 
-- Pywin32 : `python -m pip install pywin32 --user`
+- Pywin32 (required) : `python -m pip install pywin32 --user`
+- Pyperclip (if you're going to use the animation editor) : `python -m pip install pyperclip --user`
 
 ## Exporting from Tekken 7
 This tool exports movesets from memory, you therefore need the game running with the target moveset loaded up already.
@@ -100,23 +138,18 @@ Administrator rights may be required to import the moveset into memory.
 - Import camera and projectiles for Tekken 7. Lee crashes with Lili or Leo RA.
 - Look into making ttt2 intro and outro end automatically
 - Use opponent for tag2 outros (might not be viable)
-- Delete files before exporting moveset
 - (Jin) Dj tag2 vs DJ tag2, treasure battle, online player buttons, crash on loadscreen
 - Green Ogre 3~4 crash
-- Allow throws using item moves?
 - Rename "group_cancels" to "generic_cancels"
 - Split command in two 4bytes
 - Split attack hitlevel in 2? need to keep the order the same for tag2
 - Check out eliza in tekken revolution for projectile struct
-- Don't force_type the extra move prop that sets opponent move id, look into what the type is used for
-- Look at what function writes MOTA offsets and byteswaps them
 - Dunno if you know already but using Anna's df4 will cause the character's body to spazz out a bit.
 - Build requirements also from group_cancels
 
 - Create tool to view current T7 move data. Cancel list, reactions
 
 Moveset editor:
-- Window to list animations and copy one to another character's folder
 - Fix modifying tag2 movesets, 'if you change the requirement of a move to screw / bound with any tag 2 character, the game insta crashes'
 - MoveId nmes hovers in reaction list?
 - Reload file button
