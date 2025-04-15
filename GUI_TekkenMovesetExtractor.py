@@ -447,13 +447,10 @@ class Monitor:
                     loading = 0
                 time.sleep(monitorVerificationFrequency)
             except Exception as e:
-                print(e, file=sys.stderr)
                 try:
                     # Read on self to see if process still exists
                     self.Importer.readInt(self.moveset.motbin_ptr, 8)
-                    print (self.Importer.readInt(self.moveset.motbin_ptr, 8))
                     time.sleep(monitorVerificationFrequency)
-                    print (e, file=sys.stderr)
                 except Exception as e:
                     print(e, file=sys.stderr)
                     print("Monitor %d closing because process can't be read" %
