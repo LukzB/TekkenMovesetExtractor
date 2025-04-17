@@ -170,7 +170,10 @@ cancelFields = {
 
 requirementFields = {
     'req': 'int',
-    'param': 'int'
+    'param': 'int',
+    # 'param2': 'int',
+    'param3': 'int',
+    # 'param4': 'int'
 }
 
 extrapropFields = {
@@ -938,9 +941,9 @@ class SearchResultWindow:
             result_str += f'{len(found_items)} {base} found with specified {type}:\n'
             result_str += self.stringify_items(found_items)
                     
-            TextArea.insert("end", result_str + "\n\n")
+        TextArea.insert("end", result_str + "\n\n")
 
-            TextArea.insert("end", "--- %d entries containing %s %s ---" %
+        TextArea.insert("end", "--- %d entries containing %s %s ---" %
                             (len(self.found_items) + len(group_found_items), type, value))
         
         TextArea.configure(state="disabled")
