@@ -795,66 +795,26 @@ class SearchDialog(simpledialog.Dialog):
     def __init__(self, app_instance, parent, title, search_base):
         self.search_base = search_base
         self.dropdown_values = {
-            "moves": [
-                "name",
-                "anim_name",
-                "vuln",
-                "hitlevel",
-                "cancel_idx",
-                "transition",
-                "anim_max_len",
-                "hit_condition_idx",
-                "voiceclip_idx",
-                "extra_properties_idx",
-                "move_start_properties_idx",
-                "move_end_properties_idx",
-                "hitbox_location",
-                "first_active_frame",
-                "last_active_frame",
-
-                "hitbox1_first_active_frame",
-                "hitbox1_last_active_frame",
-                "hitbox1_location",
-
-                "hitbox2_first_active_frame",
-                "hitbox2_last_active_frame",
-                "hitbox2_location",
-
-                "first_active_frame3",
-                "last_active_frame3",
-                "hitbox_location3"
-                ],
-            "cancels": [
-                "command",
-                "extradata_idx",
-                "requirement_idx",
-                "frame_window_start",
-                "frame_window_end",
-                "starting_frame",
-                "move_id"
-                ],
+            "moves": list(moveFields.keys()),
+            "cancels": list(cancelFields.keys()),
             "extra_move_properties": [
                 "id",
                 "requirement_idx",
                 "value",
                 "value2",
-                "value3"
+                "value3",
+                "value4",
+                "value5",
                 ],
             "requirements": [
                 "req", 
-                "param"
+                "param",
+                "param2",
+                "param3",
+                "param4",
                 ],
-            "pushbacks": [
-                "val1",
-                "val2",
-                "val3",
-                "pushbackextra_idx"
-                ],
-            "hit_conditions": [
-                "requirement_idx",
-                "damage",
-                "reaction_list_idx"
-            ],
+            "pushbacks": list(pushbackFields.keys()),
+            "hit_conditions": list(hitConditionFields.keys()),
 
         }
         self.app_instance = app_instance
@@ -916,6 +876,8 @@ class SearchResultWindow:
 
         TextArea.config(yscrollcommand=scrollbar.set)
 
+        result_str = ''
+        group_found_items = []
         if len(found_items) == 0:
             TextArea.insert(
                 "end", "No %s containing %s %s found" % 
