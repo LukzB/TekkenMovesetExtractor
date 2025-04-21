@@ -243,6 +243,7 @@
 0x8695,Camera zoom focal point
 0x8696,Camera zoom VFX
 0x86b0,Heat activation camera
+0x877a,Play facial anim
 0x877b,Play cinematic facial anim
 0x877c,Expand left arm muscles
 0x877d,Expand right arm muscles

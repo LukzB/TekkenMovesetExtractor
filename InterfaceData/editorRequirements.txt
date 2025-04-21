@@ -170,6 +170,7 @@
 659,RNG (9-way)
 660,RNG (10-way)
 661,RNG (weighted)
+664,Playing Arcade mode(?)
 666,Playing Ball mode
 667,Playing Story mode
 668,Story battle number
