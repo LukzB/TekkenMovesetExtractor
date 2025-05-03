@@ -1578,6 +1578,68 @@ def setStructureSizes(self):
         setattr(self, key, structSizes[self.TekkenVersion][key])
 
 
+def expand32To64WithChecksum(input_value: int, key: int) -> int:
+    """
+    Expands a 32-bit integer to 64-bit with a checksum using a 64-bit key.
+    """
+    checksum = 0
+    byte_shift = 0
+    shifted_input = input_value & 0xFFFFFFFF  # Ensure 32-bit
+
+    while byte_shift < 32:
+        temp_key = key & 0xFFFFFFFFFFFFFFFF  # Ensure 64-bit
+        shift_count = (byte_shift + 8) & 0xFF  # uint8_t cast
+
+        for _ in range(shift_count):
+            temp_key = ((temp_key >> 63) + (2 * temp_key)) & 0xFFFFFFFFFFFFFFFF  # Left shift with carry, 64-bit wrap
+
+        checksum ^= (shifted_input & 0xFFFFFFFF) ^ (temp_key & 0xFFFFFFFF)
+        shifted_input >>= 8
+        byte_shift += 8
+
+    # If checksum is 0, make it 1 (to prevent null-checksum)
+    checksum = checksum if checksum != 0 else 1
+    result = (input_value & 0xFFFFFFFF) + ((checksum & 0xFFFFFFFF) << 32)
+    return result & 0xFFFFFFFFFFFFFFFF  # Return as 64-bit
+
+
+def validateAndTransform64BitValue(encrypted_value: int, key: int) -> int:
+    """
+    Validates a 64-bit encrypted value and transforms it using a key-based algorithm.
+    """
+    key = key & 0xFFFFFFFFFFFFFFFF
+    encrypted_value = encrypted_value & 0xFFFFFFFFFFFFFFFF
+
+    # Validate using checksum
+    if expand32To64WithChecksum(encrypted_value & 0xFFFFFFFF, key) != encrypted_value:
+        return 0
+
+    # Scramble with XOR
+    scrambled_value = encrypted_value ^ 0x1D
+    bit_offset = scrambled_value & 0x1F  # lower 5 bits
+
+    # Rotate key left by bitOffset (circular shift with carry)
+    for _ in range(bit_offset):
+        key = ((key >> 63) + (2 * key)) & 0xFFFFFFFFFFFFFFFF
+
+    # Normalize using float logic
+    normalizer = 4294967296.0  # 2^32
+    scale_offset = 0
+
+    if normalizer >= 9223372036854775800.0:
+        normalizer -= 9223372036854775800.0
+        if normalizer < 9223372036854775800.0:
+            scale_offset = 0x8000000000000000
+
+    key = key & 0xFFFFFFFFFFFFFFE0  # Clear lower 5 bits
+    key ^= scrambled_value
+    key = (key << 32) & 0xFFFFFFFFFFFFFFFFFFFFFFFF  # May exceed 64 bits
+
+    divisor = scale_offset + int(normalizer)
+    result = key // divisor
+    return result & 0xFFFFFFFF  # Return as 32-bit unsigned
+
+
 class Exporter:
     def __init__(self, TekkenVersion, folder_destination='./extracted_chars/'):
         game_addresses.reloadValues()
@@ -2395,9 +2457,6 @@ class Motbin:
         self.extraction_date = datetime.now(timezone.utc).__str__()
         self.extraction_path = ''
 
-        if self.TekkenVersion == 't8':
-            self.decrypt_func_addr = game_addresses[self.TekkenVersion + '_decryp_func_offset'] + self.T.moduleAddr
-
         try:
             readOffsetTable(self, '')
 
@@ -2455,7 +2514,9 @@ class Motbin:
         self.dialogue_managers = []
 
     def decryptValue(self, addr):
-        return self.T.call_game_func(self.decrypt_func_addr, addr, 8)
+        enc_value = self.readInt(addr, 8)
+        enc_key = self.readInt(addr + 8, 8)
+        return validateAndTransform64BitValue(enc_value, enc_key) # decryption
     
     def getCharacterNameFromBytes(self):
         oldCharName = self.character_name
@@ -2783,29 +2844,24 @@ class Motbin:
                 self.dialogue_managers.append(dlgMngr.dict())
         
         print("Reading movelist...")
-        self.moves = [None] * self.movelist_size
-        with ThreadPoolExecutor(5) as executor:
-            executor.map(self.process_move, range(self.movelist_size))
-        self.save()
-
-    def process_move(self, i):
-        move = Move(self.movelist_head_ptr + (i * self.Move_size), self, i)
-        move.setCancelIdx((move.cancel_addr - self.cancel_head_ptr) // self.Cancel_size)
-        move.setHitConditionIdx((move.hit_condition_addr - self.hit_conditions_ptr) // self.HitCondition_size)
-        if move.extra_properties_ptr != 0:
-            move.setExtraPropertiesIdx((move.extra_properties_ptr - self.extra_move_properties_ptr) // self.ExtraMoveProperty_size)
-        if self.TekkenVersion == 't8':
-            if move.move_start_properties_ptr != 0:
+        for i in range(self.movelist_size):
+            move = Move(self.movelist_head_ptr + (i * self.Move_size), self, i)
+            move.setCancelIdx((move.cancel_addr - self.cancel_head_ptr) // self.Cancel_size)
+            move.setHitConditionIdx((move.hit_condition_addr - self.hit_conditions_ptr) // self.HitCondition_size)
+            if move.extra_properties_ptr != 0:
+                move.setExtraPropertiesIdx((move.extra_properties_ptr - self.extra_move_properties_ptr) // self.ExtraMoveProperty_size)
+            if self.TekkenVersion == 't8' and move.move_start_properties_ptr != 0:
                 move.setMoveStartPropertiesIdx((move.move_start_properties_ptr - self.move_start_props_ptr) // self.OtherMoveProperty_size)
-            if move.move_end_properties_ptr != 0:
+            if self.TekkenVersion == 't8' and move.move_end_properties_ptr != 0:
                 move.setMoveEndPropertiesIdx((move.move_end_properties_ptr - self.move_end_props_ptr) // self.OtherMoveProperty_size)
-        if move.voiceclip_ptr != 0:
-            move.setVoiceclipId((move.voiceclip_ptr - self.voiceclip_list_ptr) // self.Voiceclip_size)
-        self.moves[i] = move.dict()
+            if move.voiceclip_ptr != 0:
+                move.setVoiceclipId((move.voiceclip_ptr - self.voiceclip_list_ptr) // self.Voiceclip_size)
+            self.moves.append(move.dict())
 
-        if move.anim not in self.anims and self.TekkenVersion != 't8':
-            self.anims.append(move.anim)
+            if move.anim not in self.anims and self.TekkenVersion != 't8':
+                self.anims.append(move.anim)
 
+        self.save()
 
 
 if __name__ == "__main__":
