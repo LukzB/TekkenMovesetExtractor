@@ -1,6 +1,6 @@
 # Python 3.6.5
 
-from tkinter import Tk, Frame, Listbox, Label, Scrollbar, StringVar, Toplevel, Menu, messagebox, Text, simpledialog, filedialog
+from tkinter import Canvas, Tk, Frame, Listbox, Label, Scrollbar, StringVar, Toplevel, Menu, messagebox, Text, simpledialog, filedialog
 from tkinter.ttk import Button, Entry, Style, Combobox
 from Addresses import game_addresses, GameClass
 from additionalReqDetails import reqDetailsList # additional req details
@@ -84,6 +84,12 @@ fieldLabels = {
         'hitbox3_location': 'hitbox3',
         'hitbox3_first_active_frame': 'hitbox3 first',
         'hitbox3_last_active_frame': 'hitbox3 last',
+        'hitbox4_location': 'hitbox4',
+        'hitbox4_first_active_frame': 'hitbox4 first',
+        'hitbox4_last_active_frame': 'hitbox4 last',
+        'hitbox5_location': 'hitbox5',
+        'hitbox5_first_active_frame': 'hitbox5 first',
+        'hitbox5_last_active_frame': 'hitbox5 last',
         '_0xD0': 'moveID_val1',
         'ordinal_id': 'moveID_val2',
         'u15': 'facing/extras?',
@@ -133,9 +139,12 @@ moveFields = {
     'hitbox3_location': 'hex',
     'hitbox3_first_active_frame': 'int',
     'hitbox3_last_active_frame': 'int',
-    # 'hitbox4_location': 'hex',
-    # 'hitbox4_first_active_frame': 'int',
-    # 'hitbox4_last_active_frame': 'int',
+    'hitbox4_location': 'hex',
+    'hitbox4_first_active_frame': 'int',
+    'hitbox4_last_active_frame': 'int',
+    # 'hitbox5_location': 'hex',
+    # 'hitbox5_first_active_frame': 'int',
+    # 'hitbox5_last_active_frame': 'int',
     # 'u2': 'long',
     # 'u3': 'long',
     # 'u4': 'long',
@@ -171,9 +180,9 @@ cancelFields = {
 requirementFields = {
     'req': 'int',
     'param': 'int',
-    # 'param2': 'int',
+    'param2': 'int',
     'param3': 'int',
-    # 'param4': 'int'
+    'param4': 'int'
 }
 
 extrapropFields = {
@@ -181,7 +190,10 @@ extrapropFields = {
     'id': 'hex',
     'requirement_idx': 'positive_index',
     'value': 'int',
-    'value3': 'int'
+    'value2': 'int',
+    'value3': 'int',
+    'value4': 'int',
+    # 'value5': 'int',
 }
 
 hitConditionFields = {
@@ -1315,15 +1327,57 @@ class FormEditor:
         label = Label(container, bg='#ddd')
         label.pack(side='top', fill='x')
 
-        content = Frame(container)
-        content.pack(side='top', fill='both', expand=True)
-
+        # Button at bottom - pack it FIRST so it's always at the bottom
         saveButton = Button(container, text="Apply", command=self.saveFunction)
         saveButton.pack(side='bottom', fill='x')
 
-        self.container = content
+        # Create a separate frame for the scrollable area that will go between label and button
+        # This is the key difference - we explicitly define its heightt
+        scroll_frame = Frame(container)
+        scroll_frame.pack(side='top', fill='both', expand=True)
+
+        # Add canvas and scrollbar
+        canvas = Canvas(scroll_frame)
+        scrollbar = Scrollbar(scroll_frame, orient="vertical", command=canvas.yview)
+        scrollable_frame = Frame(canvas)
+
+        # This is very important - it updates the scroll region when the content size changes
+        def configure_scroll_region(event):
+            canvas.configure(scrollregion=canvas.bbox("all"))
+
+            # Force the scrollbar to be visible when content exceeds visible area
+            # This helps make it more visible with a lower threshold
+            content_height = scrollable_frame.winfo_reqheight()
+            canvas_height = canvas.winfo_height()
+            if content_height > canvas_height:
+                scrollbar.pack(side="right", fill="y")
+            else:
+                scrollbar.pack_forget()
+
+        # Configure scrolling
+        scrollable_frame.bind("<Configure>", configure_scroll_region)
+
+        canvas_window  = canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+
+        # Make the canvas expand with the frame width
+        def configure_canvas_window(event):
+            canvas.itemconfig(canvas_window, width=event.width)
+    
+        canvas.bind("<Configure>", configure_canvas_window)
+
+        # Pack the scrollbar and canvas
+        scrollbar.pack(side="right", fill="y")
+        canvas.pack(side="left", fill="both", expand=True)
+
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        # Set a smaller minimum height for the canvas to make scrolling more likely
+        canvas.config(height=200)  # Adjust this value as needed
+
+        self.container = scrollable_frame  # Change this from content to scrollable_frame
         self.label = label
         self.saveButton = saveButton
+        self.canvas = canvas  # Save reference to canvas
 
     def setLabel(self, text, saveLabel=True):
         self.label['text'] = text
