@@ -536,6 +536,7 @@ def exportAll(parent, TekkenVersion):
         playerCount = game_addresses[TekkenVersion + '_player_count']
 
     for i in range(playerCount):
+        playerAddr = TekkenExporter.getPlayerAddr(i) if TekkenVersion == "t8" else playerAddr
         moveset_name = TekkenExporter.getPlayerMovesetName(playerAddr)
         if moveset_name not in exportedMovesets:
             print("Requesting export for %s..." % (moveset_name))

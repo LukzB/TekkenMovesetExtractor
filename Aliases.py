@@ -45,6 +45,7 @@ t8_character_name_mappping = {
     35: '[HEIHACHI]',
     36: '[CLIVE]',
     37: '[ANNA]',
+    38: '[FAHKUMRAM]',
     116: '[DUMMY]',
     117: '[ANGEL_JIN]',
     118: '[TRUE_DEVIL_KAZUYA]',
