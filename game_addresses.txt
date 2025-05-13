@@ -1,5 +1,5 @@
 # For updating purposes
-version     = 21 # Must be different for it to register it as an update
+version     = 22 # Must be different for it to register it as an update
 repo_link   = https://raw.githubusercontent.com/LukzB/TekkenMovesetExtractor/tekken-8-import/
 
 # Tekken 8 addresses and offsets. Changes with updates
@@ -92,7 +92,7 @@ movelist_offset              = 0x230                          # Used by editor t
 move_size                    = 0x448
 player_curr_move_addr_offset = 0x3D8                          # Used by Animator to overwrite current address
 player_curr_move_offset      = 0x548                          # Used by editor to force a move to play
-next_move_offset             = 0x2410                         # Used by editor to force sa move to play
+next_move_offset             = 0x2420                         # Used by editor to force sa move to play
 curr_frame_timer_offset      = 0x390                          # Used by editor to force a move to play
 code_injection_addr          = +0x74ABFF                      # Address that writes on player+motbin_offset; used for online play. 
 playerid_ptr                 = +0x34CE508, 0x0                # Used to find whether local player is 1P or 2P; used for online play
