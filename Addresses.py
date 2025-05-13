@@ -107,6 +107,38 @@ class AddressFile:
             print(e)
             print("Could not load game_addresses.txt properly")
 
+    def setAddress(self, key, value, applyModule=False):
+        """
+        Quietly sets the resolved address for a key without modifying the original data or pointer paths.
+        Useful for injecting AOB scan results or runtime updates.
+        
+        :param key: The key in the address dictionary (e.g., "MoveData")
+        :param value: The new resolved address (int)
+        """
+        self.addr[key] = value + self.moduleAddr if applyModule else value
+
+    def updateAddress(self, key, value, keep_original=False):
+        """
+        Update a specific key's address value without modifying original data
+        
+        Args:
+            key (str): The address key to update
+            value (int): The new address value
+            keep_original (bool): If True, keeps the original value structure (for pointers)
+        """
+        if key not in self.addr:
+            raise KeyError(f"Address key '{key}' not found")
+            
+        if keep_original and isinstance(self.orig_addr[key], tuple):
+            # For pointer paths, we want to maintain the tuple structure
+            value_type, orig_value, ptr_path = self.orig_addr[key]
+            self.addr[key] = (value_type, value, ptr_path)
+        else:
+            # For regular values, just update directly
+            self.addr[key] = value
+    
+    #end of class
+
 game_addresses = AddressFile("game_addresses.txt")
 
     
@@ -190,80 +222,86 @@ class GameClass:
             currAddr = self.readInt(currAddr, 8) + ptr
         return currAddr
         
-    def aobScan(self, toSearch, aligned=True): #This is terribly slow and should not be used until improvements to speed.
-        #aobScan("48 89 91 ?? ?? 00 00")
-        currAddr = self.moduleAddr
-        moduleEnd = self.moduleAddr + self.moduleSize
+    def aobScan(self, pattern, start_addr=None, end_addr=None, aligned=True):
+        """
+        Scan for a byte pattern in the process memory with optional boundaries.
         
-        toSearch = ''.join(t.upper() for t in toSearch if t.isalnum() and ord(t.upper()) <= 70)
-        hexNumbers = []
-        for i in range(0, len(toSearch), 2):
-            try:
-                hexNumbers.append(int(toSearch[i:i+2], 16))
-            except:
-                hexNumbers.append(None)
+        Args:
+            pattern (str): Byte pattern to search for (e.g., "48 89 91 ?? ?? 00 00")
+            start_addr (int, optional): Starting address for the scan. Defaults to module base.
+            end_addr (int, optional): Ending address for the scan. Defaults to module end.
+            aligned (bool): Whether to scan only at aligned addresses (4-byte)
         
-        if aligned and currAddr % 4 != 0: currAddr += (4 - currAddr % 4) #4 bytes alignment
+        Returns:
+            int: Address where pattern was found, or None if not found
+        """
+        if self.moduleAddr is None or self.moduleSize is None:
+            raise Exception("Module address or size not initialized.")
+
+        # Set default boundaries if not provided
+        if start_addr is None:
+            start_addr = self.moduleAddr
+        if end_addr is None:
+            end_addr = self.moduleAddr + self.moduleSize
+        
+        # Validate boundaries
+        if start_addr < self.moduleAddr:
+            start_addr = self.moduleAddr
+        if end_addr > self.moduleAddr + self.moduleSize:
+            end_addr = self.moduleAddr + self.moduleSize
+        if start_addr >= end_addr:
+            return None
+        
+        # Parse pattern into a list of (byte or None) for wildcards
+        hex_bytes = []
+        for part in pattern.split():
+            if part == '??':
+                hex_bytes.append(None)
+            else:
+                try:
+                    hex_bytes.append(int(part, 16))
+                except ValueError:
+                    raise ValueError(f"Invalid pattern part: {part}")
+        
+        pattern_len = len(hex_bytes)
+        if pattern_len == 0:
+            return None
+        
+        # Alignment handling
+        if aligned and start_addr % 4 != 0:
+            start_addr += (4 - start_addr % 4)
         step = 1 if not aligned else 4
         
-        while currAddr < moduleEnd:
-            b = self.readBytes(currAddr, 4)
+        # Read memory in chunks for better performance
+        chunk_size = max(4096, pattern_len * 2)  # Read in 4KB chunks or 2x pattern length
+        current_addr = start_addr
+        
+        while current_addr < end_addr:
+            # Calculate how much we can read in this chunk
+            read_size = min(chunk_size, end_addr - current_addr)
             
-            if b[0] == hexNumbers[0]:
-                found = True
-                for orig, comp in zip(hexNumbers, b):
-                    if orig != comp and orig != None:
-                        found = False
+            try:
+                chunk = self.readBytes(current_addr, read_size)
+            except:
+                # Skip inaccessible memory regions
+                current_addr += read_size
+                continue
+            
+            # Search within the chunk
+            for offset in range(0, len(chunk) - pattern_len + 1, step):
+                match = True
+                for i, byte in enumerate(hex_bytes):
+                    if byte is not None and chunk[offset + i] != byte:
+                        match = False
                         break
-                if found:
-                    return currAddr
-            currAddr += step
+                
+                if match:
+                    return current_addr + offset
+            
+            current_addr += read_size
         
         return None
 
-    def call_game_func(self, func_addr, param_addr, param_size, allocate_memory=False):
-        remote_param_addr = param_addr  # Default to using the given address
-
-        if allocate_memory:
-            # Allocate memory in the target process for `param_size`
-            remote_param_addr = VirtualAllocEx(self.handle, 0, param_size, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE)
-            if not remote_param_addr:
-                print("Error: Failed to allocate memory in target process.")
-                return None
-
-            # Write the parameter to the allocated memory
-            bytes_written = ctypes.c_size_t(0)
-            if not WriteProcessMemory(self.handle, remote_param_addr, param_addr, param_size, ctypes.byref(bytes_written)) or bytes_written.value != param_size:
-                print("Error: Failed to write parameter to target process memory.")
-                VirtualFreeEx(self.handle, remote_param_addr, 0, MEM_DECOMMIT)
-                return None
-
-        # Create the remote thread to execute the function
-        thread_id = ctypes.c_ulong()
-        thread_handle = kernel32.CreateRemoteThread(self.handle, None, 0, ctypes.c_void_p(func_addr), ctypes.c_void_p(remote_param_addr), 0, ctypes.byref(thread_id))
-        if not thread_handle:
-            print("Error: Failed to create remote thread.")
-            if allocate_memory:
-                VirtualFreeEx(self.handle, remote_param_addr, 0, MEM_DECOMMIT)
-            return None
-
-        # Wait for the function to complete
-        kernel32.WaitForSingleObject(thread_handle, 0xFFFFFFFF)  # INFINITE
-        # Retrieve the return value from the thread
-        exit_code = ctypes.c_ulong(0)
-        if kernel32.GetExitCodeThread(thread_handle, ctypes.byref(exit_code)):
-            result = exit_code.value
-        else:
-            print("Error: Failed to get the return value from the thread.")
-            result = None
-
-        # Free the allocated memory if necessary
-        if allocate_memory:
-            VirtualFreeEx(self.handle, remote_param_addr, 0, MEM_DECOMMIT)
-
-        kernel32.CloseHandle(thread_handle)
-
-        return result
     # End of class
         
 def bToInt(data, offset, length, endian='little'):

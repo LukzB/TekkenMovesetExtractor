@@ -7,6 +7,7 @@ import json
 import os
 import sys
 from copy import deepcopy
+from Utils import scanGameAddresses
 
 importVersion = "1.0.1"
 
@@ -105,6 +106,7 @@ class Importer:
     def __init__(self, gameName="Polaris-Win64-Shipping.exe"):
         self.T = GameClass(gameName)
         self.T.applyModuleAddress(game_addresses)
+        # scanGameAddresses(self.T, game_addresses)
 
     def readInt(self, addr, bytes_length=4):
         return self.T.readInt(addr, bytes_length)

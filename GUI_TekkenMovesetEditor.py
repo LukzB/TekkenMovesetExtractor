@@ -3,6 +3,7 @@
 from tkinter import Canvas, Tk, Frame, Listbox, Label, Scrollbar, StringVar, Toplevel, Menu, messagebox, Text, simpledialog, filedialog
 from tkinter.ttk import Button, Entry, Style, Combobox
 from Addresses import game_addresses, GameClass
+from Utils import scanGameAddresses
 from additionalReqDetails import reqDetailsList # additional req details
 import webbrowser
 import shutil
@@ -1258,6 +1259,7 @@ class MoveSelector:
         gameKey = "TekkenGame-Win64-Shipping.exe" if self.root.isNotT8 else "Polaris-Win64-Shipping.exe"
         TekkenGame = GameClass(gameKey)
         TekkenGame.applyModuleAddress(game_addresses)
+        # scanGameAddresses(TekkenGame, game_addresses)
 
         addrKey = 't7' if self.root.isNotT8 else 't8'
         playerAddress = game_addresses['%s_p1_addr' % addrKey]

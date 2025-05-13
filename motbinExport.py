@@ -12,6 +12,7 @@ import re
 import string
 from zlib import crc32
 from concurrent.futures import ThreadPoolExecutor
+from Utils import scanGameAddresses
 
 exportVersion = "1.0.1"
 
@@ -1654,6 +1655,9 @@ class Exporter:
         self.folder_destination = folder_destination
         self.offsetTable = offsetTables[TekkenVersion]
 
+        # if (TekkenVersion == "t8"):
+        #     scanGameAddresses(self.T, game_addresses)
+
         if not os.path.isdir(folder_destination):
             os.mkdir(folder_destination)
 
@@ -1706,9 +1710,6 @@ class Exporter:
 
     def bToInt(self, data, offset, length, ed=None):
         return int.from_bytes(data[offset:offset + length], ed if ed != None else self.endian)
-    
-    def call_game_func(self, func_addr, param_addr, return_addr=None):
-        return self.T.call_game_func(func_addr, param_addr, return_addr, 8)
 
     def getMotbinPtr(self, playerAddress):
         key = self.TekkenVersion + '_motbin_offset'
@@ -2884,8 +2885,7 @@ if __name__ == "__main__":
     extractedMovesetNames = []
     extractedMovesets = []
 
-    playerAddr = TekkenExporter.getP1Addr()
-    playerOffset = game_addresses[TekkenVersion + "_playerstruct_size"]
+    playerAddr = TekkenExporter.getPlayerAddr(0)
 
     playerCount = 4 if TekkenVersion == 'tag2' else 2
     if len(sys.argv) > 2:
@@ -2893,6 +2893,7 @@ if __name__ == "__main__":
 
     for i in range(playerCount):
         try:
+            playerAddr = TekkenExporter.getPlayerAddr(i)
             player_name = TekkenExporter.getPlayerMovesetName(playerAddr)
         except Exception as e:
             print(e)
@@ -2901,13 +2902,11 @@ if __name__ == "__main__":
 
         if player_name in extractedMovesetNames:
             print("%x: Character %s already just extracted, not extracting twice." % (playerAddr, player_name))
-            playerAddr += playerOffset
             continue
 
         moveset = TekkenExporter.exportMoveset(playerAddr, player_name if TekkenVersion == 't8' else '')
         extractedMovesetNames.append(player_name)
         extractedMovesets.append(moveset)
-        playerAddr += playerOffset
 
     if len(extractedMovesets) > 0:
         print("\nSuccessfully extracted:")
