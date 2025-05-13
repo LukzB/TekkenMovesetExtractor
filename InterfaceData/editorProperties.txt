@@ -84,8 +84,6 @@
 0x8203,Footstep SFX+VFX
 0x822d,Power Crush
 0x822e,Rage Art activate VFX
-0x82bc,Reset combo meter
-0x82be,Add to combo counter
 0x8238,Skip move frames
 0x8239,Skip move frames (+N)
 0x823a,Skip move frames (-N)
@@ -128,7 +126,8 @@
 0x828c,Inflict scaled dmg (opponent)
 0x828d,Inflict scaled dmg (self)
 0x82a5,Inflict Chip dmg (opponent)
-0x82bc,AI Input(?)
+0x82bc,Reset combo meter
+0x82be,Add to combo counter
 0x82c1,Player visibilty
 0x82c2,Opponent visibilty
 0x82c5,Spend Tornado

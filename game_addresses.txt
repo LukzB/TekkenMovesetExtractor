@@ -1,15 +1,13 @@
 # For updating purposes
-version     = 20 # Must be different for it to register it as an update
+version     = 21 # Must be different for it to register it as an update
 repo_link   = https://raw.githubusercontent.com/LukzB/TekkenMovesetExtractor/tekken-8-import/
 
 # Tekken 8 addresses and offsets. Changes with updates
 t8_process_name       = Polaris-Win64-Shipping.exe
 t8_base               = 0x0                # base is useless here
-t8_p1_addr            = +0x9AB9928
-t8_playerstruct_size  = 0x1DAE0            # Distance between 2 players addresses
-t8_motbin_offset      = 0x3538
+t8_p1_addr            = +0x09AE92F8
+t8_motbin_offset      = 0x3548
 t8_chara_id_offset    = 0x168
-t8_decryp_func_offset = 0x1800280
 
 # Tekken 7 addresses and offsets. Changes with updates
 t7_process_name       = TekkenGame-Win64-Shipping.exe
