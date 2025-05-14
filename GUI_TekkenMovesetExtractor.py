@@ -512,7 +512,10 @@ def exportCharacter(parent, tekkenVersion, playerid, name=''):
     game_addresses.reloadValues()
     TekkenExporter = exportLib.Exporter(tekkenVersion, folder_destination=charactersPath)
     if tekkenVersion == "t8":
-        playerAddr = TekkenExporter.getPlayerAddr(playerid)
+        try:
+            playerAddr = TekkenExporter.getPlayerAddr(playerid)
+        except:
+            raise Exception("Either invalid addresses or you are not loaded into a match")
     else:
         playerAddr = TekkenExporter.getP1Addr() + (playerid * game_addresses[tekkenVersion + '_playerstruct_size'])
     player_name = TekkenExporter.getPlayerMovesetName(playerAddr)

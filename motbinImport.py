@@ -1144,7 +1144,11 @@ class MotbinStruct:
             self.allocateHitBoxes(move, 6) # 0x250 - 0x280
             self.allocateHitBoxes(move, 7) # 0x280 - 0x2B0
             self.allocateHitBoxes(move, 8) # 0x2B0 - 0x2E0
-            self.writeInt(move['u17'], 4) # 0x2E0
+            if 'u16' in move:
+                self.writeInt(move['u16'], 2) # 0x2E0
+                self.writeInt(move['u17'], 2) # 0x2E2
+            else: # supporting older movesets
+                self.writeInt(move['u17'], 4) # 0x2E0
             for val in move['unk5']:
                 self.writeInt(val, 4)  # 0x2E4 - 0x444
             self.writeInt(move['u18'], 4)  # 0x444

@@ -438,7 +438,8 @@ t8_offsetTable = {
     'move:hitbox8_recovery': {'offset': 0x2B4, 'size': 4},
     'move:hitbox8': {'offset': 0x2B8, 'size': 4},
     'move:hitbox8_related_floats': {'offset': 0x2BC, 'size': (9, 4)},
-    'move:u17': {'offset': 0x2E0, 'size': 4},
+    'move:u16': {'offset': 0x2E0, 'size': 2},
+    'move:u17': {'offset': 0x2E2, 'size': 2},
     'move:unk5': {'offset': 0x2E4, 'size': (88, 4)},
     'move:u18': {'offset': 0x444, 'size': 4},
 
@@ -2267,6 +2268,7 @@ class Move:
             'hitbox8_last_active_frame': self.hitbox8_recovery,
             'hitbox8_location': self.hitbox8,
             'hitbox8_related_floats': self.hitbox8_related_floats,
+            'u16': self.u16,
             'u17': self.u17,
             'unk5': self.unk5,
             'u18': self.u18

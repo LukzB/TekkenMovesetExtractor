@@ -94,8 +94,8 @@ fieldLabels = {
         '_0xD0': 'moveID_val1',
         'ordinal_id': 'moveID_val2',
         'u15': 'facing/extras?',
-        # 'u16': 'collision?',
-        # 'u17': 'distance',
+        'u16': 'collision?',
+        'u17': 'distance',
         'anim_max_len': 'anim_len',
     },
     'pushbacks': {
@@ -162,8 +162,8 @@ moveFields = {
     'ground_fall': 'int',
     'u15': 'int',
     '_0x154': 'int',
-    # 'u16': 'short',
-    'u17': 'int',
+    'u16': 'short',
+    'u17': 'short',
     'u18': 'int',
 }
 
