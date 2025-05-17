@@ -1,1 +1,1 @@
-pyinstaller --windowed --noconsole --clean --icon=InterfaceData/natsumi.ico --add-data InterfaceData;InterfaceData --add-data CameraAnimations;CameraAnimations --add-data game_addresses.txt;. --name TekkenMovesetExtractor GUI_TekkenMovesetExtractor.py  --contents-directory "."
+pyinstaller --windowed --noconsole --clean --icon=InterfaceData/natsumi.ico --add-data InterfaceData;InterfaceData --add-data CameraAnimations;CameraAnimations --add-data game_addresses.txt;. --add-data name_keys.json;. --name TekkenMovesetExtractor GUI_TekkenMovesetExtractor.py
