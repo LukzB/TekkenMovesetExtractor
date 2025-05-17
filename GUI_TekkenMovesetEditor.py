@@ -3569,7 +3569,11 @@ Hand animations can be created in blender, using the following plugins:\ngithub.
         if not copyCurrent:
             newCancel = {f: 0 for f in cancelFields}
         else:
+            # if the cancel we're copying has the "End-of-list" value then we
+            # set said value to 0
             newCancel = self.movelist['cancels'][insertPoint].copy()
+            if newCancel['command'] == 0x8000:
+                newCancel['command'] = 0
 
         self.movelist['cancels'].insert(insertPoint, newCancel)
 
@@ -3884,8 +3888,13 @@ Hand animations can be created in blender, using the following plugins:\ngithub.
         if not copyCurrent:
             newHitCondition = {f: 0 for f in hitConditionFields}
         else:
-            newHitCondition = self.movelist['hit_conditions'][insertPoint].copy(
-            )
+            # if the hit-condition that we're duplicating is the "end of list" one
+            # then we need to set it's `requirement_idx` to 0
+            newHitCondition = self.movelist['hit_conditions'][insertPoint].copy()
+            req_idx = newHitCondition['requirement_idx']
+            requirements = self.movelist['requirements']
+            if requirements[req_idx]['req'] == reqListEndval[self.movelist['version']]:
+                newHitCondition['requirement_idx'] = 0
 
         self.movelist['hit_conditions'].insert(insertPoint, newHitCondition)
 
