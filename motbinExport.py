@@ -4,7 +4,7 @@
 from Addresses import game_addresses, GameClass
 from ByteSwap import SwapAnimBytes, SwapMotaBytes
 from datetime import datetime, timezone
-from Aliases import getTekken8characterName
+from Aliases import fillMoveNameKeysDict, getTekken8characterName
 import json
 import os
 import sys
@@ -1656,8 +1656,10 @@ class Exporter:
         self.folder_destination = folder_destination
         self.offsetTable = offsetTables[TekkenVersion]
 
-        # if (TekkenVersion == "t8"):
-        #     scanGameAddresses(self.T, game_addresses)
+        if (TekkenVersion == "t8"):
+            global move_name_keys_mapping
+            move_name_keys_mapping = fillMoveNameKeysDict(TekkenVersion)
+            # scanGameAddresses(self.T, game_addresses)
 
         if not os.path.isdir(folder_destination):
             os.mkdir(folder_destination)
@@ -2168,14 +2170,17 @@ class Move:
         if self.TekkenVersion == 't8':
             self.hitbox_location = (self.hitbox2 << 16) | self.hitbox1
 
-        # Decrypting values
-        if self.TekkenVersion == "t8":
+            # Decrypting values
             self.name_key = parent.decryptValue(addr + get_offset(t8_offsetTable, 'move:encrypted_name_key'))
             self.anim_key = parent.decryptValue(addr + get_offset(t8_offsetTable, 'move:encrypted_anim_key'))
             self.vuln = parent.decryptValue(addr + get_offset(t8_offsetTable, 'move:encrypted_vuln'))
             self.hitlevel = parent.decryptValue(addr + get_offset(t8_offsetTable, 'move:encrypted_hit_level'))
             self._0xD0 = parent.decryptValue(addr + get_offset(t8_offsetTable, 'move:encrypted__0xD0'))
             self.ordinal_id = parent.decryptValue(addr + get_offset(t8_offsetTable, 'move:encrypted_ordinal_id'))
+
+            # Mapping Name keys
+            n_key = str(self.name_key)
+            self.name = move_name_keys_mapping[n_key] if n_key in move_name_keys_mapping else self.name
 
     # def getAliasedId(self, moveId: int, aliases: list):
     #     if aliases.index(moveId) != -1:
@@ -2846,6 +2851,7 @@ class Motbin:
                 dlgMngr.setRequirementId((dlgMngr.requirement_addr - self.requirements_ptr) // self.Requirement_size)
                 self.dialogue_managers.append(dlgMngr.dict())
         
+        print("NAME KEYS %d" % len(move_name_keys_mapping.keys()))
         print("Reading movelist...")
         for i in range(self.movelist_size):
             move = Move(self.movelist_head_ptr + (i * self.Move_size), self, i)

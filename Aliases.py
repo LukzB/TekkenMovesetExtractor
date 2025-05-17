@@ -1,4 +1,5 @@
 
+import json
 from Tag2Aliases import tag2_requirements, tag2_extra_move_properties, tag2_character_fixes, getTag2CharIDAliases, tag2_odd_hitbox_aliases, tag2_even_hitbox_aliases
 from RevAliases import rev_requirements
 from T6Aliases import t6_requirements, t6_extra_move_properties
@@ -275,3 +276,19 @@ def fillAliasesDictonnaries(version):
         
     if 'extra_move_properties' in versionAliases[version]:
         fillDict(versionAliases[version]['extra_move_properties'])
+
+
+def fillMoveNameKeysDict(version):
+    move_name_keys_mapping = {}
+    if version != "t8":
+        return move_name_keys_mapping
+    try:
+        with open("./name_keys.json") as f:
+            move_name_keys_mapping = json.load(f)
+    except FileNotFoundError:
+        print("Error: The file 'name_keys.json' was not found.")
+        move_name_keys_mapping = {}
+    except json.JSONDecodeError:
+        print("Error: Failed to decode JSON from 'name_keys.json'.")
+        move_name_keys_mapping = {}
+    return move_name_keys_mapping
