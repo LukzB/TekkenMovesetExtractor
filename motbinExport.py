@@ -2851,7 +2851,6 @@ class Motbin:
                 dlgMngr.setRequirementId((dlgMngr.requirement_addr - self.requirements_ptr) // self.Requirement_size)
                 self.dialogue_managers.append(dlgMngr.dict())
         
-        print("NAME KEYS %d" % len(move_name_keys_mapping.keys()))
         print("Reading movelist...")
         for i in range(self.movelist_size):
             move = Move(self.movelist_head_ptr + (i * self.Move_size), self, i)
