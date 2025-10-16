@@ -47,6 +47,8 @@ t8_character_name_mappping = {
     36: '[CLIVE]',
     37: '[ANNA]',
     38: '[FAHKUMRAM]',
+    39: '[ARMOR_KING]',
+    40: '[MIARY_ZO]',
     116: '[DUMMY]',
     117: '[ANGEL_JIN]',
     118: '[TRUE_DEVIL_KAZUYA]',
