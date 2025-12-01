@@ -3,7 +3,7 @@
 from tkinter import Canvas, Tk, Frame, Listbox, Label, Scrollbar, StringVar, Toplevel, Menu, messagebox, Text, simpledialog, filedialog
 from tkinter.ttk import Button, Entry, Style, Combobox
 from Addresses import game_addresses, GameClass
-from Utils import scanGameAddresses
+from Utils import getPlayerPointerPath, scanGameAddresses
 from additionalReqDetails import reqDetailsList # additional req details
 import webbrowser
 import shutil
@@ -1214,7 +1214,7 @@ class MoveSelector:
 
         playerAddr = game_addresses[('%s_p1_addr' % pKey)]
         if pKey == 't8':
-            playerAddr = T.T.readPointerPath(playerAddr, [0x30 + self.playMovePid * 8, 0])
+            playerAddr = T.T.readPointerPath(playerAddr, getPlayerPointerPath(playerId=self.playMovePid))
         else:
             playerAddr = playerAddr + (self.playMovePid * game_addresses[('%s_playerstruct_size' % pKey)])
         motbinOffset = game_addresses[('%s_motbin_offset' % pKey)]
@@ -1264,7 +1264,7 @@ class MoveSelector:
         addrKey = 't7' if self.root.isNotT8 else 't8'
         playerAddress = game_addresses['%s_p1_addr' % addrKey]
         if addrKey == 't8':
-            playerAddress = TekkenGame.readPointerPath(playerAddress, [0x30 + playerId * 8, 0])
+            playerAddress = TekkenGame.readPointerPath(playerAddress, getPlayerPointerPath(playerId))
         else:
             playerAddress = playerAddress + (playerId * game_addresses['%s_playerstruct_size' % addrKey])
         offset = game_addresses['player_curr_move_offset']

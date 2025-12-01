@@ -1,6 +1,12 @@
 from Addresses import AddressFile, GameClass
 
 
+def getPlayerPointerPath(playerId):
+    # return [0x10, 0xB0, 0x58 - playerId * 8, 0] # For customization
+    # return [0x10, 0xB0, 0x50 + playerId * 8, 0] # For customization
+    return [0x30 + playerId * 8, 0]
+
+
 def aobScan(game: GameClass, pattern, start_addr, end_addr):
     try:
         return game.aobScan(pattern, start_addr, end_addr, False)

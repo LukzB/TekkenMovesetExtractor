@@ -12,7 +12,7 @@ import re
 import string
 from zlib import crc32
 from concurrent.futures import ThreadPoolExecutor
-from Utils import scanGameAddresses
+from Utils import getPlayerPointerPath, scanGameAddresses
 
 exportVersion = "1.0.1"
 
@@ -1668,7 +1668,7 @@ class Exporter:
     def getPlayerAddr(self, playerId):
         if (self.TekkenVersion + '_p1_addr') in game_addresses.addr:
             baseAddr = game_addresses[self.TekkenVersion + '_p1_addr']
-            newAddr = self.T.readPointerPath(baseAddr, [0x30 + playerId * 8, 0])
+            newAddr = self.T.readPointerPath(baseAddr, getPlayerPointerPath(playerId))
             return newAddr
         return
     
