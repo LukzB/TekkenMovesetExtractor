@@ -84,6 +84,7 @@
 0x8203,Footstep SFX+VFX
 0x822d,Power Crush
 0x822e,Rage Art activate VFX
+0x8232,Fill Kazama essence
 0x8238,Skip move frames
 0x8239,Skip move frames (+N)
 0x823a,Skip move frames (-N)
@@ -138,6 +139,8 @@
 0x82f0,Toggle Neck Tracking
 0x82e0,Activate Rage if available
 0x82e2,Spend Rage
+0x8313,Set Drama Type
+0x8314,Set Drama No.
 0x830d,Health Bar display/vfx
 0x8338,Use fake frame advantage
 0x835b,Spend Leroy cane install
@@ -227,6 +230,7 @@
 0x854c,Restore alias 0x801e
 0x854d,Restore alias 0x801f
 0x854e,Restore alias 0x8020
+0x8555,Restore perma health
 0x860a,Both hands pose
 0x860b,Left hand pose
 0x860c,Right hand pose
@@ -243,7 +247,7 @@
 0x8696,Camera zoom VFX
 0x86b0,Heat activation camera
 0x877a,Play facial anim
-0x877b,Play cinematic facial anim
+0x877b,Play Drama facial anim
 0x877c,Expand left arm muscles
 0x877d,Expand right arm muscles
 0x87ef,Play sound from player
@@ -251,5 +255,5 @@
 0x87f1,Play sound from player
 0x87f2,Play sound from opponent
 0x87f3,Play sound from opponent
-0x87f8,Play cinematic voicelcip
+0x87f8,Play Drama voicelcip
 0x87f9,Preset camera zoom

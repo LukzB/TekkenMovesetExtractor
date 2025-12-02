@@ -178,10 +178,10 @@
 687,Playing a Bear
 689,Playing a male
 690,Playing a female
-691,Playing Jack-7/8
+691,Playing big character
 692,Opp playing a male
 693,Opp playing a female
-694,Opp playing Jack-7/8
+694,Opp playing big character
 695,Opp playing a Bear
 696,Pre-round animation
 716,Opponent airborne
@@ -209,6 +209,7 @@
 803,(DLC) Story NOT battle number
 806,Heihachi story flags
 1028,Player is in heat
+1029,Opponent is in heat
 1032,Parry High
 1033,Parry Mid
 1034,Parry Low
