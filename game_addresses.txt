@@ -1,6 +1,7 @@
 # For updating purposes
 version     = 24 # Must be different for it to register it as an update
 repo_link   = https://raw.githubusercontent.com/LukzB/TekkenMovesetExtractor/tekken-8-import/
+dict_link   = https://drive.google.com/uc?export=download&id=1J2idGLOoY66HvNQcyiELx8UkD88zqZXK
 
 # Tekken 8 addresses and offsets. Changes with updates
 t8_process_name       = Polaris-Win64-Shipping.exe

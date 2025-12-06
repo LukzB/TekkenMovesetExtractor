@@ -730,6 +730,19 @@ class GUI_TekkenMovesetExtractor(Tk):
                 else:
                     print("\nNo update needed for file %s" % file)
 
+        json_url = game_addresses['dict_link']
+        json_path = "name_keys.json"
+        try:
+            requestObject = getRequestFromURL(json_url)
+            content = request.urlopen(requestObject).read()
+            with open(json_path, "w") as jf:
+                print("name_keys.json updated.")
+                jf.write(content.decode('utf-8'))
+        except Exception as e:
+            print("Failed to download JSON:", e)
+
+        return
+
     def updateAddressFile(self):
         filedata = getFileFromRepo(
             game_addresses['repo_link'], 'game_addresses.txt')

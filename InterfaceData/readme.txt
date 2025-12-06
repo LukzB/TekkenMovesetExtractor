@@ -1,4 +1,5 @@
 1.0.22:
+- [EXPORTER] Added the functionality to download the JSON dictionary when downloading editor description files
 - [EXPORTER] Restored some move names using a pre-built dictionary
 - [EXPORTER] Export move "u16" and "u17" separately now
 - [EDITOR] Fixed a bug where duplicating the last cancel or hit-condition would break the list
