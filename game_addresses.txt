@@ -9,6 +9,7 @@ t8_base               = 0x0                # base is useless here
 t8_p1_addr            = +0x9B56AE0
 t8_motbin_offset      = 0x3898
 t8_chara_id_offset    = 0x168
+t8_playerstruct_size  = 0x0
 
 # Tekken 7 addresses and offsets. Changes with updates
 t7_process_name       = TekkenGame-Win64-Shipping.exe

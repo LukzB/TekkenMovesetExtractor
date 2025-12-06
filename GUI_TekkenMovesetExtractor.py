@@ -543,7 +543,7 @@ def exportAll(parent, TekkenVersion):
         moveset_name = TekkenExporter.getPlayerMovesetName(playerAddr)
         if moveset_name not in exportedMovesets:
             print("Requesting export for %s..." % (moveset_name))
-            moveset = TekkenExporter.exportMoveset(playerAddr, '' if TekkenVersion != 't8' else player_name)
+            moveset = TekkenExporter.exportMoveset(playerAddr, '' if TekkenVersion != 't8' else moveset_name)
             exportedMovesets.append(moveset_name)
             print()
         else:
