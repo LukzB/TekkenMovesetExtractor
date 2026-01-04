@@ -1051,11 +1051,15 @@ class MotbinStruct:
         self.writeInt(encryptedVal, 8)
         # self.writeInt(move['encrypted_%s' % key], 8)
         self.writeInt(encKey, 8)
-        for j, related in enumerate(move['%s_related' % key]):
-            if j == rawIdx:
-                self.writeInt(rawValue, 4)
-            else:    
-                self.writeInt(related, 4)
+        # Writing 4 raw values for the "related" values
+        self.writeInt(rawValue, 4)
+        for _ in range(3):
+            self.writeInt(0, 4)
+        # for j, related in enumerate(move['%s_related' % key]):
+        #     if j == rawIdx:
+        #         self.writeInt(rawValue, 4)
+        #     else:    
+        #         self.writeInt(related, 4)
         return
 
     def allocateHitBoxes(self, move, hitboxIdx):
