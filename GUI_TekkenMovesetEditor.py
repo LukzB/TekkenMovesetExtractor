@@ -74,6 +74,8 @@ itemNames = {
 
 fieldLabels = {
     'moves': {
+        'anim_addr_enc1': 'anim_key',
+        'anim_addr_enc2': 'skeleton_id',
         'move_start_properties_idx': 'start_props_idx',
         'move_end_properties_idx': 'end_props_idx',
         'hitbox1_location': 'hitbox1',
@@ -91,9 +93,9 @@ fieldLabels = {
         'hitbox5_location': 'hitbox5',
         'hitbox5_first_active_frame': 'hitbox5 first',
         'hitbox5_last_active_frame': 'hitbox5 last',
-        '_0xD0': 'moveID_val1',
-        'ordinal_id': 'moveID_val2',
-        'u15': 'facing/extras?',
+        '_0xD0': 't_char_id',
+        # 'ordinal_id': 'technical_id',
+        # 'u15': 'facing/extras?',
         'u16': 'collision?',
         'u17': 'distance',
         'anim_max_len': 'anim_len',
@@ -118,6 +120,8 @@ fieldLabels = {
 moveFields = {
     'name': 'text',
     'name_key': 'hex',
+    'anim_addr_enc1': 'hex',
+    'anim_addr_enc2': 'hex',
     'vuln': 'int',
     'hitlevel': 'int',
     'cancel_idx': 'positive_index',
@@ -152,8 +156,8 @@ moveFields = {
     'u6': 'int',
     '_0xCE': 'short',
     # 'u8_2': 'short',
-    '_0xD0': 'int',
-    'ordinal_id': 'int',
+    '_0xD0': 'hex',
+    'ordinal_id': 'hex',
     '_0x118': 'int',
     '_0x11C': 'int',
     # 'u9': 'int',
@@ -2080,7 +2084,7 @@ class MoveEditor(FormEditor):
         self.easternFrame = Frame(self.container)
         self.easternFrame.pack(side='right', fill='both', expand=True)
 
-        self.disabledFields = ["name_key"]
+        self.disabledFields = ["name_key", "anim_addr_enc2"]
 
         self.initFields()
 
