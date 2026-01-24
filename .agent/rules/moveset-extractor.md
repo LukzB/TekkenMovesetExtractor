@@ -1,0 +1,161 @@
+---
+trigger: always_on
+---
+
+# TekkenMovesetExtractor (Tekken 8 Fork) — WORKSPACE RULES
+
+## 0. Authority
+These rules define the operational boundaries of this workspace.
+All code changes, analysis, and suggestions MUST comply with them.
+
+---
+
+## 1. Scope & Target
+- Project: TekkenMovesetExtractor (Tekken 8 fork only)
+- Target Game: Tekken 8
+- Target Process: Polaris-Win64-Shipping.exe
+- Purpose:
+  - Extract moveset data from live game memory
+  - Convert binary data to editable JSON
+  - Edit moves, cancels, properties, and requirements
+  - Inject modified movesets back into the running game
+
+This workspace explicitly DOES NOT target:
+- Tekken 7
+- Tekken Tag Tournament 2
+- Offline file-only modding without memory interaction
+
+---
+
+## 2. Supported Operations
+Allowed:
+- Live memory extraction
+- JSON-based moveset editing
+- GUI-driven data manipulation
+- Live memory injection for testing
+
+Disallowed:
+- Network-based manipulation
+- Online / ranked / anti-cheat bypass logic
+- Distribution of copyrighted game assets
+
+---
+
+## 3. Project Structure (Non-Negotiable)
+
+### Core Scripts
+- GUI_TekkenMovesetExtractor.py
+  - Main GUI entry point
+  - Allows opening "GUI_TekkenMovesetEditor.py"
+- GUI_TekkenMovesetEditor.py
+  - Contains editor logic only
+- motbinExport.py
+  - Reads live game memory
+  - Exports moveset binaries
+- motbinImport.py
+  - Injects moveset binaries into live memory
+- Addresses.py
+  - ALL memory read/write logic
+  - Uses pywin32 exclusively
+- TekkenMovesetExtractor.py
+  - Legacy or CLI logic (do not expand unless required)
+
+### Configuration
+- game_addresses.txt
+  - CRITICAL FILE
+  - All memory addresses and pointer paths live here
+  - Tekken 8 entries MUST use the `t8_` prefix
+  - MUST be updated after every game patch
+
+### Data & Assets
+- extracted_chars/
+  - Default output directory for extracted characters
+- InterfaceData/
+  - GUI assets only (icons, images)
+
+---
+
+## 4. Technology Constraints
+- Language: Python 3.x only
+- GUI Framework: tkinter ONLY
+- Memory Access: pywin32 ONLY
+- Serialization:
+  - JSON for editable data
+  - Custom binary formats (.bin, .mot) for injection
+
+---
+
+## 5. Workflow Rules
+
+### Setup
+- Tekken 8 MUST be running before extraction or injection
+- game_addresses.txt MUST contain a valid t8_p1_addr
+
+### Extraction (Export)
+- Extraction reads from t8_p1_addr
+- Pointer resolution is handled via Addresses.py
+- Output path:
+  extracted_chars/<CharacterName>/
+
+### Editing
+- All edits occur via GUI_TekkenMovesetEditor.py
+- Raw IDs and hex values are expected
+- Name resolution may use:
+  - Aliases.py
+  - name_keys.json (if present)
+
+### Injection (Import)
+- Injection occurs via:
+  - GUI Import / Monitor features, or
+  - motbinImport.py
+- Injection writes directly to live process memory
+
+---
+
+## 6. Memory Safety & Pointer Rules
+- ALL memory access MUST go through Addresses.game_addresses
+- Pointer chains MUST be defined in game_addresses.txt as:
+  (base_value, [offset1, offset2, ...])
+- Incorrect offsets WILL crash the game
+- Never hardcode live addresses in Python files
+
+---
+
+## 7. Tekken 8–Specific Constraints
+- Process name is fixed:
+  Polaris-Win64-Shipping.exe
+- Tekken 8 variables MUST use the `t8_` prefix
+- t8_playerstruct_size is currently 0x0
+  - Assume dynamic sizing unless explicitly updated
+
+---
+
+## 8. GUI Development Rules
+- Use tkinter only
+- Keep responsibilities separated:
+  - GUI logic → GUI_TekkenMovesetEditor.py
+  - Memory logic → Addresses.py
+  - File I/O → motbinExport.py / motbinImport.py
+- Editor schemas are defined via `fields` dictionaries
+- Do NOT mix memory logic into GUI code
+
+---
+
+## 9. Debugging & Maintenance
+- Tool not connecting → verify game_addresses.txt
+- Garbage values → broken t8_p1_addr pointer chain
+- After game patches:
+  - Re-scan memory (Cheat Engine / scanner.exe)
+  - Update game_addresses.txt immediately
+
+---
+
+## 10. AI-Agent Guidance (IMPORTANT)
+- Do NOT invent memory structures or offsets
+- Do NOT assume stability across game patches
+- Always prefer updating game_addresses.txt over code changes
+- If information is missing, request clarification instead of guessing
+- Favor minimal, surgical changes over refactors
+- Preserve backward compatibility unless explicitly instructed
+
+END OF WORKSPACE RULES
