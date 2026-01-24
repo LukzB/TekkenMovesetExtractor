@@ -36,12 +36,13 @@
 47,On block
 48,On whiff
 49,On hit/block
+50,Hit/Block related
 51,On hit
 61,Check opponent VULN
-62,Opp doing a damaging move
-63,Opp doing a damaging move + standing
-64,Opp doing a damaging move + crouching
-65,Opp doing a non-damaging move
+62,Opp attacking
+63,Opp doing standing attack
+64,Opp doing crouching attack
+65,Opp moving but not attacking
 66,Opponent Standing
 67,Opponent Crouching
 68,Incoming high attack
@@ -52,6 +53,7 @@
 73,Not Backturned
 76,Facing direction >= X
 77,Facing direction < X
+87,Collide with opponent
 92,Opponent facing Forward
 93,Opponent facing Left
 94,Opponent facing Right
@@ -99,9 +101,12 @@
 149,Standing on right side
 150,On ground (right side)
 151,On ground (left side)
+152,Player standing side (Left)
+153,Player standing side (Right)
 157,If Ki-charged
 158,If not Ki-charged
 159,Player is in rage
+168,Speed/Frame related?
 184,Near Wall
 192,Wallbreak available
 219,Something wallsplat related
@@ -142,6 +147,7 @@
 360,0x80cb == X
 365,Short flag == X
 442,Heat available
+453,Check Button Input
 454,Chara install
 466,Heat related
 473,Kazuya perma devil
@@ -170,6 +176,7 @@
 659,RNG (9-way)
 660,RNG (10-way)
 661,RNG (weighted)
+662,RNG-Related
 664,Playing Arcade mode(?)
 666,Playing Ball mode
 667,Playing Story mode
@@ -189,25 +196,34 @@
 718,Has Item
 723,Juggle
 724,Tornado available
+738,Kazama Essence >= X
+744,Kazama Essence < X
 750,Leroy cane available
 751,Leroy cane not available
 755,Chara ID related?
+758,Opponent distance <= X
 766,Chara episode pre-fight?
 767,Chara episode post-fight?
 777,Story flags
 778,Not Story mode
+783,RNG related >= X
+784,RNG related <= X
+785,RNG related == X
 790,Opp first active frame < X
 791,Opp first active frame >= X
 792,Opp first active frame == X
 793,Opp last active frame < X
 794,Opp last active frame >= X
 795,Opp last active frame == X
+796,Tekken Force mode
 799,Special-style related?
 800,Special-style related?
 801,(DLC) Playing Story mode
 802,(DLC) Story battle number
 803,(DLC) Story NOT battle number
+804,Check Player Side
 806,Heihachi story flags
+1016,RNG related == X - 1
 1028,Player is in heat
 1029,Opponent is in heat
 1032,Parry High
