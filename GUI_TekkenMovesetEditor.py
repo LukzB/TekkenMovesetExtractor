@@ -41,7 +41,7 @@ def appendFurtherDetails(itemId, param, key):
     if key == 'requirements':  # for requirements
         req_processor = reqDetailsList.get(itemId)
         if req_processor:
-            desc = req_processor.get(param, "Invalid")
+            desc = req_processor(param, "Invalid")
             detail = " : %s" % desc if desc != None else ""
     return detail
 

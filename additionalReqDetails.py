@@ -37,6 +37,9 @@ charIDs = {
     35: 'Heihachi',
     36: 'Clive',
     37: 'Anna',
+    38: 'Fahkumram',
+    39: 'Armor King',
+    40: 'Miary Zo',
     116: 'Dummy',
     117: 'Angel Jin',
     118: 'True Devil Kazuya',
@@ -78,96 +81,79 @@ req567 = {
     33: "Customization sequence play?",
 }
 
-def getStoryBattle(battleCode: int):
-    chapter = (battleCode & 0xF0) >> 4
-    fight = battleCode & 0xF
-    return "CH %d BT %d" % (chapter, fight)
+
+checkInput = {
+    0x1: "1",
+    0x2: "2",
+    0x3: "1+2",
+    0x4: "3",
+    0x5: "1+3",
+    0x6: "2+3",
+    0x7: "1+2+3",
+    0x8: "4",
+    0x9: "1+4",
+    0xA: "2+4",
+    0xB: "1+2+4",
+    0xC: "3+4",
+    0xD: "1+3+4",
+    0xE: "2+3+4",
+    0xF: "1+2+3+4",
+}
 
 
-class Requirement:
-    def get(self, x, default):
-        raise NotImplementedError(
-            "This method should be overridden by subclasses")
+# Helper functions
+def lookup(data_dict):
+    """Returns a function that looks up the value in the provided dictionary."""
+    def _lookup(x, default):
+        return data_dict.get(x, default)
+    return _lookup
 
 
-class DictionaryRequirement(Requirement):
-    def __init__(self, data):
-        self.data = data
-
-    def get(self, x, default):
-        return self.data.get(x, default)
-
-
-class ShortFlagGT(Requirement):
-    def get(self, x, default):
+def flag_check(operator):
+    """Returns a function that formats a flag comparison."""
+    def _check(x, default):
         try:
-            y = int(x)
-        except:
+            val = int(x)
+        except (ValueError, TypeError):
             return default
-        flag = x >> 16
-        value = x & 0xFFFF
-        return f"flag {flag} >= {value}"
+        flag = val >> 16
+        value = val & 0xFFFF
+        return f"flag {flag} {operator} {value}"
+    return _check
 
 
-class ShortFlagLT(Requirement):
-    def get(self, x, default):
-        try:
-            y = int(x)
-        except:
-            return default
-        flag = x >> 16
-        value = x & 0xFFFF
-        return f"flag {flag} <= {value}"
+def story_battle_req(x, default):
+    """Formats story battle requirement."""
+    try:
+        battle_code = int(x)
+        chapter = (battle_code & 0xF0) >> 4
+        fight = battle_code & 0xF
+        return f"CH {chapter} BT {fight}"
+    except (ValueError, TypeError):
+        return default
 
 
-class ShortFlagEQ(Requirement):
-    def get(self, x, default):
-        try:
-            y = int(x)
-        except:
-            return default
-        flag = x >> 16
-        value = x & 0xFFFF
-        return f"flag {flag} == {value}"
-
-
-class StoryBattleRequirement(Requirement):
-    def get(self, x, default):
-        try:
-            battle_code = int(x)
-            return getStoryBattle(battle_code)
-        except:
-            return default
-
-
-# Function to get story battle details
-def getStoryBattle(battleCode: int):
-    chapter = (battleCode & 0xF0) >> 4
-    fight = battleCode & 0xF
-    return f"CH {chapter} BT {fight}"
-
-
-# Add req in this list and assign parameter list
-# Format: reqId -> paramList
+# Formatting: reqId -> processor_function
 reqDetailsList = {
-    159: DictionaryRequirement(reqYesNo),
-    220: DictionaryRequirement(charIDs),  # Char ID checks
-    221: DictionaryRequirement(charIDs),
-    222: DictionaryRequirement(charIDs),
-    223: DictionaryRequirement(charIDs),
-    224: DictionaryRequirement(charIDs),
-    225: DictionaryRequirement(charIDs),
-    226: DictionaryRequirement(charIDs),
-    227: DictionaryRequirement(charIDs),
-    228: DictionaryRequirement(req225),  # Player is CPU
-    229: DictionaryRequirement(req225),  # Player is CPU
-    288: ShortFlagGT(),  # Short flag >= X
-    326: ShortFlagLT(),  # Short flag <= X
-    365: ShortFlagEQ(),  # Short flag == X
-    454: DictionaryRequirement(reqYesNo), # Bryan Snake Eyes
-    473: DictionaryRequirement(reqYesNo), # Perma devil
-    498: DictionaryRequirement(reqYesNo), # Heihachi Warrior Instinct
-    668: StoryBattleRequirement(),  # Story battle details
-    672: DictionaryRequirement(gamemodes),  # Game mode
-    1028: DictionaryRequirement(reqYesNo),
+    159: lookup(reqYesNo),
+    220: lookup(charIDs),
+    221: lookup(charIDs),
+    222: lookup(charIDs),
+    223: lookup(charIDs),
+    224: lookup(charIDs),
+    225: lookup(charIDs),
+    226: lookup(charIDs),
+    227: lookup(charIDs),
+    228: lookup(req225),  # Player is CPU
+    229: lookup(req225),  # Player is CPU
+    288: flag_check(">="),
+    326: flag_check("<="),
+    365: flag_check("=="),
+    453: lookup(checkInput),  # Check Input
+    454: lookup(reqYesNo),  # Bryan Snake Eyes
+    473: lookup(reqYesNo),  # Perma devil
+    498: lookup(reqYesNo),  # Heihachi Warrior Instinct
+    668: story_battle_req,
+    672: lookup(gamemodes),
+    1028: lookup(reqYesNo),
 }
