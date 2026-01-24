@@ -1550,8 +1550,14 @@ class FormEditor:
             self.fieldLabel[field] = fieldLabel
 
     def registerFieldButtons(self, items):
-        for field, function in items:
-            self.fieldLabel[field].config(cursor='hand2', bg='#cce3e1')
+        for field, item in items:
+            if isinstance(item, tuple):
+                function, color = item
+            else:
+                function = item
+                color = '#cce3e1'
+            
+            self.fieldLabel[field].config(cursor='hand2', bg=color)
             self.fieldLabel[field].bind("<Button-1>", lambda _, self=self, field=field,
                                         function=function: function(self.fieldValue[field]) if self.editMode != None else 0)
 
@@ -1597,6 +1603,80 @@ class HitConditionEditor(FormEditor):
 
         reactionlistId = self.fieldValue['reaction_list_idx']
         self.disableSaveButton()
+
+
+
+class InputSequenceEditor:
+    def __init__(self, root, index):
+        window = Toplevel()
+        self.window = window
+        self.root = root
+        self.index = index
+
+        self.window.title("Input Sequence Editor - Sequence %d" % index)
+        window.geometry("600x600")
+        window.iconbitmap('InterfaceData/renge.ico')
+
+        self.mainFrame = Frame(window)
+        self.mainFrame.pack(fill='both', expand=1)
+
+        # Header info
+        infoFrame = Frame(self.mainFrame)
+        infoFrame.pack(side='top', fill='x', padx=10, pady=5)
+        
+        sequence = self.root.movelist['input_sequences'][index]
+        inputWindow = sequence['u1']
+        count = sequence['u2']
+        extradataIndex = sequence['extradata_idx']
+
+        def create_ro_field(parent, label, value):
+            f = Frame(parent)
+            f.pack(fill='x', pady=2)
+            Label(f, text=label, width=20, anchor='w').pack(side='left')
+            e = Entry(f)
+            e.insert(0, str(value))
+            e.config(state='readonly')
+            e.pack(side='left', fill='x', expand=True)
+
+        create_ro_field(infoFrame, "Sequence Index:", index)
+        create_ro_field(infoFrame, "Input Window (u1):", inputWindow)
+        create_ro_field(infoFrame, "Input Count (u2):", count)
+        create_ro_field(infoFrame, "Extradata Index:", extradataIndex)
+
+        # List of inputs
+        listFrame = Frame(self.mainFrame)
+        listFrame.pack(side='top', fill='both', expand=1, padx=10, pady=5)
+
+        Label(listFrame, text="Inputs:", anchor='w').pack(fill='x')
+
+        textArea = Text(listFrame, height=20, width=80)
+        scrollbar = Scrollbar(listFrame, command=textArea.yview)
+        textArea.configure(yscrollcommand=scrollbar.set)
+        
+        scrollbar.pack(side='right', fill='y')
+        textArea.pack(side='left', fill='both', expand=True)
+
+        input_extradata = self.root.movelist.get('input_extradata', [])
+        
+        textArea.insert('end', "Idx   | Dir (u1) | Btn (u2) | Command (Str)\n")
+        textArea.insert('end', "-" * 40 + "\n")
+
+        for i in range(count):
+            currIdx = extradataIndex + i
+            if currIdx < len(input_extradata):
+                data = input_extradata[currIdx]
+                # data has u1 (dir) and u2 (btn)
+                # Command is 64-bit: u2 << 32 | u1
+                u1 = data['u1']
+                u2 = data['u2']
+                command = (u2 << 32) | u1
+                
+                commandStr = getCommandStr(command)
+                textArea.insert('end', "%-5d | 0x%-6x | 0x%-6x | %s\n" % (currIdx, u1, u2, commandStr))
+            else:
+                 textArea.insert('end', "%-5d | <INVALID INDEX>\n" % (currIdx))
+
+        textArea.configure(state='disabled')
 
 
 class VoiceclipEditor(FormEditor):
@@ -1925,7 +2005,17 @@ class GroupCancelEditor(FormEditor):
             ('move_id', self.root.setMove),
             ('requirement_idx', self.root.setRequirementList),
             ('extradata_idx', self.root.setCancelExtra),
+            ('command', self.onCommandClick),
         ])
+
+    def onCommandClick(self, value):
+        directionBits = value & 0xffffffff
+        if directionBits >= INPUT_SEQ_START:
+            index = directionBits - INPUT_SEQ_START
+            if index < len(self.root.movelist.get('input_sequences', [])):
+                InputSequenceEditor(self.root, index)
+            else:
+                print("Input sequence index out of range: %d" % index)
 
     def onchange(self, field, sv):
         if self.editMode == None:
@@ -1981,9 +2071,19 @@ class CancelEditor(FormEditor):
             ('move_id', self.onMoveClick),
             ('requirement_idx', self.root.setRequirementList),
             ('extradata_idx', self.root.setCancelExtra),
+            ('command', self.onCommandClick),
         ])
 
         self.setTitleFunction = None
+
+    def onCommandClick(self, value):
+        directionBits = value & 0xffffffff
+        if directionBits >= INPUT_SEQ_START:
+            index = directionBits - INPUT_SEQ_START
+            if index < len(self.root.movelist.get('input_sequences', [])):
+                InputSequenceEditor(self.root, index)
+            else:
+                print("Input sequence index out of range: %d" % index)
 
     def onMoveClick(self, id):
         if self.fieldValue['command'] == GROUP_CANCEL_START:
