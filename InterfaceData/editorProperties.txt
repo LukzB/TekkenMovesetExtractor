@@ -29,6 +29,7 @@
 0x8079,Throw VFX (self)
 0x807a,Throw VFX (opponent)
 0x807c,Block VFX (self)
+0x807d,Sparks on self (?)
 0x807f,Small sparks VFX (self)
 0x8087,Do self (perma) damage
 0x8088,Heal (perma) Health
@@ -72,10 +73,12 @@
 0x814b,Add recoverable health
 0x814d,Heat-dash related
 0x8151,Activate devil permanently
+0x81ec,Allow Blocking
 0x81ed,Give CH property
 0x81f1,Detach position
 0x81f5,Detach height (smooth)
 0x81f6,Detach height (instant)
+0x81f8,Give Parry immunity
 0x81fa,Add tracking (self)
 0x81fb,Add tracking (opponent)
 0x81fc,Change VULN
@@ -107,6 +110,7 @@
 0x8258,Inflict pushback (self)
 0x825a,Align with pushback (self)
 0x825b,Align with pushback (self, backwards)
+0x825c,Enable/Disable Gravity
 0x825d,Inflict pushback (opponent)
 0x825f,Align with pushback (opponent)
 0x8260,Align with pushback (opponent, backwards)
@@ -119,14 +123,16 @@
 0x8276,Push player in X-axis
 0x8278,Push player in Y-axis (height)
 0x827b,Spawn projectile
-0x827c,Spawn height related?
-0x827d,Projectile horizontal spawn distance
 0x827c,Projectile vertical spawn distance
 0x827d,Projectile lateral spawn distance
+0x827e,Projectile Initial Vertical Velocity
+0x827f,Projectile Initial Lateral Velocity
 0x828b,Enable scaled dmg
 0x828c,Inflict scaled dmg (opponent)
 0x828d,Inflict scaled dmg (self)
+0x8296,2D Jump Height
 0x82a5,Inflict Chip dmg (opponent)
+0x82a9,Add scaling (downed)
 0x82bc,Reset combo meter
 0x82be,Add to combo counter
 0x82c1,Player visibilty
@@ -136,15 +142,22 @@
 0x82d5,Show Yoshi second sword
 0x82d6,Yoshi main sword VFX
 0x82d7,Yoshi second sword VFX
-0x82f0,Toggle Neck Tracking
+0x82d8,Yoshi main sword effect
+0x82d9,Yoshi second sword effect
 0x82e0,Activate Rage if available
 0x82e2,Spend Rage
+0x82f0,Toggle Neck Tracking
+0x82fc,Slow Down Effect
+0x8302,Player Stop Motion Effect
+0x8303,Opponent Stop Motion Effect
+0x830d,Health Bar display/vfx
 0x8313,Set Drama Type
 0x8314,Set Drama No.
-0x830d,Health Bar display/vfx
 0x8338,Use fake frame advantage
 0x835b,Spend Leroy cane install
 0x8383,Refill/drain heat
+0x8384,Refill / Drain Heat (Opponent)
+0x8387,Remove Recoverable Health
 0x838e,Trigger cinematic camera
 0x838f,Trigger Rage Art Stage VFX
 0x8394,Activate Heat Aura VFX
@@ -155,13 +168,16 @@
 0x83bc,Rotate Player
 0x83bd,Rotate Opponent
 0x83be,Pause/resume Heat Timer
-0x83ce,Add scaling (standing)
+0x83c0,Play black screen VFX
+0x83ca,Make Character Glow
 0x83cd,Add scaling (airborne)
+0x83ce,Add scaling (standing)
 0x83d6,Set game speed
 0x83d7,Slowdown VFX
 0x83e6,Armor break
 0x83ee,Set Multi-level installs
 0x83f9,Set Heihachi Warrior Instinct
+0x8405,Apply Weakened state
 0x848b,Attach item(?)
 0x848c,Detach item(?)
 0x850d,Change default initiator
@@ -243,8 +259,10 @@
 0x8683,Play wing anim
 0x8684,wing anim related
 0x8685,Play wing anim
+0x868f,Throw Camera
 0x8695,Camera zoom focal point
 0x8696,Camera zoom VFX
+0x8697,Camera orbit effect
 0x86b0,Heat activation camera
 0x877a,Play facial anim
 0x877b,Play Drama facial anim
