@@ -164,7 +164,7 @@ moveFields = {
     'airborne_start': 'int',
     'airborne_end': 'int',
     'ground_fall': 'int',
-    'u15': 'int',
+    'u15': 'hex',
     '_0x154': 'int',
     'u16': 'short',
     'u17': 'short',
