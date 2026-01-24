@@ -2143,6 +2143,8 @@ class GroupCancelEditor(FormEditor):
 
         self.initFields()
 
+        self.default_btn_bg = self.fieldLabel['command'].cget('bg')
+
         self.registerFieldButtons([
             ('move_id', self.root.setMove),
             ('requirement_idx', self.root.setRequirementList),
@@ -2164,6 +2166,16 @@ class GroupCancelEditor(FormEditor):
             return
         super().onchange(field, sv)
         self.setMoveIdLabel()
+        if field == 'command':
+            self.updateCommandLook()
+
+    def updateCommandLook(self):
+        val = self.fieldValue.get('command', 0)
+        directionBits = val & 0xffffffff
+        if directionBits >= INPUT_SEQ_START:
+             self.fieldLabel['command'].config(bg='#cce3e1', cursor='hand2')
+        else:
+             self.fieldLabel['command'].config(bg=self.default_btn_bg, cursor='')
 
     def setMoveIdLabel(self):
         command = self.fieldValue['command']
@@ -2197,6 +2209,7 @@ class GroupCancelEditor(FormEditor):
         self.editMode = True
 
         self.setMoveIdLabel()
+        self.updateCommandLook()
         self.disableSaveButton()
 
 
@@ -2208,6 +2221,8 @@ class CancelEditor(FormEditor):
         self.enableDetailsArea()
 
         self.initFields()
+
+        self.default_btn_bg = self.fieldLabel['command'].cget('bg')
 
         self.registerFieldButtons([
             ('move_id', self.onMoveClick),
@@ -2238,6 +2253,16 @@ class CancelEditor(FormEditor):
             return
         super().onchange(field, sv)
         self.setMoveIdLabel()
+        if field == 'command':
+            self.updateCommandLook()
+
+    def updateCommandLook(self):
+        val = self.fieldValue.get('command', 0)
+        directionBits = val & 0xffffffff
+        if directionBits >= INPUT_SEQ_START:
+             self.fieldLabel['command'].config(bg='#cce3e1', cursor='hand2')
+        else:
+             self.fieldLabel['command'].config(bg=self.default_btn_bg, cursor='')
 
     def setMoveIdLabel(self):
         command = self.fieldValue['command']
@@ -2275,6 +2300,7 @@ class CancelEditor(FormEditor):
         self.editMode = True
 
         self.setMoveIdLabel()
+        self.updateCommandLook()
         self.disableSaveButton()
 
 
