@@ -1608,75 +1608,217 @@ class HitConditionEditor(FormEditor):
 
 class InputSequenceEditor:
     def __init__(self, root, index):
-        window = Toplevel()
-        self.window = window
         self.root = root
         self.index = index
-
+        self.window = Toplevel()
         self.window.title("Input Sequence Editor - Sequence %d" % index)
-        window.geometry("600x600")
-        window.iconbitmap('InterfaceData/renge.ico')
+        self.window.geometry("650x500")
+        self.window.iconbitmap('InterfaceData/renge.ico')
 
-        self.mainFrame = Frame(window)
+        # Load Global Data references
+        self.global_sequences = self.root.movelist['input_sequences']
+        self.global_extradata = self.root.movelist['input_extradata']
+
+        # Clone current sequence data locally
+        self.seq_data = self.global_sequences[index]
+        self.orig_input_window = self.seq_data['u1']
+        self.orig_count = self.seq_data['u2']
+        self.orig_start_idx = self.seq_data['extradata_idx']
+        
+        # Clone extradata slice locally
+        # Careful with bounds
+        end_idx = self.orig_start_idx + self.orig_count
+        if end_idx > len(self.global_extradata):
+            end_idx = len(self.global_extradata) # Safety clamp
+            
+        self.local_extradata = [
+            copy.deepcopy(item) for item in self.global_extradata[self.orig_start_idx : end_idx]
+        ]
+
+        # vars for header fields
+        self.var_window_frames = StringVar(value=str(self.orig_input_window))
+        self.var_count = StringVar(value=str(len(self.local_extradata)))
+
+        self.init_ui()
+
+    def init_ui(self):
+        self.mainFrame = Frame(self.window)
         self.mainFrame.pack(fill='both', expand=1)
 
-        # Header info
-        infoFrame = Frame(self.mainFrame)
-        infoFrame.pack(side='top', fill='x', padx=10, pady=5)
+        # --- Header ---
+        header = Frame(self.mainFrame)
+        header.pack(side='top', fill='x', padx=10, pady=5)
         
-        sequence = self.root.movelist['input_sequences'][index]
-        inputWindow = sequence['u1']
-        count = sequence['u2']
-        extradataIndex = sequence['extradata_idx']
-
-        def create_ro_field(parent, label, value):
-            f = Frame(parent)
-            f.pack(fill='x', pady=2)
-            Label(f, text=label, width=20, anchor='w').pack(side='left')
-            e = Entry(f)
-            e.insert(0, str(value))
-            e.config(state='readonly')
-            e.pack(side='left', fill='x', expand=True)
-
-        create_ro_field(infoFrame, "Sequence Index:", index)
-        create_ro_field(infoFrame, "Input Window (u1):", inputWindow)
-        create_ro_field(infoFrame, "Input Count (u2):", count)
-        create_ro_field(infoFrame, "Extradata Index:", extradataIndex)
-
-        # List of inputs
-        listFrame = Frame(self.mainFrame)
-        listFrame.pack(side='top', fill='both', expand=1, padx=10, pady=5)
-
-        Label(listFrame, text="Inputs:", anchor='w').pack(fill='x')
-
-        textArea = Text(listFrame, height=20, width=80)
-        scrollbar = Scrollbar(listFrame, command=textArea.yview)
-        textArea.configure(yscrollcommand=scrollbar.set)
+        # Combined Info Row
+        r1 = Frame(header)
+        r1.pack(fill='x')
+        Label(r1, text="Seq Idx: %d" % self.index, width=15, anchor='w').pack(side='left')
+        Label(r1, text="Start Idx: %d" % self.orig_start_idx, width=15, anchor='w').pack(side='left')
         
-        scrollbar.pack(side='right', fill='y')
-        textArea.pack(side='left', fill='both', expand=True)
-
-        input_extradata = self.root.movelist.get('input_extradata', [])
+        Label(r1, text="Window:", width=8, anchor='w').pack(side='left')
+        Entry(r1, textvariable=self.var_window_frames, width=6).pack(side='left')
         
-        textArea.insert('end', "Idx   | Dir (u1) | Btn (u2) | Command (Str)\n")
-        textArea.insert('end', "-" * 40 + "\n")
+        Label(r1, text=" Count:", width=8, anchor='w').pack(side='left')
+        Entry(r1, textvariable=self.var_count, width=6, state='readonly').pack(side='left')
 
-        for i in range(count):
-            currIdx = extradataIndex + i
-            if currIdx < len(input_extradata):
-                data = input_extradata[currIdx]
-                # data has u1 (dir) and u2 (btn)
-                # Command is 64-bit: u2 << 32 | u1
-                u1 = data['u1']
-                u2 = data['u2']
-                command = (u2 << 32) | u1
+        # --- Footer ---
+        footer = Frame(self.mainFrame)
+        footer.pack(side='bottom', fill='x', padx=10, pady=10)
+
+        Button(footer, text="Apply Changes", command=self.apply_changes).pack(fill='x')
+
+        # --- Inputs List (Scrollable) ---
+        list_container = Frame(self.mainFrame)
+        list_container.pack(side='top', fill='both', expand=True, padx=10, pady=5)
+        
+        # Canvas/Scrollbar setup
+        self.canvas = Canvas(list_container)
+        scrollbar = Scrollbar(list_container, orient="vertical", command=self.canvas.yview)
+        self.scroll_frame = Frame(self.canvas)
+
+        self.scroll_frame.bind(
+            "<Configure>",
+            lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+        )
+        self.canvas.create_window((0, 0), window=self.scroll_frame, anchor="nw")
+        self.canvas.configure(yscrollcommand=scrollbar.set)
+
+        scrollbar.pack(side="right", fill="y")
+        self.canvas.pack(side="left", fill="both", expand=True)
+
+        # Header for List
+        headers = Frame(self.scroll_frame)
+        headers.pack(fill='x')
+        Label(headers, text="#", width=4).pack(side='left')
+        Label(headers, text="Command (Hex)", width=16).pack(side='left')
+        Label(headers, text="Preview", width=25).pack(side='left')
+        Label(headers, text="Actions", width=10).pack(side='left')
+
+        self.rows_frame = Frame(self.scroll_frame)
+        self.rows_frame.pack(fill='both', expand=True)
+
+        self.refresh_rows()
+
+
+    def refresh_rows(self):
+        # Clear existing rows
+        for widget in self.rows_frame.winfo_children():
+            widget.destroy()
+
+        self.var_count.set(str(len(self.local_extradata)))
+
+        if len(self.local_extradata) == 0:
+            Button(self.rows_frame, text="Add First Input", command=lambda: self.add_input(-1)).pack(pady=10)
+        else:
+            for i, data in enumerate(self.local_extradata):
+                self.create_row(i, data)
+
+    def create_row(self, i, data):
+        row = Frame(self.rows_frame)
+        row.pack(fill='x', pady=1)
+
+        Label(row, text=str(i), width=4).pack(side='left')
+
+        # Combined Command Var (u2 << 32 | u1)
+        # u1 is bits 0-31, u2 is bits 32-63
+        cmd_val = (data['u2'] << 32) | data['u1']
+        var_command = StringVar(value="0x%X" % cmd_val)
+        
+        # Preview Label
+        lbl_preview = Label(row, text="...", width=25, anchor='w', fg='blue')
+        
+        def update_preview(*args):
+            try:
+                cmd_val = int(var_command.get(), 16)
                 
-                commandStr = getCommandStr(command)
-                textArea.insert('end', "%-5d | 0x%-6x | 0x%-6x | %s\n" % (currIdx, u1, u2, commandStr))
-            else:
-                 textArea.insert('end', "%-5d | <INVALID INDEX>\n" % (currIdx))
+                # Split back into u1/u2
+                u1_val = cmd_val & 0xFFFFFFFF
+                u2_val = (cmd_val >> 32) & 0xFFFFFFFF
+                
+                data['u1'] = u1_val
+                data['u2'] = u2_val
+                
+                lbl_preview.config(text=getCommandStr(cmd_val))
+            except ValueError:
+                lbl_preview.config(text="Invalid Hex")
 
-        textArea.configure(state='disabled')
+        # Trace changes
+        var_command.trace("w", update_preview)
+
+        # Initial update
+        update_preview()
+
+        e_cmd = Entry(row, textvariable=var_command, width=18)
+        e_cmd.pack(side='left', padx=2)
+
+        lbl_preview.pack(side='left', padx=5)
+
+        Button(row, text="-", width=2, command=lambda idx=i: self.remove_input(idx)).pack(side='left', padx=1)
+        Button(row, text="+", width=2, command=lambda idx=i: self.add_input(idx)).pack(side='left', padx=1)
+
+    def add_input(self, idx):
+        # Insert after idx. If idx is -1 (from "Add First"), inserts at 0.
+        new_data = {'u1': 0, 'u2': 0}
+        self.local_extradata.insert(idx + 1, new_data)
+        self.refresh_rows()
+
+    def remove_input(self, idx):
+        if 0 <= idx < len(self.local_extradata):
+            del self.local_extradata[idx]
+            self.refresh_rows()
+
+    def apply_changes(self):
+        try:
+             new_window_val = int(self.var_window_frames.get())
+        except ValueError:
+            messagebox.showerror("Error", "Input Window must be an integer.")
+            return
+
+        # 1. Update the sequence resource itself
+        self.seq_data['u1'] = new_window_val
+        self.seq_data['u2'] = len(self.local_extradata) # Update count
+
+        # 2. Handle Extradata Array Splicing (Global Fixup)
+        # Calculate size difference
+        old_len = self.orig_count
+        new_len = len(self.local_extradata)
+        delta = new_len - old_len
+        
+        # This is where we modify the global 'input_extradata' array
+        # We replace the slice [start : start + old_len] with local_extradata
+        start = self.orig_start_idx
+        end = start + old_len
+        
+        # Python list slice assignment handles insertion/deletion/replacement automatically!
+        # input_extradata[start:end] = local_extradata
+        # However, we must ensure we are modifying the list in place
+        
+        # Verify bounds safety before slicing
+        if start > len(self.global_extradata):
+            # This shouldn't happen unless data is corrupt, but handle safely by appending
+            self.global_extradata.extend(self.local_extradata) 
+            # Re-point index if it was OOB
+            self.seq_data['extradata_idx'] = len(self.global_extradata) - new_len
+        else:
+            # Splicing
+            self.global_extradata[start:end] = self.local_extradata
+
+        # 3. Fixup Indices for SUBSEQUENT sequences
+        # Only if delta != 0
+        if delta != 0:
+            for seq in self.global_sequences:
+                # If a sequence starts AFTER our current sequence's start index, shift it
+                # Note: We use > start because any sequence sharing the SAME start index 
+                # (rare, but aliasing) would essentially share the same data we just modified, 
+                # so its index remains valid (pointing to the same start). 
+                # Only sequences stored *after* this block need shifting.
+                if seq['extradata_idx'] > start:
+                    seq['extradata_idx'] += delta
+
+        print("Applied InputSequence changes. Delta: %d. New Extradata Len: %d" % (delta, len(self.global_extradata)))
+        
+        # Close window
+        self.window.destroy()
 
 
 class VoiceclipEditor(FormEditor):
