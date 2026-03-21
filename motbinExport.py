@@ -4,7 +4,7 @@
 from Addresses import game_addresses, GameClass
 from ByteSwap import SwapAnimBytes, SwapMotaBytes
 from datetime import datetime, timezone
-from Aliases import fillMoveNameKeysDict, getTekken8characterName
+from Aliases import fillMoveNameKeysDict
 import json
 import os
 import sys
@@ -12,7 +12,7 @@ import re
 import string
 from zlib import crc32
 from concurrent.futures import ThreadPoolExecutor
-from Utils import getPlayerPointerPath, scanGameAddresses
+from Utils import getPlayerPointerPath, scanGameAddresses, getTekken8characterName
 
 exportVersion = "1.0.1"
 
