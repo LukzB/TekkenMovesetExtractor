@@ -3,7 +3,8 @@
 from tkinter import Canvas, Tk, Frame, Listbox, Label, Scrollbar, StringVar, Toplevel, Menu, messagebox, Text, simpledialog, filedialog
 from tkinter.ttk import Button, Entry, Style, Combobox
 from Addresses import game_addresses, GameClass
-from Utils import getPlayerPointerPath, scanGameAddresses
+from Utils import getPlayerPointerPath, scanGameAddresses, getCharacterCode
+from jsonToBin import json_to_motbin
 from additionalReqDetails import reqDetailsList # additional req details
 import webbrowser
 import shutil
@@ -16,7 +17,7 @@ import ctypes
 from zlib import crc32
 
 charactersPath = "./extracted_chars/"
-editorVersion = "0.32-BETA"
+editorVersion = "0.33"
 
 GROUP_CANCEL_START = 0x8012
 GROUP_CANCEL_END = 0x8013
@@ -3276,11 +3277,21 @@ class GUI_TekkenMovesetEditor():
             ("How to use", self.displayHandAnimInfoDialog),
         ]
 
+        loadToGameMenu = [
+            ("Player 1", lambda self=self: self.Charalist.loadToPlayer(0)),
+            ("Player 2", lambda self=self: self.Charalist.loadToPlayer(1)),
+        ]
+
+        exportAsBinMenu = [
+            ("Without Anim Keys (Default)", lambda self=self: self.export_motbin(0)),
+            ("With Anim Keys", lambda self=self: self.export_motbin(1)),
+        ]
+
         menuActions = [
             ('Toggle character selector', self.Charalist.toggleVisibility),
             ("", "separator"),
-            ("Load to P1", lambda self=self: self.Charalist.loadToPlayer(0)),
-            ("Load to P2", lambda self=self: self.Charalist.loadToPlayer(1)),
+            ("Load to Game", loadToGameMenu),
+            ("Export as Bin", exportAsBinMenu),
             ("", "separator"),
             ("New", creationMenu),
             ("Delete", deletionMenu),
@@ -3358,6 +3369,34 @@ class GUI_TekkenMovesetEditor():
             json.dump(self.movelist, f, indent=4)
 
         print("Editor: saved at " + jsonPath)
+
+    def export_motbin(self, mode):
+        if self.Charalist.movelist_path == None or self.movelist == None:
+            return
+        cid = self.movelist.get('character_id')
+        if cid is None:
+            messagebox.showerror(
+                'Export as Bin', 'Moveset has no character_id; cannot export.')
+            return
+        code = getCharacterCode(cid)
+        if code == 'Unknown':
+            messagebox.showerror(
+                'Export as Bin',
+                'Unrecognized character id (%s); cannot export .motbin.' % (cid,))
+            return
+        out_path = os.path.join(self.Charalist.movelist_path, "%s.motbin" % code)
+        try:
+            buf = json_to_motbin(self.movelist, mode)
+        except Exception as err:
+            messagebox.showerror('Export as Bin', str(err))
+            return
+        try:
+            with open(out_path, "wb") as f:
+                f.write(buf)
+        except Exception as err:
+            messagebox.showerror('Export as Bin', str(err))
+            return
+        print("Editor: exported motbin at " + out_path)
 
     def updateCharacterlist(self):
         self.Charalist.updateCharacterlist()

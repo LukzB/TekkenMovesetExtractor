@@ -1,5 +1,60 @@
 from Addresses import AddressFile, GameClass
 
+CHAR_CODE_MAPPING = {
+    0: 'grf',
+    1: 'pig',
+    2: 'pgn',
+    3: 'cml',
+    4: 'snk',
+    5: 'rat',
+    6: 'ant',
+    7: 'cht',
+    8: 'grl',
+    9: 'bsn',
+    10: 'ccn',
+    11: 'der',
+    12: 'swl',
+    13: 'klw',
+    14: 'hms',
+    15: 'kmd',
+    16: 'ghp',
+    17: 'lzd',
+    18: 'mnt',
+    19: 'ctr',
+    20: 'hrs',
+    21: 'kal',
+    22: 'wlf',
+    23: 'rbt',
+    24: 'ttr',
+    25: 'crw',
+    26: 'jly',
+    27: 'aml',
+    28: 'zbr',
+    29: 'cat',
+    30: 'lon',
+    31: 'bbn',
+    32: 'got',
+    33: 'dog',
+    34: 'cbr',
+    35: 'bee',
+    36: 'okm',
+    37: 'kgr',
+    38: 'tgr',
+    39: 'knk',
+    40: 'wkz',
+    117: 'xxa',
+    118: 'xxb',
+    119: 'xxc',
+    120: 'xxd',
+    121: 'xxe',
+    122: 'xxf',
+    123: 'xxg',
+    128: 'test'
+}
+
+def getCharacterCode(charId):
+    return CHAR_CODE_MAPPING.get(charId, 'Unknown')
+
 
 def getPlayerPointerPath(playerId):
     # return [0x10, 0xB0, 0x58 - playerId * 8, 0] # For customization
