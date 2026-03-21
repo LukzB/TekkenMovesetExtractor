@@ -1,3 +1,6 @@
+1.0.33:
+- [EDITOR] Added the option to export as a Motbin File
+- [EXPORTER/IMPORTER] Added "character_ids.csv" file, now getting new characters will not require app update
 1.0.22:
 - [EXPORTER] Added the functionality to download the JSON dictionary when downloading editor description files
 - [EXPORTER] Restored some move names using a pre-built dictionary
