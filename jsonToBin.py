@@ -148,7 +148,7 @@ def write_hit_condition(buf, offset, hc):
 
 def write_projectile(buf, offset, proj):
     u1 = proj.get("u1", [])
-    for i in range(35):
+    for i in range(36):
         val = u1[i] if i < len(u1) else 0
         offset = write_uint32_le(buf, offset, val)
     offset = write_uint64_le(buf, offset, proj.get("hit_condition_idx", 0))
