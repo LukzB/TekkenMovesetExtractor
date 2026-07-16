@@ -121,8 +121,9 @@ fieldLabels = {
 moveFields = {
     'name': 'text',
     'name_key': 'hex',
+    'anim_name': 'text',
     'anim_addr_enc1': 'hex',
-    'anim_addr_enc2': 'hex',
+    # 'anim_addr_enc2': 'hex',
     'vuln': 'int',
     'hitlevel': 'int',
     'cancel_idx': 'positive_index',
@@ -2353,7 +2354,7 @@ class MoveEditor(FormEditor):
         self.easternFrame = Frame(self.container)
         self.easternFrame.pack(side='right', fill='both', expand=True)
 
-        self.disabledFields = ["name_key", "anim_addr_enc2"]
+        self.disabledFields = ["name_key", "anim_name", "anim_addr_enc2"]
 
         self.initFields()
 

@@ -233,7 +233,7 @@ structSizes = {
 }
 
 t8_offsetTable = {
-    '_0x4': {'offset': 0x4, 'size': 4},
+    '_0x4': {'offset': 0x4, 'size': 4}, # compilation date. e.g, "20240719"
     'character_name': {'offset': None, 'size': 'stringPtr'},
     'creator_name': {'offset': None, 'size': 'stringPtr'},
     'date': {'offset': None, 'size': 'stringPtr'},
@@ -351,14 +351,14 @@ t8_offsetTable = {
     'hitcondition:reaction_list_addr': {'offset': 0x10, 'size': 8},
 
     'extramoveprop:type': {'offset': 0x0, 'size': 4},
-    'extramoveprop:_0x4': {'offset': 0x4, 'size': 4},
+    # 'extramoveprop:_0x4': {'offset': 0x4, 'size': 4}, # padding bytes, no longer read to be read
     'extramoveprop:requirement_addr': {'offset': 0x8, 'size': 8},
     'extramoveprop:id': {'offset': 0x10, 'size': 4},
     'extramoveprop:value': {'offset': 0x14, 'size': 4},
     'extramoveprop:value2': {'offset': 0x18, 'size': 4},
     'extramoveprop:value3': {'offset': 0x1C, 'size': 4},
     'extramoveprop:value4': {'offset': 0x20, 'size': 4},
-    'extramoveprop:value5': {'offset': 0x24, 'size': 4},
+    # 'extramoveprop:value5': {'offset': 0x24, 'size': 4}, # padding bytes, no longer read to be read
 
     'move:encrypted_name_key': {'offset': 0x0, 'size': 8},
     'move:encrypted_name_key_key': {'offset': 0x8, 'size': 8},
@@ -476,11 +476,11 @@ t8_offsetTable = {
     'othermoveprop:value2': {'offset': 0x10, 'size': 4},
     'othermoveprop:value3': {'offset': 0x14, 'size': 4},
     'othermoveprop:value4': {'offset': 0x18, 'size': 4},
-    'othermoveprop:value5': {'offset': 0x1C, 'size': 4},
+    # 'othermoveprop:value5': {'offset': 0x1C, 'size': 4}, # padding bytes, no longer read to be read
 
     'dialogues:type': { 'offset': 0x0, 'size': 2 },
     'dialogues:id': { 'offset': 0x2, 'size': 2 },
-    'dialogues:_0x4': { 'offset': 0x4, 'size': 4 },
+    # 'dialogues:_0x4': { 'offset': 0x4, 'size': 4 }, # padding bytes, no longer read to be read
     'dialogues:requirement_addr': { 'offset': 0x8, 'size': 8 },
     'dialogues:voiceclip_key': { 'offset': 0x10, 'size': 4 },
     'dialogues:facial_anim_idx': { 'offset': 0x14, 'size': 4 },
@@ -2112,12 +2112,12 @@ class ExtraMoveProperty:
             'value': self.value
         }
         if self.TekkenVersion == 't8':
-            _dict['_0x4'] = self._0x4
+            # _dict['_0x4'] = self._0x4
             _dict['requirement_idx'] = self.requirement_idx
             _dict['value2'] = self.value2
             _dict['value3'] = self.value3
             _dict['value4'] = self.value4
-            _dict['value5'] = self.value5
+            # _dict['value5'] = self.value5
         return _dict
 
 
@@ -2142,7 +2142,7 @@ class OtherMoveProperty:
             _dict['value2'] = self.value2
             _dict['value3'] = self.value3
             _dict['value4'] = self.value4
-            _dict['value5'] = self.value5
+            # _dict['value5'] = self.value5
         return _dict
 
 class Move:
@@ -2152,7 +2152,7 @@ class Move:
         readOffsetTable(self, 'move')
 
         if self.name == 0:
-            self.name = str(addr) if moveId == None else 'move_%d' % moveId
+            self.name = str(addr) if moveId is None else 'move_%d' % moveId
             self.anim_name = self.name
 
         self.anim = AnimData(self.anim_name, self.base + self.anim_addr, self) if self.TekkenVersion != 't8' else None
@@ -2181,7 +2181,9 @@ class Move:
 
             # Mapping Name keys
             n_key = str(self.name_key)
+            a_key = str(self.anim_key)
             self.name = move_name_keys_mapping[n_key] if n_key in move_name_keys_mapping else self.name
+            self.anim_name = move_name_keys_mapping[a_key] if a_key in move_name_keys_mapping else hex(int(self.anim_key))
 
     # def getAliasedId(self, moveId: int, aliases: list):
     #     if aliases.index(moveId) != -1:
@@ -2454,7 +2456,7 @@ class DialogueManager:
         return {
             'type': self.type,
             'id': self.id,
-            '_0x4': self._0x4,
+            # '_0x4': self._0x4,
             'requirement_idx': self.requirement_idx,
             'voiceclip_key': self.voiceclip_key,
             'facial_anim_idx': self.facial_anim_idx,
@@ -2669,7 +2671,7 @@ class Motbin:
             movesetData['last_calculated_hash'] = movesetData['original_hash']
             movesetData['mota_type'] = 780 if self.version == 'Tekken7' else (
                 1 << 2)  # allow hand mota by default
-            json.dump(movesetData, f, indent=None)
+            json.dump(movesetData, f, indent=2)
 
         if self.TekkenVersion != 't8':
             print("Saving animations...")

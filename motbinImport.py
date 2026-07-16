@@ -948,6 +948,7 @@ class MotbinStruct:
         self.extra_move_properties_ptr = self.align()
 
         for prop in self.m['extra_move_properties']:
+            # keys "_0x4" & "value5" are padding bytes
             keys = ['type', '_0x4', 'requirement_idx', 'id', 'value', 'value2', 'value3', 'value4', 'value5']
             for key in keys:
                 value = prop[key] if key in prop else 0
