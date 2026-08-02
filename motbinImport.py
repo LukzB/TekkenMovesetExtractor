@@ -2,7 +2,7 @@
 # Python 3.6.5
 
 from Addresses import game_addresses, GameClass, VirtualAllocEx, VirtualFreeEx, GetLastError, MEM_RESERVE, MEM_COMMIT, MEM_DECOMMIT, MEM_RELEASE, PAGE_EXECUTE_READWRITE
-from Aliases import getRequirementAlias, getMoveExtrapropAlias, getCharacteridAlias, ApplyCharacterFixes, fillAliasesDictonnaries, getHitboxAliases, applyGlobalRequirementAliases
+from Aliases import COMMON_ENCRYPTION_KEY, getRequirementAlias, getMoveExtrapropAlias, getCharacteridAlias, ApplyCharacterFixes, fillAliasesDictonnaries, getHitboxAliases, applyGlobalRequirementAliases
 import json
 import os
 import sys
@@ -1047,7 +1047,7 @@ class MotbinStruct:
 
     def allocateEncrypted(self, move, key, rawIdx):
         rawValue = move[key]
-        encKey = move['encrypted_%s_key' % key]
+        encKey = move.get('encrypted_%s_key' % key, COMMON_ENCRYPTION_KEY)
         encryptedVal = TK_encrypt_field(rawValue, encKey)
         self.writeInt(encryptedVal, 8)
         # self.writeInt(move['encrypted_%s' % key], 8)

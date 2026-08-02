@@ -4,7 +4,7 @@
 from Addresses import game_addresses, GameClass
 from ByteSwap import SwapAnimBytes, SwapMotaBytes
 from datetime import datetime, timezone
-from Aliases import fillMoveNameKeysDict
+from Aliases import fillMoveNameKeysDict, COMMON_ENCRYPTION_KEY
 import json
 import os
 import sys
@@ -15,8 +15,6 @@ from concurrent.futures import ThreadPoolExecutor
 from Utils import getPlayerPointerPath, scanGameAddresses, getTekken8characterName
 
 exportVersion = "1.0.1"
-
-COMMON_ENCRYPTION_KEY = 0xEDCCFB96DCA40FBA
 
 def GetBigEndianAnimEnd(data, searchStart):
     return [

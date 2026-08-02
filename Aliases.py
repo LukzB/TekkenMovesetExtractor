@@ -7,6 +7,8 @@ from T5Aliases import t5_requirements
 from T5DRAliases import t5dr_requirements
 from T4Aliases import t4_requirements
 
+COMMON_ENCRYPTION_KEY = 0xEDCCFB96DCA40FBA
+
 def disableProp(type, id, value):
     return 0, 0, 0
 
