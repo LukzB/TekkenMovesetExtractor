@@ -234,6 +234,23 @@ reactionlistExtraLaunchFields = [
     'downed_rotation'
 ]
 
+reactionlistAnimFields = (
+    'standing',
+    'crouch',
+    'ch',
+    'crouch_ch',
+    'left_side',
+    'left_side_crouch',
+    'right_side',
+    'right_side_crouch',
+    'back',
+    'back_crouch',
+    'block',
+    'crouch_block',
+    'wallslump',
+    'downed',
+)
+
 reactionlistFields = {
     'standing': 'short',
     'ch': 'short',
@@ -3600,29 +3617,59 @@ Hand animations can be created in blender, using the following plugins:\ngithub.
             self, self.movelist['moves'][self.MoveEditor.id]['name'], self.MoveEditor.id, refList)
         app.window.mainloop()
 
+    def listUsersOfReactionList(self, reactionlistId):
+        hitConditionCount = len(self.movelist['hit_conditions'])
+
+        for move_id, move in enumerate(self.movelist['moves']):
+            base = move['hit_condition_idx']
+            if base < 0 or base >= hitConditionCount:
+                continue
+            hitList = getHitConditionList(self.movelist, base)
+            for offset, hc in enumerate(hitList):
+                if hc['reaction_list_idx'] == reactionlistId:
+                    yield 'Move %s (%d) -> Hit condition list %d (item %d, idx %d)' % (
+                        move['name'], move_id, base, base + offset, offset)
+
+        for projectile_id, projectile in enumerate(self.movelist.get('projectiles', [])):
+            base = projectile.get('hit_condition_idx', -1)
+            if base < 0 or base >= hitConditionCount:
+                continue
+            hitList = getHitConditionList(self.movelist, base)
+            for offset, hc in enumerate(hitList):
+                if hc['reaction_list_idx'] == reactionlistId:
+                    yield 'Projectile (%d) -> Hit condition list %d (item %d, idx %d)' % (
+                        projectile_id, base, base + offset, offset)
+
     def listReactionsForMove(self):
         if self.MoveEditor.editMode == None:
             return
         refList = []
+        moveId = self.MoveEditor.id
 
         for reactionlistId, reactionList in enumerate(self.movelist['reaction_list']):
-            referencesMove = False
+            matchedFields = [
+                field for field in reactionlistAnimFields
+                if reactionList.get(field) == moveId
+            ]
+            if not matchedFields:
+                continue
 
-            for field in [f for f in reactionList if f != 'pushback_indexes' and f != 'u1list' and f != 'vertical_pushback']:
-                if reactionList[field] == self.MoveEditor.id:
-                    referencesMove = True
-                    break
+            references = ['fields: %s' % (', '.join(matchedFields))]
+            users = list(self.listUsersOfReactionList(reactionlistId))
+            if users:
+                references.extend(users)
+            else:
+                references.append(
+                    '(orphan — no move/projectile references this reaction list)')
 
-            if referencesMove:
-                references = []
-                refList.append({
-                    'origin': 'reaction_list',
-                    'item_id': reactionlistId,
-                    'references': references
-                })
+            refList.append({
+                'origin': 'reaction_list',
+                'item_id': reactionlistId,
+                'references': references
+            })
 
         app = MoveReferenceWindow(
-            self, self.movelist['moves'][self.MoveEditor.id]['name'], self.MoveEditor.id, refList)
+            self, self.movelist['moves'][moveId]['name'], moveId, refList)
         app.window.mainloop()
 
     def openGroupCancel(self, id):
