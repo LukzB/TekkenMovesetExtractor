@@ -19,9 +19,9 @@ from zlib import crc32
 charactersPath = "./extracted_chars/"
 editorVersion = "0.33"
 
-GROUP_CANCEL_START = 0x8012
-GROUP_CANCEL_END = 0x8013
-INPUT_SEQ_START = 0x8014 # Assuming it ot be 0x8014
+GROUP_CANCEL_START = 0x800D
+GROUP_CANCEL_END = 0x800E
+INPUT_SEQ_START = 0x800F
 
 requirementLabels = {}
 propertyLabels = {}
@@ -48,7 +48,7 @@ def appendFurtherDetails(itemId, param, key):
 
 
 reqListEndval = {
-    'Tekken8': 1100,
+    'Tekken8': 894,
     'Tekken7': 881,
     'Tag2': 690,
     'Revolution': 697,
