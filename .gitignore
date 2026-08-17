@@ -5,3 +5,4 @@ dist
 build
 *.spec
 *script*
+.venv
