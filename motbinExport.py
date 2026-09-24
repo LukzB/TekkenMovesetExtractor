@@ -2461,6 +2461,385 @@ class DialogueManager:
         }
 
 
+# Tekken 8 live PANM export. Type bit and map layouts match tempFull.cpp / anim-pointers.md.
+T8_ANIM_TYPES = (
+    (0, '0_body'),
+    (1, '1_hand'),
+    (2, '2_face'),
+    (3, '3_swing'),
+    (4, '4_camera'),
+    (5, '5_extra'),
+)
+T8_ANIM_TYPE_BIT = 20
+T8_ANIM_GLOBAL_KEY = 0x81
+T8_PANM_MAX_SIZE = 32 * 1024 * 1024
+T8_MAP_MASK_MAX = 0x200000
+
+
+class _PanmNeedMore(Exception):
+    pass
+
+
+def _t8UserPtr(value):
+    return isinstance(value, int) and 0x10000 <= value <= 0x00007FFFFFFFFFFF
+
+
+def _t8Read(moveset, addr, size):
+    try:
+        return moveset.readInt(addr, size)
+    except Exception:
+        return None
+
+
+def _t8Fnv1a(value):
+    hash_value = 0xCBF29CE484222325
+    for shift in range(0, 32, 8):
+        hash_value ^= (value >> shift) & 0xFF
+        hash_value = (hash_value * 0x100000001B3) & 0xFFFFFFFFFFFFFFFF
+    return hash_value
+
+
+def _t8MapLookupNode(moveset, head, buckets, mask, key):
+    if not _t8UserPtr(head) or not _t8UserPtr(buckets) or not mask or mask > T8_MAP_MASK_MAX:
+        return 0
+    bucket = buckets + (_t8Fnv1a(key & 0xFFFFFFFF) & mask) * 0x10
+    node = _t8Read(moveset, bucket + 8, 8)
+    if not _t8UserPtr(node) or node == head:
+        return 0
+    stop = _t8Read(moveset, bucket, 8)
+    for _ in range(8192):
+        found = _t8Read(moveset, node + 0x10, 4)
+        if found is None:
+            return 0
+        if found == (key & 0xFFFFFFFF):
+            return node
+        if stop is not None and node == stop:
+            break
+        node = _t8Read(moveset, node + 8, 8)
+        if not _t8UserPtr(node):
+            return 0
+    return 0
+
+
+def _t8DecodeAnimType(packed):
+    found = -1
+    for anim_type in range(len(T8_ANIM_TYPES)):
+        if packed & (1 << (T8_ANIM_TYPE_BIT + anim_type)):
+            if found >= 0:
+                return -1
+            found = anim_type
+    return found
+
+
+def _t8CollectAnimSlots(moveset, char_node):
+    end = _t8Read(moveset, char_node + 0x20, 8)
+    buckets = _t8Read(moveset, char_node + 0x30, 8)
+    mask = _t8Read(moveset, char_node + 0x48, 8)
+    if not _t8UserPtr(end) or not _t8UserPtr(buckets) or not mask or mask > T8_MAP_MASK_MAX:
+        return []
+
+    slots = []
+    seen = set()
+    for bucket_index in range(mask + 1):
+        bucket = buckets + bucket_index * 0x10
+        node = _t8Read(moveset, bucket + 8, 8)
+        if not _t8UserPtr(node) or node == end:
+            continue
+        stop = _t8Read(moveset, bucket, 8)
+        for _ in range(16384):
+            packed = _t8Read(moveset, node + 0x10, 4)
+            if packed is None:
+                break
+            handle = _t8Read(moveset, node + 0x18, 8)
+            if handle is None:
+                break
+            anim_type = _t8DecodeAnimType(packed)
+            instance_id = handle & 0xFFFFFFFF
+            identity = (anim_type, instance_id)
+            if anim_type >= 0 and identity not in seen:
+                seen.add(identity)
+                slots.append(identity)
+            if stop is not None and node == stop:
+                break
+            node = _t8Read(moveset, node + 8, 8)
+            if not _t8UserPtr(node):
+                break
+    return slots
+
+
+def _t8GetIdMap(moveset, container, key):
+    head = _t8Read(moveset, container + 0x08, 8)
+    buckets = _t8Read(moveset, container + 0x18, 8)
+    mask = _t8Read(moveset, container + 0x30, 8)
+    node = _t8MapLookupNode(moveset, head, buckets, mask, key)
+    if not node:
+        return 0
+    begin = _t8Read(moveset, node + 0x18, 8)
+    end = _t8Read(moveset, node + 0x20, 8)
+    if not _t8UserPtr(begin) or end is None or end <= begin:
+        return 0
+    id_map = _t8Read(moveset, begin, 8)
+    return id_map if _t8UserPtr(id_map) else 0
+
+
+def _t8ResolvePanm(moveset, id_map, instance_id):
+    if not id_map:
+        return 0
+    head = _t8Read(moveset, id_map + 0x10, 8)
+    buckets = _t8Read(moveset, id_map + 0x20, 8)
+    mask = _t8Read(moveset, id_map + 0x38, 8)
+    node = _t8MapLookupNode(moveset, head, buckets, mask, instance_id)
+    if not node:
+        return 0
+    entry = _t8Read(moveset, node + 0x18, 8)
+    if not _t8UserPtr(entry):
+        return 0
+    resource = _t8Read(moveset, entry + 0x08, 8)
+    if not _t8UserPtr(resource):
+        return 0
+    panm = _t8Read(moveset, resource + 0x1A0, 8)
+    return panm if _t8UserPtr(panm) else 0
+
+
+def _t8PanmMagic(moveset, panm):
+    try:
+        return moveset.readBytes(panm + 4, 4) == b'PANM'
+    except Exception:
+        return False
+
+
+def _t8Take(data, offset, length):
+    if offset < 0 or length < 0 or offset + length > len(data):
+        raise _PanmNeedMore()
+    return data[offset:offset + length]
+
+
+def _t8FbFieldOffset(data, table, field_index):
+    soffset = int.from_bytes(_t8Take(data, table, 4), 'little', signed=True)
+    # FlatBuffers: vtable = table_addr - soffset (not table + soffset).
+    vtable = table - soffset
+    if vtable < 0:
+        return None
+    vtable_size = int.from_bytes(_t8Take(data, vtable, 2), 'little')
+    if vtable_size < 4 or vtable_size > 0x1000:
+        return None
+    _t8Take(data, vtable, vtable_size)
+    entry = 4 + field_index * 2
+    if entry + 2 > vtable_size:
+        return 0
+    return int.from_bytes(data[vtable + entry:vtable + entry + 2], 'little')
+
+
+def _t8FbInlineU32(data, table, field_index):
+    field_offset = _t8FbFieldOffset(data, table, field_index)
+    if not field_offset:
+        return None
+    return int.from_bytes(_t8Take(data, table + field_offset, 4), 'little')
+
+
+def _t8FbTable(data, table, field_index):
+    field_offset = _t8FbFieldOffset(data, table, field_index)
+    if not field_offset:
+        return None
+    field_pos = table + field_offset
+    relative = int.from_bytes(_t8Take(data, field_pos, 4), 'little')
+    if relative == 0:
+        return None
+    return field_pos + relative
+
+
+def t8PanmFileSize(data):
+    if len(data) < 8:
+        raise _PanmNeedMore()
+    if data[4:8] != b'PANM':
+        return None
+    root = int.from_bytes(data[0:4], 'little')
+    if root > T8_PANM_MAX_SIZE:
+        return None
+    animation = _t8FbTable(data, root, 3)
+    if animation is None:
+        return None
+    block_c_base = _t8FbInlineU32(data, animation, 5)
+    raw_end_0 = _t8FbInlineU32(data, animation, 6)
+    if block_c_base is None or raw_end_0 is None:
+        return None
+    file_size = block_c_base + raw_end_0
+    if file_size <= 8 or file_size > T8_PANM_MAX_SIZE:
+        return None
+    return file_size
+
+
+def _t8ReadPanm(moveset, panm):
+    if not _t8PanmMagic(moveset, panm):
+        return None
+    try:
+        data = moveset.readBytes(panm, 8)
+    except Exception:
+        return None
+    for prefix in (0x200, 0x800, 0x2000, 0x8000, 0x20000, 0x80000, 0x100000):
+        try:
+            data = moveset.readBytes(panm, prefix)
+        except Exception:
+            break
+        try:
+            file_size = t8PanmFileSize(data)
+        except _PanmNeedMore:
+            continue
+        if not file_size:
+            return None
+        if file_size <= len(data):
+            return data[:file_size]
+        try:
+            return moveset.readBytes(panm, file_size)
+        except Exception:
+            return None
+    try:
+        file_size = t8PanmFileSize(data)
+    except _PanmNeedMore:
+        return None
+    if not file_size or file_size > len(data):
+        return None
+    return data[:file_size]
+
+
+def _t8AnimNamesByInstance(moves):
+    mapping = globals().get('move_name_keys_mapping') or {}
+    names = {}
+    for move in moves:
+        anim_key = move.get('anim_key')
+        if anim_key is None:
+            continue
+        name = mapping.get(str(anim_key))
+        if not name:
+            continue
+        names[move.get('anim_addr_enc1', 0) & 0xFFFFFFFF] = name
+    return names
+
+
+def _t8AnimFileStem(name, instance_id):
+    if name:
+        cleaned = ''.join(
+            '_' if (char in '<>:"/\\|?*' or ord(char) < 32) else char for char in name)
+        cleaned = cleaned.rstrip(' .')
+        if cleaned not in ('', '.', '..'):
+            return cleaned[:120]
+    return "0x%08X" % (instance_id & 0xFFFFFFFF)
+
+
+def _t8ChooseAnimPath(folder, stem, instance_id, blob, written):
+    blob_id = (len(blob), crc32(blob) & 0xFFFFFFFF)
+    path = "%s/%s.panm" % (folder, stem)
+
+    def existing_id(file_path):
+        known = written.get(file_path)
+        if known is not None:
+            return known
+        if not os.path.isfile(file_path):
+            return None
+        try:
+            with open(file_path, "rb") as existing:
+                previous = existing.read()
+        except Exception:
+            return None
+        return (len(previous), crc32(previous) & 0xFFFFFFFF)
+
+    if existing_id(path) not in (None, blob_id):
+        path = "%s/%s_0x%08X.panm" % (folder, stem, instance_id & 0xFFFFFFFF)
+    written[path] = blob_id
+    return path
+
+
+def _t8GameAddress(key):
+    try:
+        if key not in game_addresses.orig_addr:
+            return 0
+        addr = game_addresses[key]
+    except Exception:
+        return 0
+    return addr if _t8UserPtr(addr) else 0
+
+
+def _t8ExportAnimations(moveset, folders, saved, skipped):
+    char_id = getattr(moveset, 'chara_id', -1)
+    if not isinstance(char_id, int) or char_id < 0:
+        return
+    char_id &= 0xFFFFFFFF
+
+    manager = _t8GameAddress('t8_anim_manager')
+    container = _t8GameAddress('t8_anim_container')
+    if not manager:
+        return
+
+    head = _t8Read(moveset, manager + 0x2090, 8)
+    buckets = _t8Read(moveset, manager + 0x20A0, 8)
+    mask = _t8Read(moveset, manager + 0x20B8, 8)
+    char_node = _t8MapLookupNode(moveset, head, buckets, mask, char_id)
+    if not char_node:
+        return
+
+    grouped = {anim_type: [] for anim_type, _ in T8_ANIM_TYPES}
+    seen = {anim_type: set() for anim_type, _ in T8_ANIM_TYPES}
+    for anim_type, instance_id in _t8CollectAnimSlots(moveset, char_node):
+        if instance_id in seen[anim_type]:
+            continue
+        seen[anim_type].add(instance_id)
+        grouped[anim_type].append(instance_id)
+
+    if not container:
+        for anim_type, _ in T8_ANIM_TYPES:
+            skipped[anim_type] += len(grouped[anim_type])
+        return
+
+    id_map_global = _t8GetIdMap(moveset, container, T8_ANIM_GLOBAL_KEY)
+    id_map_char = _t8GetIdMap(moveset, container, char_id)
+    names = _t8AnimNamesByInstance(getattr(moveset, 'moves', []))
+    written = {}
+
+    for anim_type, folder_name in T8_ANIM_TYPES:
+        folder = folders[folder_name]
+        for instance_id in grouped[anim_type]:
+            panm = _t8ResolvePanm(moveset, id_map_global, instance_id)
+            if not panm or not _t8PanmMagic(moveset, panm):
+                panm = _t8ResolvePanm(moveset, id_map_char, instance_id)
+                if not panm or not _t8PanmMagic(moveset, panm):
+                    skipped[anim_type] += 1
+                    continue
+            try:
+                blob = _t8ReadPanm(moveset, panm)
+                if not blob:
+                    skipped[anim_type] += 1
+                    continue
+                stem = _t8AnimFileStem(names.get(instance_id), instance_id)
+                path = _t8ChooseAnimPath(folder, stem, instance_id, blob, written)
+                with open(path, "wb") as anim_file:
+                    anim_file.write(blob)
+                saved[anim_type] += 1
+            except Exception:
+                skipped[anim_type] += 1
+
+
+def saveT8Animations(moveset, anim_path):
+    folders = {}
+    saved = {}
+    skipped = {}
+    for anim_type, folder_name in T8_ANIM_TYPES:
+        folder_path = "%s/%s" % (anim_path, folder_name)
+        if not os.path.isdir(folder_path):
+            os.makedirs(folder_path)
+        folders[folder_name] = folder_path
+        saved[anim_type] = 0
+        skipped[anim_type] = 0
+
+    try:
+        _t8ExportAnimations(moveset, folders, saved, skipped)
+    except Exception as e:
+        print("Error extracting animations: %s" % (e), file=sys.stderr)
+
+    for anim_type, folder_name in T8_ANIM_TYPES:
+        print("%s: saved %d animations, skipped %d" % (
+            folder_name, saved[anim_type], skipped[anim_type]))
+
+
 class Motbin:
     def __init__(self, addr, exporterObject, name=''):
         initTekkenStructure(self, exporterObject, addr, size=0)
@@ -2671,7 +3050,10 @@ class Motbin:
                 1 << 2)  # allow hand mota by default
             json.dump(movesetData, f, indent=2)
 
-        if self.TekkenVersion != 't8':
+        if self.TekkenVersion == 't8':
+            print("Saving animations...")
+            saveT8Animations(self, anim_path)
+        else:
             print("Saving animations...")
             animBoundaries = sorted([anim.addr for anim in self.anims])
             existingAnim = 0
