@@ -15,6 +15,7 @@ import os
 import re
 import ctypes
 from zlib import crc32
+from kamuiHash import getKamuiHashDigest
 
 charactersPath = "./extracted_chars/"
 editorVersion = "0.33"
@@ -75,31 +76,17 @@ itemNames = {
 
 fieldLabels = {
     'moves': {
-        'anim_addr_enc1': 'anim_key',
-        'anim_addr_enc2': 'skeleton_id',
+        'name_key': 'name_hash',
+        'anim_name_key': 'anim_hash',
+        'skeleton_id': 'skeleton_id',
         'move_start_properties_idx': 'start_props_idx',
         'move_end_properties_idx': 'end_props_idx',
-        'hitbox1_location': 'hitbox1',
-        'hitbox1_first_active_frame': 'hitbox1 first',
-        'hitbox1_last_active_frame': 'hitbox1 last',
-        'hitbox2_location': 'hitbox2',
-        'hitbox2_first_active_frame': 'hitbox2 first',
-        'hitbox2_last_active_frame': 'hitbox2 last',
-        'hitbox3_location': 'hitbox3',
-        'hitbox3_first_active_frame': 'hitbox3 first',
-        'hitbox3_last_active_frame': 'hitbox3 last',
-        'hitbox4_location': 'hitbox4',
-        'hitbox4_first_active_frame': 'hitbox4 first',
-        'hitbox4_last_active_frame': 'hitbox4 last',
-        'hitbox5_location': 'hitbox5',
-        'hitbox5_first_active_frame': 'hitbox5 first',
-        'hitbox5_last_active_frame': 'hitbox5 last',
-        '_0xD0': 't_char_id',
-        # 'ordinal_id': 'technical_id',
-        # 'u15': 'facing/extras?',
         'u16': 'collision?',
         'u17': 'distance',
         'anim_max_len': 'anim_len',
+        'hitbox1_location': 'hitbox1',
+        'hitbox2_location': 'hitbox2',
+        'hitbox3_location': 'hitbox3',
     },
     'pushbacks': {
         'val1': 'duration',
@@ -110,11 +97,10 @@ fieldLabels = {
         'value': 'displacement'
     },
     'extra_move_properties': {
-        'type': 'starting_frame',
+        'type': 'frame',
     },
     'reaction_list': {
         'standing': 'default',
-        # 'vertical_pushback': 'verti pushback / front_ch_rot',
     }
 }
 
@@ -122,8 +108,9 @@ moveFields = {
     'name': 'text',
     'name_key': 'hex',
     'anim_name': 'text',
-    'anim_addr_enc1': 'hex',
-    # 'anim_addr_enc2': 'hex',
+    'anim_name_key': 'hex',
+    'anim_key': 'hex',
+    # 'skeleton_id': 'hex',
     'vuln': 'int',
     'hitlevel': 'int',
     'cancel_idx': 'positive_index',
@@ -134,35 +121,20 @@ moveFields = {
     'extra_properties_idx': 'index',
     'move_start_properties_idx': 'index',
     'move_end_properties_idx': 'index',
-    'hitbox_location': 'hex',
+    # 'hitbox_location': 'hex',  # kept in JSON; edited via hitbox1-3 + first/last frames
     'first_active_frame': 'int',
     'last_active_frame': 'int',
+    # 'cancel2_related': 'int',
+    # 'cancel3_related': 'int',
+    # 'cancel4_related': 'int',
     'hitbox1_location': 'hex',
-    'hitbox1_first_active_frame': 'int',
-    'hitbox1_last_active_frame': 'int',
     'hitbox2_location': 'hex',
-    'hitbox2_first_active_frame': 'int',
-    'hitbox2_last_active_frame': 'int',
     'hitbox3_location': 'hex',
-    'hitbox3_first_active_frame': 'int',
-    'hitbox3_last_active_frame': 'int',
-    'hitbox4_location': 'hex',
-    'hitbox4_first_active_frame': 'int',
-    'hitbox4_last_active_frame': 'int',
-    # 'hitbox5_location': 'hex',
-    # 'hitbox5_first_active_frame': 'int',
-    # 'hitbox5_last_active_frame': 'int',
-    # 'u2': 'long',
-    # 'u3': 'long',
-    # 'u4': 'long',
-    'u6': 'int',
-    '_0xCE': 'short',
-    # 'u8_2': 'short',
-    '_0xD0': 'hex',
-    'ordinal_id': 'hex',
-    '_0x118': 'int',
-    '_0x11C': 'int',
-    # 'u9': 'int',
+    'end_rotation': 'short',
+    't_char_id': 'hex',
+    'global_id': 'hex',
+    'damage_override': 'short',
+    'anim_max_len_adjuster': 'int',
     'airborne_start': 'int',
     'airborne_end': 'int',
     'ground_fall': 'int',
@@ -170,7 +142,6 @@ moveFields = {
     '_0x154': 'int',
     'u16': 'short',
     'u17': 'short',
-    'u18': 'int',
 }
 
 cancelFields = {
@@ -196,11 +167,10 @@ extrapropFields = {
     'type': 'int',
     'id': 'hex',
     'requirement_idx': 'positive_index',
-    'value': 'int',
-    'value2': 'int',
-    'value3': 'int',
-    'value4': 'int',
-    # 'value5': 'int',
+    'param': 'int',
+    'param2': 'int',
+    'param3': 'int',
+    'param4': 'int',
 }
 
 hitConditionFields = {
@@ -211,10 +181,10 @@ hitConditionFields = {
 
 reactionlistExtraPushbackFields = [
     'front_pushback',
-    'back_pushback',
+    'backturned_pushback',
     'left_side_pushback',
     'right_side_pushback',
-    'front_ch_pushback',
+    'front_counterhit_pushback',
     'downed_pushback',
     'block_pushback'
 ]
@@ -224,7 +194,7 @@ reactionlistExtraLaunchFields = [
     'back_direction',
     'left_side_direction',
     'right_side_direction',
-    'front_ch_direction',
+    'front_counterhit_direction',
     'downed_direction',
     'front_rotation',
     'back_rotation',
@@ -267,23 +237,23 @@ reactionlistFields = {
     'wallslump': 'short',
     'downed': 'short',
     'front_pushback': 'positive_index',
-    'back_pushback': 'positive_index',
+    'backturned_pushback': 'positive_index',
     'left_side_pushback': 'positive_index',
     'right_side_pushback': 'positive_index',
-    'front_ch_pushback': 'positive_index',
+    'front_counterhit_pushback': 'positive_index',
     'downed_pushback': 'positive_index',
     'block_pushback': 'positive_index',
     'front_direction': 'short',
     'back_direction': 'short',
     'left_side_direction': 'short',
     'right_side_direction': 'short',
-    'front_ch_direction': 'short',
+    'front_counterhit_direction': 'short',
     'downed_direction': 'short',
     'front_rotation': 'short',
     'back_rotation': 'short',
     'left_side_rotation': 'short',
     'right_side_rotation': 'short',
-    'vertical_pushback': 'short', #aka front_counterhit_rotation
+    'vertical_pushback': 'short',
     'downed_rotation': 'short'
 }
 
@@ -435,6 +405,38 @@ def validateField(type, value):
     if type == 'text':
         return re.match("^[a-zA-Z0-9_\-\(\)]+$", value)
     raise Exception("Unknown type '%s'" % (type))
+
+
+def isPlaceholderMoveName(name):
+    """Export / create placeholders — do not rehash name_key."""
+    return bool(re.match(r'^(move_|NEW_MOVE_)\d+$', name))
+
+
+def isPlaceholderAnimName(name):
+    """Unresolved anim labels — do not rehash anim_name_key."""
+    if re.match(r'^anim_\d+$', name):
+        return True
+    # Export fallback when name_keys.json has no match
+    if re.match(r'^0[xX][0-9A-Fa-f]+$', name):
+        return True
+    return False
+
+
+def uniquifyMoveString(name, moves, currentId, field):
+    """If another move already uses this string for field, append _2, _3, ..."""
+    existing = {
+        moves[i][field]
+        for i in range(len(moves))
+        if i != currentId and field in moves[i]
+    }
+    if name not in existing:
+        return name
+    suffix = 2
+    while True:
+        candidate = '%s_%d' % (name, suffix)
+        if candidate not in existing:
+            return candidate
+        suffix += 1
 
 
 def getFieldValue(type, value):
@@ -836,11 +838,10 @@ class SearchDialog(simpledialog.Dialog):
             "extra_move_properties": [
                 "id",
                 "requirement_idx",
-                "value",
-                "value2",
-                "value3",
-                "value4",
-                "value5",
+                "param",
+                "param2",
+                "param3",
+                "param4",
                 ],
             "requirements": [
                 "req", 
@@ -1968,9 +1969,13 @@ class ReactionListEditor(FormEditor):
                 'short', self.fieldVar[f].get())]
 
             if len(invalidFields) == 0:
-                launchFields = [getFieldValue(
+                launchValues = [getFieldValue(
                     'short', self.fieldVar[f].get()) for f in launchFields]
-                self.root.saveField(self.key, self.id, 'u1list', launchFields)
+                if self.root.movelist['version'] == 'Tekken8':
+                    for key, value in zip(reactionlistExtraLaunchFields, launchValues):
+                        self.root.saveField(self.key, self.id, key, value)
+                else:
+                    self.root.saveField(self.key, self.id, 'u1list', launchValues)
 
     def setItem(self, itemData, itemId):
         self.id = itemId
@@ -1984,22 +1989,12 @@ class ReactionListEditor(FormEditor):
 
         for i, val in enumerate(itemData['pushback_indexes']):
             self.setField(reactionlistExtraPushbackFields[i], val, True)
-        if 'u1list' in itemData:
+        if self.root.movelist['version'] == 'Tekken8':
+            for field in reactionlistExtraLaunchFields:
+                self.setField(field, itemData[field], True)
+        else:
             for i, val in enumerate(itemData['u1list']):
                 self.setField(reactionlistExtraLaunchFields[i], val, True)
-        else:
-            self.setField(reactionlistExtraLaunchFields[0], itemData['front_direction'], True)
-            self.setField(reactionlistExtraLaunchFields[1], itemData['back_direction'], True)
-            self.setField(reactionlistExtraLaunchFields[2], itemData['left_side_direction'], True)
-            self.setField(reactionlistExtraLaunchFields[3], itemData['right_side_direction'], True)
-            self.setField(reactionlistExtraLaunchFields[4], itemData['front_counterhit_direction'], True)
-            self.setField(reactionlistExtraLaunchFields[5], itemData['downed_direction'], True)
-            self.setField(reactionlistExtraLaunchFields[6], itemData['front_rotation'], True)
-            self.setField(reactionlistExtraLaunchFields[7], itemData['back_rotation'], True)
-            self.setField(reactionlistExtraLaunchFields[8], itemData['left_side_rotation'], True)
-            self.setField(reactionlistExtraLaunchFields[9], itemData['right_side_rotation'], True)
-            self.setField(reactionlistExtraLaunchFields[10], itemData['vertical_pushback'], True) #aka front_counterhit_rotation
-            self.setField(reactionlistExtraLaunchFields[11], itemData['downed_rotation'], True)
 
         self.editMode = True
         self.disableSaveButton()
@@ -2371,7 +2366,7 @@ class MoveEditor(FormEditor):
         self.easternFrame = Frame(self.container)
         self.easternFrame.pack(side='right', fill='both', expand=True)
 
-        self.disabledFields = ["name_key", "anim_name", "anim_addr_enc2"]
+        self.disabledFields = ["name_key", "anim_name_key"]
 
         self.initFields()
 
@@ -2424,8 +2419,93 @@ class MoveEditor(FormEditor):
             if field in moveFields:
                 self.setField(field, moveData[field], True)
                 self.fieldInput[field].config(state='enabled' if field not in self.disabledFields else 'readonly')
+        for i in range(3):
+            field = 'hitbox%d_location' % (i + 1)
+            if field in self.fieldInput:
+                location = 0
+                hitboxes = moveData.get('hitboxes')
+                if hitboxes and i < len(hitboxes):
+                    location = hitboxes[i].get('location', 0)
+                self.setField(field, location, True)
+                self.fieldInput[field].config(state='enabled')
         self.editMode = True
         self.disableSaveButton()
+
+    def save(self):
+        if self.editMode == None:
+            return False
+
+        pending = {}
+        for field in self.fieldVar:
+            # Virtual UI fields — written into hitboxes[] below.
+            if field in ('hitbox1_location', 'hitbox2_location', 'hitbox3_location'):
+                valueType = self.fieldTypes[field]
+                value = self.fieldVar[field].get()
+                if validateField(valueType, value):
+                    self.fieldValue[field] = getFieldValue(valueType, value)
+                else:
+                    print("Invalid field value for '%s'" % (field))
+                    return False
+                continue
+
+            # Read-only key fields — set from name/anim_name hashing below.
+            if field in ('name_key', 'anim_name_key'):
+                continue
+
+            valueType = self.fieldTypes[field]
+            value = self.fieldVar[field].get()
+            if validateField(valueType, value):
+                pending[field] = getFieldValue(valueType, value)
+            else:
+                print("Invalid field value for '%s'" % (field))
+                return False
+
+        moves = self.root.movelist['moves']
+        moveId = self.id
+
+        name = pending['name']
+        if not isPlaceholderMoveName(name):
+            name = uniquifyMoveString(name, moves, moveId, 'name')
+            pending['name'] = name
+            pending['name_key'] = getKamuiHashDigest(name)
+
+        animName = pending['anim_name']
+        if not isPlaceholderAnimName(animName):
+            pending['anim_name_key'] = getKamuiHashDigest(animName)
+
+        for field, fieldValue in pending.items():
+            self.root.saveField(self.key, self.id, field, fieldValue)
+            self.setField(field, fieldValue, setFieldValue=True)
+
+        move = moves[moveId]
+        hitboxes = move.get('hitboxes')
+        if not hitboxes or len(hitboxes) != 8:
+            hitboxes = [
+                {
+                    'first_active_frame': 0,
+                    'last_active_frame': 0,
+                    'location': 0,
+                    'related_floats': [0] * 9,
+                }
+                for _ in range(8)
+            ]
+            move['hitboxes'] = hitboxes
+
+        for i in range(3):
+            field = 'hitbox%d_location' % (i + 1)
+            hitboxes[i]['location'] = self.fieldValue[field]
+
+        first = move['first_active_frame']
+        last = move['last_active_frame']
+        for i in range(3):
+            hitboxes[i]['first_active_frame'] = first
+            hitboxes[i]['last_active_frame'] = last
+
+        # Keep packed hitbox_location in sync with the first two locations.
+        move['hitbox_location'] = ((hitboxes[1]['location'] & 0xFFFF) << 16) | (hitboxes[0]['location'] & 0xFFFF)
+
+        self.disableSaveButton()
+        return True
 
     def selectCancel(self, event):
         if self.editMode == None:
@@ -2692,11 +2772,9 @@ class MoveCopyingWindow:
         for pushback in reactionList['pushback_indexes']:
             self.getPushback(pushback, dependencies)
 
-        moveKeys = (k for k in reactionList if k !=
-                    'vertical_pushback' and k != 'u1list' and k != 'pushback_indexes')
-        for key in moveKeys:
-            if reactionList[key] != 0:
-                self.getMove(reactionList[key], dependencies)
+        for field in reactionlistAnimFields:
+            if reactionList[field] != 0:
+                self.getMove(reactionList[field], dependencies)
 
     def getHitConditions(self, id, dependencies):
         if id in dependencies['hit_conditions']:
@@ -2871,9 +2949,7 @@ class MoveCopyingWindow:
             for i, pushback in enumerate(reactionList['pushback_indexes']):
                 reactionList['pushback_indexes'][i] = idAliases['pushbacks'].get(
                     pushback, -1)
-            moveKeys = (k for k in reactionList if k !=
-                        'vertical_pushback' and k != 'u1list' and k != 'pushback_indexes')
-            for k in moveKeys:
+            for k in reactionlistAnimFields:
                 reactionList[k] = idAliases['moves'].get(reactionList[k], 0)
 
         for pushbackId in dependencies['pushbacks']:
@@ -4411,9 +4487,7 @@ Hand animations can be created in blender, using the following plugins:\ngithub.
                 cancel['move_id'] -= 1
 
         for reactionList in self.movelist['reaction_list']:
-            keyList = [key for key in reactionList if key !=
-                       'pushback_indexes' and key != 'u1list' and key != 'vertical_pushback']
-            for key in keyList:
+            for key in reactionlistAnimFields:
                 if reactionList[key] > moveId:
                     reactionList[key] -= 1
 
@@ -4431,10 +4505,34 @@ Hand animations can be created in blender, using the following plugins:\ngithub.
             newMove['name'] = 'COPY_' + newMove['name']
         else:
             newMove = {f: (0 if moveFields[f] != 'text' else '')
-                       for f in moveFields}
+                       for f in moveFields
+                       if f not in ('hitbox1_location', 'hitbox2_location', 'hitbox3_location')}
             newMove['name'] = 'NEW_MOVE_%d' % (moveId)
+            newMove['anim_name'] = 'anim_%d' % (moveId)
             newMove['voiceclip_idx'] = -1
             newMove['extra_properties_idx'] = -1
+            newMove['name_key'] = 0
+            newMove['anim_name_key'] = 0
+            newMove['cancel2_addr'] = 0
+            newMove['cancel3_addr'] = 0
+            newMove['cancel4_addr'] = 0
+            newMove['anim_max_len_adjuster'] = 0
+            newMove['hitbox_location'] = 0
+            newMove['unk5'] = [0] * 88
+            newMove['hitboxes'] = [
+                {
+                    'first_active_frame': 0,
+                    'last_active_frame': 0,
+                    'location': 0,
+                    'related_floats': [0] * 9,
+                }
+                for _ in range(8)
+            ]
+
+        if copyCurrent:
+            newMove['name'] = uniquifyMoveString(newMove['name'], self.movelist['moves'], -1, 'name')
+            if not isPlaceholderMoveName(newMove['name']):
+                newMove['name_key'] = getKamuiHashDigest(newMove['name'])
 
         self.movelist['moves'].append(newMove)
         self.MoveSelector.setMoves(

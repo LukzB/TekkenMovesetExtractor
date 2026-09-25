@@ -6,3 +6,4 @@ build
 *.spec
 *script*
 .venv
+docs

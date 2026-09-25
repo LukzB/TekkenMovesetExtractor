@@ -327,16 +327,14 @@ class Importer:
             for alias in m['original_aliases']:
                 self.writeInt(motbin_ptr + alias_offset, alias, 2)
                 alias_offset += 2
-            if 'current_aliases' in m:
-                alias_offset = 0xA8
-                for alias in m['current_aliases']:
-                    self.writeInt(motbin_ptr + alias_offset, alias, 2)
-                    alias_offset += 2
-            if 'unknown_aliases' in m:
-                alias_offset = 0x120
-                for alias in m['unknown_aliases']:
-                    self.writeInt(motbin_ptr + alias_offset, alias, 2)
-                    alias_offset += 2
+            alias_offset = 0xA8
+            for alias in m['current_aliases']:
+                self.writeInt(motbin_ptr + alias_offset, alias, 2)
+                alias_offset += 2
+            alias_offset = 0x120
+            for alias in m['unknown_aliases']:
+                self.writeInt(motbin_ptr + alias_offset, alias, 2)
+                alias_offset += 2
 
         else:  # T6 and later games alias system
             for alias in m['aliases']:
@@ -917,9 +915,11 @@ class MotbinStruct:
         self.throw_extras_ptr = self.align()
 
         for t in self.m['throw_extras']:
-            self.writeInt(t['u1'], 4)
-            for short in t['u2']:
-                self.writeInt(short, 2)
+            self.writeInt(t['pick_probability'], 4)
+            self.writeInt(t['camera_type'], 2)
+            self.writeInt(t['left_side_camera_data'], 2)
+            self.writeInt(t['right_side_camera_data'], 2)
+            self.writeInt(t['additional_rotation'], 2)
 
         return self.throw_extras_ptr, len(self.m['throw_extras'])
 
@@ -928,7 +928,8 @@ class MotbinStruct:
         self.throws_ptr = self.align()
 
         for t in self.m['throws']:
-            self.writeInt(t['u1'], 8)
+            self.writeInt(t['side'], 4)
+            self.writeInt(0, 4)  # padding
             extra_addr = self.getThrowExtraFromId(t['throwextra_idx'])
             self.writeInt(extra_addr, 8)
 
@@ -948,8 +949,8 @@ class MotbinStruct:
         self.extra_move_properties_ptr = self.align()
 
         for prop in self.m['extra_move_properties']:
-            # keys "_0x4" & "value5" are padding bytes
-            keys = ['type', '_0x4', 'requirement_idx', 'id', 'value', 'value2', 'value3', 'value4', 'value5']
+            # "_0x4" and trailing slot are padding
+            keys = ['type', '_0x4', 'requirement_idx', 'id', 'param', 'param2', 'param3', 'param4', 'value5']
             for key in keys:
                 value = prop[key] if key in prop else 0
                 size = 4
@@ -965,7 +966,7 @@ class MotbinStruct:
         self.move_start_props_ptr = self.align()
 
         for prop in self.m['move_start_props']:
-            keys = ['id', 'value', 'value2', 'value3', 'value4', 'value5']
+            keys = ['id', 'param', 'param2', 'param3', 'param4', 'value5']
             requirements_addr = self.getRequirementFromId(prop['requirement_idx'])
             self.writeInt(requirements_addr, 8)
             for key in keys:
@@ -978,7 +979,7 @@ class MotbinStruct:
         self.move_end_props_ptr = self.align()
 
         for prop in self.m['move_end_props']:
-            keys = ['id', 'value', 'value2', 'value3', 'value4', 'value5']
+            keys = ['id', 'param', 'param2', 'param3', 'param4', 'value5']
             requirements_addr = self.getRequirementFromId(prop['requirement_idx'])
             self.writeInt(requirements_addr, 8)
             for key in keys:
@@ -1064,10 +1065,11 @@ class MotbinStruct:
         return
 
     def allocateHitBoxes(self, move, hitboxIdx):
-        self.writeInt(move['hitbox%d_first_active_frame' % hitboxIdx], 4) 
-        self.writeInt(move['hitbox%d_last_active_frame' % hitboxIdx], 4) 
-        self.writeInt(move['hitbox%d_location' % hitboxIdx], 4)
-        for value in move['hitbox%d_related_floats' % hitboxIdx]:
+        hitbox = move['hitboxes'][hitboxIdx - 1]
+        self.writeInt(hitbox['first_active_frame'], 4)
+        self.writeInt(hitbox['last_active_frame'], 4)
+        self.writeInt(hitbox['location'], 4)
+        for value in hitbox['related_floats']:
             self.writeInt(value, 4)
 
     def allocateMoves(self):
@@ -1095,27 +1097,30 @@ class MotbinStruct:
             rawIdx = (i % 8) - 4
 
             self.allocateEncrypted(move, 'name_key', rawIdx) # 0x0 - 0x20
-            self.allocateEncrypted(move, 'anim_key', rawIdx) # 0x20 - 0x40
+            self.allocateEncrypted(move, 'anim_name_key', rawIdx) # 0x20 - 0x40
             self.writeInt(placeholder_address, 8)  # 0x40
             self.writeInt(placeholder_address, 8)  # 0x48
-            self.writeInt(move['anim_addr_enc1'], 4)  # 0x50
-            self.writeInt(move['anim_addr_enc2'], 4)  # 0x54
+            self.writeInt(move['anim_key'], 4)  # 0x50
+            self.writeInt(0, 4)  # 0x54 skeleton_id (not exported)
             self.allocateEncrypted(move, 'vuln', rawIdx) # 0x58 - 0x78
             self.allocateEncrypted(move, 'hitlevel', rawIdx) # 0x78 - 0x98
             self.writeInt(self.getCancelFromId(move['cancel_idx']), 8)  # 0x98
-            self.writeInt(0, 8)  # 0xA0
-            self.writeInt(0, 8)  # 0xA8
-            self.writeInt(move['u2'], 8)  # 0xB0
-            self.writeInt(move['u3'], 8)  # 0xB8
-            self.writeInt(move['u4'], 8)  # 0xC0
-            self.writeInt(move['u6'], 4)  # 0xC8
+            self.writeInt(move['cancel2_addr'], 8)  # 0xA0
+            self.writeInt(move['cancel2_related'], 4)  # 0xA8
+            self.writeInt(0, 4)  # 0xAC padding
+            self.writeInt(move['cancel3_addr'], 8)  # 0xB0
+            self.writeInt(move['cancel3_related'], 4)  # 0xB8
+            self.writeInt(0, 4)  # 0xBC padding
+            self.writeInt(move['cancel4_addr'], 8)  # 0xC0
+            self.writeInt(move['cancel4_related'], 4)  # 0xC8
             self.writeInt(move['transition'], 2)  # 0xCC
-            self.writeInt(move['_0xCE'], 2)  # 0xCE
-            self.allocateEncrypted(move, '_0xD0', rawIdx) # 0xD0 - 0xF0
-            self.allocateEncrypted(move, 'ordinal_id', rawIdx) # 0xF0 - 0x110
+            self.writeInt(move['end_rotation'], 2)  # 0xCE
+            self.allocateEncrypted(move, 't_char_id', rawIdx) # 0xD0 - 0xF0
+            self.allocateEncrypted(move, 'global_id', rawIdx) # 0xF0 - 0x110
             self.writeInt(self.getHitConditionFromId(move['hit_condition_idx']), 8)  # 0x110
-            self.writeInt(move['_0x118'], 4)  # 0x118
-            self.writeInt(move['_0x11C'], 4)  # 0x11C
+            self.writeInt(move['damage_override'], 2)  # 0x118
+            self.writeInt(0, 2)  # 0x11A padding
+            self.writeInt(move['anim_max_len_adjuster'], 4)  # 0x11C
             self.writeInt(move['anim_max_len'], 4)  # 0x120
 
             if self.m['version'] == "Tag2" or self.m['version'] == "Revolution":
@@ -1149,14 +1154,11 @@ class MotbinStruct:
             self.allocateHitBoxes(move, 6) # 0x250 - 0x280
             self.allocateHitBoxes(move, 7) # 0x280 - 0x2B0
             self.allocateHitBoxes(move, 8) # 0x2B0 - 0x2E0
-            if 'u16' in move:
-                self.writeInt(move['u16'], 2) # 0x2E0
-                self.writeInt(move['u17'], 2) # 0x2E2
-            else: # supporting older movesets
-                self.writeInt(move['u17'], 4) # 0x2E0
+            self.writeInt(move['u16'], 2) # 0x2E0
+            self.writeInt(move['u17'], 2) # 0x2E2
             for val in move['unk5']:
                 self.writeInt(val, 4)  # 0x2E4 - 0x444
-            self.writeInt(move['u18'], 4)  # 0x444
+            self.writeInt(0, 4)  # 0x444 padding
 
         for move_id in forbiddenMoveIds:
             self.forbidCancel(move_id, groupedCancels=True)

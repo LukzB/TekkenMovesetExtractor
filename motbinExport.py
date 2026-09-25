@@ -14,7 +14,7 @@ from zlib import crc32
 from concurrent.futures import ThreadPoolExecutor
 from Utils import getPlayerPointerPath, scanGameAddresses, getTekken8characterName
 
-exportVersion = "1.0.1"
+exportVersion = "1.0.2"
 
 def GetBigEndianAnimEnd(data, searchStart):
     return [
@@ -122,7 +122,7 @@ t8StructSizes = {
     'Projectile_size': 0xE0,
     'ThrowExtra_size': 0xC,
     'Throw_size': 0x10,
-    'UnknownParryRelated_size': 0x4,
+    'GlobalMoveIDList_size': 0x4,
     'DialogueManager_size': 0x18
 }
 
@@ -142,7 +142,7 @@ tag2StructSizes = {
     'Projectile_size': 0x88,
     'ThrowExtra_size': 0xC,
     'Throw_size': 0x8,
-    'UnknownParryRelated_size': 0x4
+    'GlobalMoveIDList_size': 0x4
 }
 
 t6StructSizes = {
@@ -161,7 +161,7 @@ t6StructSizes = {
     'Projectile_size': 0x88,
     'ThrowExtra_size': 0xC,
     'Throw_size': 0x8,
-    'UnknownParryRelated_size': 0x4
+    'GlobalMoveIDList_size': 0x4
 }
 
 t5StructSizes = {
@@ -180,7 +180,7 @@ t5StructSizes = {
     'Projectile_size': 0x88,
     'ThrowExtra_size': 0xC,
     'Throw_size': 0x8,
-    'UnknownParryRelated_size': 0x4
+    'GlobalMoveIDList_size': 0x4
 }
 
 structSizes = {
@@ -201,7 +201,7 @@ structSizes = {
         'Projectile_size': 0xa8,
         'ThrowExtra_size': 0xC,
         'Throw_size': 0x10,
-        'UnknownParryRelated_size': 0x4
+        'GlobalMoveIDList_size': 0x4
     },
     'tag2': tag2StructSizes,
     'rpcs3_tag2': tag2StructSizes,
@@ -226,12 +226,12 @@ structSizes = {
         'Projectile_size': 0x88,
         'ThrowExtra_size': 0xC,
         'Throw_size': 0x8,
-        'UnknownParryRelated_size': 0x4
+        'GlobalMoveIDList_size': 0x4
     },
 }
 
 t8_offsetTable = {
-    '_0x4': {'offset': 0x4, 'size': 4}, # compilation date. e.g, "20240719"
+    'compile_date': {'offset': 0x4, 'size': 4}, # compilation date. e.g, "20240719"
     'character_name': {'offset': None, 'size': 'stringPtr'},
     'creator_name': {'offset': None, 'size': 'stringPtr'},
     'date': {'offset': None, 'size': 'stringPtr'},
@@ -257,10 +257,10 @@ t8_offsetTable = {
     'cancel_extradata_list_size': {'offset': 0x1F8, 'size': 8},
     'extra_move_properties_ptr': {'offset': 0x200, 'size': 8},
     'extra_move_properties_size': {'offset': 0x208, 'size': 8},
-    'move_start_props_ptr': {'offset': 0x210, 'size': 8},
-    'move_start_props_size': {'offset': 0x218, 'size': 8},
-    'move_end_props_ptr': {'offset': 0x220, 'size': 8},
-    'move_end_props_size': {'offset': 0x228, 'size': 8},
+    'pre_move_props_ptr': {'offset': 0x210, 'size': 8},
+    'pre_move_props_size': {'offset': 0x218, 'size': 8},
+    'post_move_props_ptr': {'offset': 0x220, 'size': 8},
+    'post_move_props_size': {'offset': 0x228, 'size': 8},
     'movelist_head_ptr': {'offset': 0x230, 'size': 8},
     'movelist_size': {'offset': 0x238, 'size': 8},
     'voiceclip_list_ptr': {'offset': 0x240, 'size': 8},
@@ -269,8 +269,8 @@ t8_offsetTable = {
     'input_sequence_size': {'offset': 0x258, 'size': 8},
     'input_extradata_ptr': {'offset': 0x260, 'size': 8},
     'input_extradata_size': {'offset': 0x268, 'size': 8},
-    'unknown_parryrelated_list_ptr': {'offset': 0x270, 'size': 8},
-    'unknown_parryrelated_list_size': {'offset': 0x278, 'size': 8},
+    'parry_list_ptr': {'offset': 0x270, 'size': 8},
+    'parry_list_size': {'offset': 0x278, 'size': 8},
     'throw_extras_ptr': {'offset': 0x280, 'size': 8},
     'throw_extras_size': {'offset': 0x288, 'size': 8},
     'throws_ptr': {'offset': 0x290, 'size': 8},
@@ -324,7 +324,7 @@ t8_offsetTable = {
     'reactionlist:left_side_rotation': {'offset': 0x48, 'size': 2},
     'reactionlist:right_side_rotation': {'offset': 0x4A, 'size': 2},
     # vertical_pushback a.k.a front_counterhit_rotation
-    'reactionlist:vertical_pushback': {'offset': 0x4C, 'size': 4},
+    'reactionlist:vertical_pushback': {'offset': 0x4C, 'size': 2},
     'reactionlist:downed_rotation': {'offset': 0x4E, 'size': 2},
     # move ids
     'reactionlist:standing': {'offset': 0x50, 'size': 2},
@@ -349,26 +349,23 @@ t8_offsetTable = {
     'hitcondition:reaction_list_addr': {'offset': 0x10, 'size': 8},
 
     'extramoveprop:type': {'offset': 0x0, 'size': 4},
-    # 'extramoveprop:_0x4': {'offset': 0x4, 'size': 4}, # padding bytes, no longer read to be read
     'extramoveprop:requirement_addr': {'offset': 0x8, 'size': 8},
     'extramoveprop:id': {'offset': 0x10, 'size': 4},
-    'extramoveprop:value': {'offset': 0x14, 'size': 4},
-    'extramoveprop:value2': {'offset': 0x18, 'size': 4},
-    'extramoveprop:value3': {'offset': 0x1C, 'size': 4},
-    'extramoveprop:value4': {'offset': 0x20, 'size': 4},
-    # 'extramoveprop:value5': {'offset': 0x24, 'size': 4}, # padding bytes, no longer read to be read
+    'extramoveprop:param': {'offset': 0x14, 'size': 4},
+    'extramoveprop:param2': {'offset': 0x18, 'size': 4},
+    'extramoveprop:param3': {'offset': 0x1C, 'size': 4},
+    'extramoveprop:param4': {'offset': 0x20, 'size': 4},
 
     'move:encrypted_name_key': {'offset': 0x0, 'size': 8},
     'move:encrypted_name_key_key': {'offset': 0x8, 'size': 8},
     'move:name_key_related': {'offset': 0x10, 'size': (4, 4)},
-    'move:encrypted_anim_key': {'offset': 0x20, 'size': 8},
-    'move:encrypted_anim_key_key': {'offset': 0x28, 'size': 8},
-    'move:anim_key_related': {'offset': 0x30, 'size': (4, 4)},
+    'move:encrypted_anim_name_key': {'offset': 0x20, 'size': 8},
+    'move:encrypted_anim_name_key_key': {'offset': 0x28, 'size': 8},
+    'move:anim_name_key_related': {'offset': 0x30, 'size': (4, 4)},
     'move:anim_name': {'offset': None, 'size': 'stringPtr'},
     'move:name': {'offset': None, 'size': 'stringPtr'},
-    'move:anim_addr_enc1': {'offset': 0x50, 'size': 4},
-    'move:anim_addr_enc2': {'offset': 0x54, 'size': 4},
-    # 'move:anim_addr': {'offset': None, 'size': 8},
+    'move:anim_key': {'offset': 0x50, 'size': 4},
+    'move:skeleton_id': {'offset': 0x54, 'size': 4},
     'move:encrypted_vuln': {'offset': 0x58, 'size': 8},
     'move:encrypted_vuln_key': {'offset': 0x60, 'size': 8},
     'move:vuln_related': {'offset': 0x68, 'size': (4, 4)},
@@ -376,23 +373,23 @@ t8_offsetTable = {
     'move:encrypted_hit_level_key': {'offset': 0x80, 'size': 8},
     'move:hit_level_related': {'offset': 0x88, 'size': (4, 4)},
     'move:cancel_addr': {'offset': 0x98, 'size': 8},
-    'move:cancel1_addr': {'offset': 0xA0, 'size': 8},
-    'move:u1': { 'offset': 0xA8, 'size': 8 },
-    'move:u2': {'offset': 0xB0, 'size': 8},
-    'move:u3': {'offset': 0xB8, 'size': 8},
-    'move:u4': {'offset': 0xC0, 'size': 8},
-    'move:u6': {'offset': 0xC8, 'size': 4},
+    'move:cancel2_addr': {'offset': 0xA0, 'size': 8},
+    'move:cancel2_related': {'offset': 0xA8, 'size': 4},
+    'move:cancel3_addr': {'offset': 0xB0, 'size': 8},
+    'move:cancel3_related': {'offset': 0xB8, 'size': 4},
+    'move:cancel4_addr': {'offset': 0xC0, 'size': 8},
+    'move:cancel4_related': {'offset': 0xC8, 'size': 4},
     'move:transition': {'offset': 0xCC, 'size': 2},
-    'move:_0xCE': {'offset': 0xCE, 'size': 2},
-    'move:encrypted__0xD0': {'offset': 0xD0, 'size': 8},
-    'move:encrypted__0xD0_key': {'offset': 0xD8, 'size': 8},
-    'move:_0xD0_related': {'offset': 0xE0, 'size': (4, 4)},
-    'move:encrypted_ordinal_id': {'offset': 0xF0, 'size': 8},
-    'move:encrypted_ordinal_id_key': {'offset': 0xF8, 'size': 8},
-    'move:ordinal_id_related': {'offset': 0x100, 'size': (4, 4)},
+    'move:end_rotation': {'offset': 0xCE, 'size': 2},
+    'move:encrypted_t_char_id': {'offset': 0xD0, 'size': 8},
+    'move:encrypted_t_char_id_key': {'offset': 0xD8, 'size': 8},
+    'move:t_char_id_related': {'offset': 0xE0, 'size': (4, 4)},
+    'move:encrypted_global_id': {'offset': 0xF0, 'size': 8},
+    'move:encrypted_global_id_key': {'offset': 0xF8, 'size': 8},
+    'move:global_id_related': {'offset': 0x100, 'size': (4, 4)},
     'move:hit_condition_addr': {'offset': 0x110, 'size': 8},
-    'move:_0x118': {'offset': 0x118, 'size': 4},
-    'move:_0x11C': {'offset': 0x11C, 'size': 4},
+    'move:damage_override': {'offset': 0x118, 'size': 2},
+    'move:anim_max_len_adjuster': {'offset': 0x11C, 'size': 4},
     'move:anim_max_len': {'offset': 0x120, 'size': 4},
     'move:airborne_start': {'offset': 0x124, 'size': 4},
     'move:airborne_end': {'offset': 0x128, 'size': 4},
@@ -440,7 +437,7 @@ t8_offsetTable = {
     'move:u16': {'offset': 0x2E0, 'size': 2},
     'move:u17': {'offset': 0x2E2, 'size': 2},
     'move:unk5': {'offset': 0x2E4, 'size': (88, 4)},
-    'move:u18': {'offset': 0x444, 'size': 4},
+    # 'move:u18': {'offset': 0x444, 'size': 4}, padding
 
     'voiceclip:val1': {'offset': 0x0, 'size': 4},
     'voiceclip:val2': {'offset': 0x4, 'size': 4},
@@ -455,30 +452,32 @@ t8_offsetTable = {
     'inputsequence:extradata_addr': {'offset': 0x8, 'size': 8},
 
 
-    'throw:u1': {'offset': 0x0, 'size': 8},
+    'throw:side': {'offset': 0x0, 'size': 4},
     'throw:throwextra_addr': {'offset': 0x8, 'size': 8},
 
-    'unknownparryrelated:value': {'offset': 0x0, 'size': 4},
+    'parry_list:value': {'offset': 0x0, 'size': 4},
 
     'projectile:u1': {'offset': 0x0, 'size': (36, 4)},
     'projectile:hit_condition_addr': {'offset': 0x90, 'size': 8},
     'projectile:cancel_addr': {'offset': 0x98, 'size': 8},
     'projectile:u2': {'offset': 0xA0, 'size': (16, 4)},
 
-    'throwextra:u1': {'offset': 0x0, 'size': 4},
-    'throwextra:u2': {'offset': 4, 'size': (4, 2)},
+    'throwextra:pick_probability': {'offset': 0x0, 'size': 4},
+    'throwextra:camera_type': {'offset': 0x4, 'size': 2},
+    'throwextra:left_side_camera_data': {'offset': 0x6, 'size': 2},
+    'throwextra:right_side_camera_data': {'offset': 0x8, 'size': 2},
+    'throwextra:additional_rotation': {'offset': 0xA, 'size': 2},
 
     'othermoveprop:requirement_addr': {'offset': 0x0, 'size': 8},
     'othermoveprop:id': {'offset': 0x8, 'size': 4},
-    'othermoveprop:value': {'offset': 0xC, 'size': 4},
-    'othermoveprop:value2': {'offset': 0x10, 'size': 4},
-    'othermoveprop:value3': {'offset': 0x14, 'size': 4},
-    'othermoveprop:value4': {'offset': 0x18, 'size': 4},
+    'othermoveprop:param': {'offset': 0xC, 'size': 4},
+    'othermoveprop:param2': {'offset': 0x10, 'size': 4},
+    'othermoveprop:param3': {'offset': 0x14, 'size': 4},
+    'othermoveprop:param4': {'offset': 0x18, 'size': 4},
     # 'othermoveprop:value5': {'offset': 0x1C, 'size': 4}, # padding bytes, no longer read to be read
 
     'dialogues:type': { 'offset': 0x0, 'size': 2 },
     'dialogues:id': { 'offset': 0x2, 'size': 2 },
-    # 'dialogues:_0x4': { 'offset': 0x4, 'size': 4 }, # padding bytes, no longer read to be read
     'dialogues:requirement_addr': { 'offset': 0x8, 'size': 8 },
     'dialogues:voiceclip_key': { 'offset': 0x10, 'size': 4 },
     'dialogues:facial_anim_idx': { 'offset': 0x14, 'size': 4 },
@@ -518,8 +517,8 @@ t7_offsetTable = {
     'input_sequence_size': {'offset': 0x238, 'size': 8},
     'input_extradata_ptr': {'offset': 0x240, 'size': 8},
     'input_extradata_size': {'offset': 0x248, 'size': 8},
-    'unknown_parryrelated_list_ptr': {'offset': 0x250, 'size': 8},
-    'unknown_parryrelated_list_size': {'offset': 0x258, 'size': 8},
+    'parry_list_ptr': {'offset': 0x250, 'size': 8},
+    'parry_list_size': {'offset': 0x258, 'size': 8},
     'throw_extras_ptr': {'offset': 0x260, 'size': 8},
     'throw_extras_size': {'offset': 0x268, 'size': 8},
     'throws_ptr': {'offset': 0x270, 'size': 8},
@@ -527,7 +526,8 @@ t7_offsetTable = {
 
     'mota_start': {'offset': 0x280, 'size': None},
     # 112 aliases + 36 ??? of 2 bytes
-    'aliases': {'offset': 0x28, 'size': (148, 2)},
+    'aliases': {'offset': 0x28, 'size': (148, 2)}, # TODO: rename them "original_aliases" everywhere. 56 x 2
+    # TODO: split "aliases2" into "current_aliases[56]" and "unknown_aliases[36]" - each element size is 2 bytes.
     # 112 aliases + 36 ??? of 2 bytes
     'aliases2': {'offset': 0x108, 'size': (36, 2)},
 
@@ -555,6 +555,54 @@ t7_offsetTable = {
     # array of 7 variables, each 8 bytes long
     'reactionlist:ptr_list': {'offset': 0x0, 'size': (7, 8)},
     # array of 6 variables, each 2 bytes long
+
+    """
+    #TODO: rename / expand u1list according to this.
+struct TK_Reaction {
+  // Array
+  TK_Pushback *front_pushback;
+  TK_Pushback *backturned_pushback;
+  TK_Pushback *left_side_pushback;
+  TK_Pushback *right_side_pushback;
+  TK_Pushback *front_counterhit_pushback;
+  TK_Pushback *downed_pushback;
+  TK_Pushback *block_pushback;
+
+  // Directions
+  int16_t front_direction;            // Offset: 0x38
+  int16_t back_direction;             // Offset: 0x3a
+  int16_t left_side_direction;        // Offset: 0x3c
+  int16_t right_side_direction;       // Offset: 0x3e
+  int16_t front_counterhit_direction; // Offset: 0x40
+  int16_t downed_direction;           // Offset: 0x42
+
+  // Rotations
+  int16_t front_rotation;      // Offset: 0x44
+  int16_t back_rotation;       // Offset: 0x46
+  int16_t left_side_rotation;  // Offset: 0x48
+  int16_t right_side_rotation; // Offset: 0x4a
+  int16_t vertical_pushback; // Offset: 0x4c (a.k.a front_counterhit_rotation)
+  int16_t downed_rotation;   // Offset: 0x4e
+
+  // Move IDs
+  uint16_t standing;          // Offset: 0x50
+  uint16_t crouch;            // Offset: 0x52
+  uint16_t ch;                // Offset: 0x54
+  uint16_t crouch_ch;         // Offset: 0x56
+  uint16_t left_side;         // Offset: 0x58
+  uint16_t left_side_crouch;  // Offset: 0x5a
+  uint16_t right_side;        // Offset: 0x5c
+  uint16_t right_side_crouch; // Offset: 0x5e
+  uint16_t back;              // Offset: 0x60
+  uint16_t back_crouch;       // Offset: 0x62
+  uint16_t block;             // Offset: 0x64
+  uint16_t crouch_block;      // Offset: 0x66
+  uint16_t wallslump;         // Offset: 0x68
+  uint16_t downed;            // Offset: 0x6a
+  // uint16_t unk1;              // Offset: 0x6c padding
+  // uint16_t unk2;              // Offset: 0x6e padding
+};
+    """
     'reactionlist:u1list': {'offset': 0x38, 'size': (6, 2)},
     'reactionlist:vertical_pushback': {'offset': 0x4C, 'size': 2},
     'reactionlist:standing': {'offset': 0x50, 'size': 2},
@@ -625,10 +673,10 @@ t7_offsetTable = {
     'inputsequence:extradata_addr': {'offset': 0x8, 'size': 8},
 
 
-    'throw:u1': {'offset': 0x0, 'size': 8},
+    'throw:u1': {'offset': 0x0, 'size': 4},
     'throw:throwextra_addr': {'offset': 0x8, 'size': 8},
 
-    'unknownparryrelated:value': {'offset': 0x0, 'size': 4},
+    'parry_list:value': {'offset': 0x0, 'size': 4},
 
     'projectile:u1': {'offset': 0x0, 'size': (48, 2)},
     'projectile:hit_condition_addr': {'offset': 0x60, 'size': 8},
@@ -673,8 +721,8 @@ tag2_offsetTable = {
     'input_sequence_size': {'offset': 0x1b4, 'size': 4},
     'input_extradata_ptr': {'offset': 0x1b8, 'size': 4},
     'input_extradata_size': {'offset': 0x1bc, 'size': 4},
-    'unknown_parryrelated_list_ptr': {'offset': 0x1c0, 'size': 4},
-    'unknown_parryrelated_list_size': {'offset': 0x1c4, 'size': 4},
+    'parry_list_ptr': {'offset': 0x1c0, 'size': 4},
+    'parry_list_size': {'offset': 0x1c4, 'size': 4},
     'throw_extras_ptr': {'offset': 0x1c8, 'size': 4},
     'throw_extras_size': {'offset': 0x1cc, 'size': 4},
     'throws_ptr': {'offset': 0x1d0, 'size': 4},
@@ -781,7 +829,7 @@ tag2_offsetTable = {
     'throw:u1': {'offset': 0x0, 'size': 4},
     'throw:throwextra_addr': {'offset': 0x4, 'size': 4},
 
-    'unknownparryrelated:value': {'offset': 0x0, 'size': 4},
+    'parry_list:value': {'offset': 0x0, 'size': 4},
 
     'projectile:u1': {'offset': 0x0, 'size': (48, None)},  # 48 * [0]
     'projectile:hit_condition_addr': {'offset': None, 'size': 4},  # 0
@@ -826,8 +874,8 @@ t6_offsetTable = {
     'input_sequence_size': {'offset': None, 'size': 4},  # unknown
     'input_extradata_ptr': {'offset': None, 'size': 4},  # unknown
     'input_extradata_size': {'offset': None, 'size': 4},  # unknown
-    'unknown_parryrelated_list_ptr': {'offset': None, 'size': 4},  # unknown
-    'unknown_parryrelated_list_size': {'offset': None, 'size': 4},  # unknown
+    'parry_list_ptr': {'offset': None, 'size': 4},  # unknown
+    'parry_list_size': {'offset': None, 'size': 4},  # unknown
     'throw_extras_ptr': {'offset': 0x22c, 'size': 4},
     'throw_extras_size': {'offset': 0x230, 'size': 4},
     'throws_ptr': {'offset': None, 'size': 4},  # unknown, prob 0x224
@@ -933,7 +981,7 @@ t6_offsetTable = {
     'throw:u1': {'offset': None, 'size': 4},
     'throw:throwextra_addr': {'offset': None, 'size': 4},
 
-    'unknownparryrelated:value': {'offset': None, 'size': 4},
+    'parry_list:value': {'offset': None, 'size': 4},
 
     'projectile:u1': {'offset': 0x0, 'size': (48, None)},  # 48 * [0]
     'projectile:hit_condition_addr': {'offset': None, 'size': 4},  # 0
@@ -978,8 +1026,8 @@ t5_offsetTable = {
     'input_sequence_size': {'offset': 0x1ec, 'size': 4},
     'input_extradata_ptr': {'offset': 0x1f0, 'size': 4},
     'input_extradata_size': {'offset': 0x1f4, 'size': 4},
-    'unknown_parryrelated_list_ptr': {'offset': None, 'size': 4},
-    'unknown_parryrelated_list_size': {'offset': None, 'size': 4},
+    'parry_list_ptr': {'offset': None, 'size': 4},
+    'parry_list_size': {'offset': None, 'size': 4},
     'throw_extras_ptr': {'offset': None, 'size': 4},
     'throw_extras_size': {'offset': None, 'size': 4},
     'throws_ptr': {'offset': None, 'size': 4},
@@ -1085,7 +1133,7 @@ t5_offsetTable = {
     'throw:u1': {'offset': 0x0, 'size': 4},
     'throw:throwextra_addr': {'offset': 0x4, 'size': 4},
 
-    'unknownparryrelated:value': {'offset': 0x0, 'size': 4},
+    'parry_list:value': {'offset': 0x0, 'size': 4},
 
     'projectile:u1': {'offset': 0x0, 'size': (48, None)},  # 48 * [0]
     'projectile:hit_condition_addr': {'offset': None, 'size': 4},  # 0
@@ -1130,8 +1178,8 @@ t5dr_offsetTable = {
     'input_sequence_size': {'offset': 0x1f4, 'size': 4},  # unknown
     'input_extradata_ptr': {'offset': 0x1f8, 'size': 4},  # unknown
     'input_extradata_size': {'offset': 0x1fc, 'size': 4},  # unknown
-    'unknown_parryrelated_list_ptr': {'offset': None, 'size': 4},  # unknown
-    'unknown_parryrelated_list_size': {'offset': None, 'size': 4},  # unknown
+    'parry_list_ptr': {'offset': None, 'size': 4},  # unknown
+    'parry_list_size': {'offset': None, 'size': 4},  # unknown
     'throw_extras_ptr': {'offset': None, 'size': 4},  # unknown
     'throw_extras_size': {'offset': None, 'size': 4},  # unknown
     'throws_ptr': {'offset': None, 'size': 4},  # unknown
@@ -1237,7 +1285,7 @@ t5dr_offsetTable = {
     'throw:u1': {'offset': 0x0, 'size': 4},
     'throw:throwextra_addr': {'offset': 0x4, 'size': 4},
 
-    'unknownparryrelated:value': {'offset': 0x0, 'size': 4},
+    'parry_list:value': {'offset': 0x0, 'size': 4},
 
     'projectile:u1': {'offset': 0x0, 'size': (48, None)},  # 48 * [0]
     'projectile:hit_condition_addr': {'offset': None, 'size': 4},  # 0
@@ -1282,8 +1330,8 @@ t4_offsetTable = {
     'input_sequence_size': {'offset': None, 'size': 4},  # unknown
     'input_extradata_ptr': {'offset': None, 'size': 4},  # unknown
     'input_extradata_size': {'offset': None, 'size': 4},  # unknown
-    'unknown_parryrelated_list_ptr': {'offset': None, 'size': 4},  # unknown
-    'unknown_parryrelated_list_size': {'offset': None, 'size': 4},  # unknown
+    'parry_list_ptr': {'offset': None, 'size': 4},  # unknown
+    'parry_list_size': {'offset': None, 'size': 4},  # unknown
     'throw_extras_ptr': {'offset': None, 'size': 4},  # unknown
     'throw_extras_size': {'offset': None, 'size': 4},  # unknown
     'throws_ptr': {'offset': None, 'size': 4},  # unknown
@@ -1389,7 +1437,7 @@ t4_offsetTable = {
     'throw:u1': {'offset': 0x0, 'size': 4},
     'throw:throwextra_addr': {'offset': 0x4, 'size': 4},
 
-    'unknownparryrelated:value': {'offset': 0x0, 'size': 4},
+    'parry_list:value': {'offset': 0x0, 'size': 4},
 
     'projectile:u1': {'offset': 0x0, 'size': (48, None)},  # 48 * [0]
     'projectile:hit_condition_addr': {'offset': None, 'size': 4},  # 0
@@ -2104,19 +2152,21 @@ class ExtraMoveProperty:
         self.requirement_idx = requirement_idx
 
     def dict(self):
-        _dict = {
+        if self.TekkenVersion == 't8':
+            return {
+                'id': self.id,
+                'type': self.type,
+                'requirement_idx': self.requirement_idx,
+                'param': self.param,
+                'param2': self.param2,
+                'param3': self.param3,
+                'param4': self.param4,
+            }
+        return {
             'id': self.id,
             'type': self.type,
             'value': self.value
         }
-        if self.TekkenVersion == 't8':
-            # _dict['_0x4'] = self._0x4
-            _dict['requirement_idx'] = self.requirement_idx
-            _dict['value2'] = self.value2
-            _dict['value3'] = self.value3
-            _dict['value4'] = self.value4
-            # _dict['value5'] = self.value5
-        return _dict
 
 
 class OtherMoveProperty:
@@ -2136,11 +2186,10 @@ class OtherMoveProperty:
         if self.TekkenVersion == 't8':
             _dict['id'] = self.id
             _dict['requirement_idx'] = self.requirement_idx
-            _dict['value'] = self.value
-            _dict['value2'] = self.value2
-            _dict['value3'] = self.value3
-            _dict['value4'] = self.value4
-            # _dict['value5'] = self.value5
+            _dict['param'] = self.param
+            _dict['param2'] = self.param2
+            _dict['param3'] = self.param3
+            _dict['param4'] = self.param4
         return _dict
 
 class Move:
@@ -2171,17 +2220,17 @@ class Move:
 
             # Decrypting values
             self.name_key = parent.decryptValue(addr + get_offset(t8_offsetTable, 'move:encrypted_name_key'))
-            self.anim_key = parent.decryptValue(addr + get_offset(t8_offsetTable, 'move:encrypted_anim_key'))
+            self.anim_name_key = parent.decryptValue(addr + get_offset(t8_offsetTable, 'move:encrypted_anim_name_key'))
             self.vuln = parent.decryptValue(addr + get_offset(t8_offsetTable, 'move:encrypted_vuln'))
             self.hitlevel = parent.decryptValue(addr + get_offset(t8_offsetTable, 'move:encrypted_hit_level'))
-            self._0xD0 = parent.decryptValue(addr + get_offset(t8_offsetTable, 'move:encrypted__0xD0'))
-            self.ordinal_id = parent.decryptValue(addr + get_offset(t8_offsetTable, 'move:encrypted_ordinal_id'))
+            self.t_char_id = parent.decryptValue(addr + get_offset(t8_offsetTable, 'move:encrypted_t_char_id'))
+            self.global_id = parent.decryptValue(addr + get_offset(t8_offsetTable, 'move:encrypted_global_id'))
 
             # Mapping Name keys
             n_key = str(self.name_key)
-            a_key = str(self.anim_key)
+            a_key = str(self.anim_name_key)
             self.name = move_name_keys_mapping[n_key] if n_key in move_name_keys_mapping else self.name
-            self.anim_name = move_name_keys_mapping[a_key] if a_key in move_name_keys_mapping else hex(int(self.anim_key))
+            self.anim_name = move_name_keys_mapping[a_key] if a_key in move_name_keys_mapping else hex(int(self.anim_name_key))
 
     # def getAliasedId(self, moveId: int, aliases: list):
     #     if aliases.index(moveId) != -1:
@@ -2190,52 +2239,44 @@ class Move:
     def dict(self):
         return {
             'name_key': self.name_key,
-            'anim_key': self.anim_key,
+            'anim_name_key': self.anim_name_key,
             # 'encrypted_name_key': self.encrypted_name_key,
             # 'encrypted_name_key_key': self.encrypted_name_key_key,
             # 'name_key_related': self.name_key_related,
-            'encrypted_name_key_key': COMMON_ENCRYPTION_KEY,
-            # 'encrypted_anim_key': self.encrypted_anim_key,
-            # 'encrypted_anim_key_key': self.encrypted_anim_key_key,
-            # 'anim_key_related': self.anim_key_related,
-            'encrypted_anim_key_key': COMMON_ENCRYPTION_KEY,
+            # 'encrypted_name_key_key': COMMON_ENCRYPTION_KEY,
+            # 'encrypted_anim_name_key': self.encrypted_anim_name_key,
+            # 'encrypted_anim_name_key_key': self.encrypted_anim_name_key_key,
+            # 'anim_name_key_related': self.anim_name_key_related,
+            # 'encrypted_anim_name_key_key': COMMON_ENCRYPTION_KEY,
             'anim_name': self.anim_name,
             'name': self.name,
-            'anim_addr_enc1': self.anim_addr_enc1,
-            'anim_addr_enc2': self.anim_addr_enc2,
+            'anim_key': self.anim_key,
+            # 'skeleton_id': self.skeleton_id,
             'vuln': self.vuln,
-            'encrypted_vuln_key': COMMON_ENCRYPTION_KEY,
+            # 'encrypted_vuln_key': COMMON_ENCRYPTION_KEY,
             # 'encrypted_vuln': self.encrypted_vuln,
             # 'encrypted_vuln_key': self.encrypted_vuln_key,
             # 'vuln_related': self.vuln_related,
             'hitlevel': self.hitlevel,
-            'encrypted_hitlevel_key': COMMON_ENCRYPTION_KEY,
+            # 'encrypted_hitlevel_key': COMMON_ENCRYPTION_KEY,
             # 'encrypted_hitlevel': self.encrypted_hit_level,
             # 'encrypted_hitlevel_key': self.encrypted_hit_level_key,
             # 'hitlevel_related': self.hit_level_related,
             'cancel_idx': self.cancel_idx,
-            'cancel1_addr': self.cancel1_addr,
-            'u1': self.u1,
-            'u2': self.u2,
-            'u3': self.u3,
-            'u4': self.u4,
-            'u6': self.u6,
+            'cancel2_addr': self.cancel2_addr,
+            'cancel2_related': self.cancel2_related,
+            'cancel3_addr': self.cancel3_addr,
+            'cancel3_related': self.cancel3_related,
+            'cancel4_addr': self.cancel4_addr,
+            'cancel4_related': self.cancel4_related,
             'transition': self.transition,
             'anim_max_len': self.anim_max_len,
-            '_0xCE': self._0xCE,
-            '_0xD0': self._0xD0,
-            # 'encrypted__0xD0': self.encrypted__0xD0,
-            # 'encrypted__0xD0_key': self.encrypted__0xD0_key,
-            # '_0xD0_related': self._0xD0_related,
-            'encrypted__0xD0_key': COMMON_ENCRYPTION_KEY,
-            'ordinal_id': self.ordinal_id,
-            'encrypted_ordinal_id_key': COMMON_ENCRYPTION_KEY,
-            # 'encrypted_ordinal_id': self.encrypted_ordinal_id,
-            # 'encrypted_ordinal_id_key': self.encrypted_ordinal_id_key,
-            # 'ordinal_id_related': self.ordinal_id_related,
+            'end_rotation': self.end_rotation,
+            't_char_id': self.t_char_id,
+            'global_id': self.global_id,
             'hit_condition_idx': self.hit_condition_idx,
-            '_0x118': self._0x118,
-            '_0x11C': self._0x11C,
+            'damage_override': self.damage_override,
+            'anim_max_len_adjuster': self.anim_max_len_adjuster,
             'airborne_start': self.airborne_start,
             'airborne_end': self.airborne_end,
             'ground_fall': self.ground_fall,
@@ -2248,42 +2289,19 @@ class Move:
             '_0x154': self._0x154,
             'first_active_frame': self.startup,
             'last_active_frame': self.recovery,
-            'hitbox1_first_active_frame': self.hitbox1_startup,
-            'hitbox1_last_active_frame': self.hitbox1_recovery,
-            'hitbox1_location': self.hitbox1,
-            'hitbox1_related_floats': self.hitbox1_related_floats,
-            'hitbox2_first_active_frame': self.hitbox2_startup,
-            'hitbox2_last_active_frame': self.hitbox2_recovery,
-            'hitbox2_location': self.hitbox2,
-            'hitbox2_related_floats': self.hitbox2_related_floats,
-            'hitbox3_first_active_frame': self.hitbox3_startup,
-            'hitbox3_last_active_frame': self.hitbox3_recovery,
-            'hitbox3_location': self.hitbox3,
-            'hitbox3_related_floats': self.hitbox3_related_floats,
-            'hitbox4_first_active_frame': self.hitbox4_startup,
-            'hitbox4_last_active_frame': self.hitbox4_recovery,
-            'hitbox4_location': self.hitbox4,
-            'hitbox4_related_floats': self.hitbox4_related_floats,
-            'hitbox5_first_active_frame': self.hitbox5_startup,
-            'hitbox5_last_active_frame': self.hitbox5_recovery,
-            'hitbox5_location': self.hitbox5,
-            'hitbox5_related_floats': self.hitbox5_related_floats,
-            'hitbox6_first_active_frame': self.hitbox6_startup,
-            'hitbox6_last_active_frame': self.hitbox6_recovery,
-            'hitbox6_location': self.hitbox6,
-            'hitbox6_related_floats': self.hitbox6_related_floats,
-            'hitbox7_first_active_frame': self.hitbox7_startup,
-            'hitbox7_last_active_frame': self.hitbox7_recovery,
-            'hitbox7_location': self.hitbox7,
-            'hitbox7_related_floats': self.hitbox7_related_floats,
-            'hitbox8_first_active_frame': self.hitbox8_startup,
-            'hitbox8_last_active_frame': self.hitbox8_recovery,
-            'hitbox8_location': self.hitbox8,
-            'hitbox8_related_floats': self.hitbox8_related_floats,
+            'hitboxes': [
+                {
+                    'first_active_frame': getattr(self, 'hitbox%d_startup' % i),
+                    'last_active_frame': getattr(self, 'hitbox%d_recovery' % i),
+                    'location': getattr(self, 'hitbox%d' % i),
+                    'related_floats': getattr(self, 'hitbox%d_related_floats' % i),
+                }
+                for i in range(1, 9)
+            ],
             'u16': self.u16,
             'u17': self.u17,
             'unk5': self.unk5,
-            'u18': self.u18
+            # 'u18': self.u18
         }
 
     def setCancelIdx(self, cancel_idx):
@@ -2407,6 +2425,14 @@ class ThrowExtra:
         readOffsetTable(self, 'throwextra')
 
     def dict(self):
+        if hasattr(self, 'pick_probability'):
+            return {
+                'pick_probability': self.pick_probability,
+                'camera_type': self.camera_type,
+                'left_side_camera_data': self.left_side_camera_data,
+                'right_side_camera_data': self.right_side_camera_data,
+                'additional_rotation': self.additional_rotation,
+            }
         return {
             'u1': self.u1,
             'u2': self.u2
@@ -2422,6 +2448,11 @@ class Throw:
         self.throwextra_idx = -1
 
     def dict(self):
+        if hasattr(self, 'side'):
+            return {
+                'side': self.side,
+                'throwextra_idx': self.throwextra_idx
+            }
         return {
             'u1': self.u1,
             'throwextra_idx': self.throwextra_idx
@@ -2431,12 +2462,12 @@ class Throw:
         self.throwextra_idx = idx
 
 
-class UnknownParryRelated:
+class GlobalMoveID:
     def __init__(self, addr, parent):
         data = initTekkenStructure(
-            self, parent, addr, parent.UnknownParryRelated_size)
+            self, parent, addr, parent.GlobalMoveIDList_size)
 
-        readOffsetTable(self, 'unknownparryrelated')
+        readOffsetTable(self, 'parry_list')
 
     def dict(self):
         return self.value
@@ -2454,7 +2485,6 @@ class DialogueManager:
         return {
             'type': self.type,
             'id': self.id,
-            # '_0x4': self._0x4,
             'requirement_idx': self.requirement_idx,
             'voiceclip_key': self.voiceclip_key,
             'facial_anim_idx': self.facial_anim_idx,
@@ -2706,13 +2736,13 @@ def _t8AnimNamesByInstance(moves):
     mapping = globals().get('move_name_keys_mapping') or {}
     names = {}
     for move in moves:
-        anim_key = move.get('anim_key')
-        if anim_key is None:
+        anim_name_key = move.get('anim_name_key')
+        if anim_name_key is None:
             continue
-        name = mapping.get(str(anim_key))
+        name = mapping.get(str(anim_name_key))
         if not name:
             continue
-        names[move.get('anim_addr_enc1', 0) & 0xFFFFFFFF] = name
+        names[move.get('anim_key', 0) & 0xFFFFFFFF] = name
     return names
 
 
@@ -2971,7 +3001,7 @@ class Motbin:
             'version': self.version,
             'character_id': self.chara_id,
             'extraction_date': self.extraction_date,
-            **({'_0x4': self._0x4 } if hasattr(self, '_0x4') else {}),
+            **({'compile_date': self.compile_date } if hasattr(self, 'compile_date') else {}),
             'character_name': self.name,
             'tekken_character_name': self.character_name,
             'creator_name': self.creator_name,
@@ -3123,9 +3153,9 @@ class Motbin:
     def extractMoveset(self):
         self.printBasicData()
 
-        print("Reading parry-related...")
-        for i in range(self.unknown_parryrelated_list_size):
-            unknown = UnknownParryRelated(self.unknown_parryrelated_list_ptr + (i * self.UnknownParryRelated_size), self)
+        print("Reading parry-related (global move ids)...")
+        for i in range(self.parry_list_size):
+            unknown = GlobalMoveID(self.parry_list_ptr + (i * self.GlobalMoveIDList_size), self)
             self.parry_related.append(unknown.dict())
 
         if self.input_extradata_size != 0:
@@ -3197,14 +3227,14 @@ class Motbin:
 
         if self.TekkenVersion == 't8':
             print("Reading move start extra properties...")
-            for i in range(self.move_start_props_size):
-                move_start_props = OtherMoveProperty(self.move_start_props_ptr + (i * self.OtherMoveProperty_size), self)
+            for i in range(self.pre_move_props_size):
+                move_start_props = OtherMoveProperty(self.pre_move_props_ptr + (i * self.OtherMoveProperty_size), self)
                 move_start_props.setRequirementId((move_start_props.requirement_addr - self.requirements_ptr) // self.Requirement_size)
                 self.move_start_props.append(move_start_props.dict())
 
             print("Reading move end extra properties...")
-            for i in range(self.move_end_props_size):
-                move_end_props = OtherMoveProperty(self.move_end_props_ptr + (i * self.OtherMoveProperty_size), self)
+            for i in range(self.post_move_props_size):
+                move_end_props = OtherMoveProperty(self.post_move_props_ptr + (i * self.OtherMoveProperty_size), self)
                 move_end_props.setRequirementId((move_end_props.requirement_addr - self.requirements_ptr) // self.Requirement_size)
                 self.move_end_props.append(move_end_props.dict())
 
@@ -3248,9 +3278,9 @@ class Motbin:
             if move.extra_properties_ptr != 0:
                 move.setExtraPropertiesIdx((move.extra_properties_ptr - self.extra_move_properties_ptr) // self.ExtraMoveProperty_size)
             if self.TekkenVersion == 't8' and move.move_start_properties_ptr != 0:
-                move.setMoveStartPropertiesIdx((move.move_start_properties_ptr - self.move_start_props_ptr) // self.OtherMoveProperty_size)
+                move.setMoveStartPropertiesIdx((move.move_start_properties_ptr - self.pre_move_props_ptr) // self.OtherMoveProperty_size)
             if self.TekkenVersion == 't8' and move.move_end_properties_ptr != 0:
-                move.setMoveEndPropertiesIdx((move.move_end_properties_ptr - self.move_end_props_ptr) // self.OtherMoveProperty_size)
+                move.setMoveEndPropertiesIdx((move.move_end_properties_ptr - self.post_move_props_ptr) // self.OtherMoveProperty_size)
             if move.voiceclip_ptr != 0:
                 move.setVoiceclipId((move.voiceclip_ptr - self.voiceclip_list_ptr) // self.Voiceclip_size)
             self.moves.append(move.dict())
