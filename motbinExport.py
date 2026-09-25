@@ -126,6 +126,9 @@ t8StructSizes = {
     'DialogueManager_size': 0x18
 }
 
+# TK_Motbin header size (through arc_mota_ptr). Tables follow contiguously.
+T8_MOTBIN_HEADER_SIZE = 0x318
+
 tag2StructSizes = {
     'Pushback_size': 0xC,
     'PushbackExtradata_size': 0x2,
@@ -1616,7 +1619,17 @@ def initTekkenStructure(self, parent, addr=0, size=0):
     self.bToInt = parent.bToInt
 
     if addr != 0 and size != 0:
-        self.data = self.readBytes(self.base + addr, size)
+        blob = getattr(parent, 'moveset_blob', None)
+        blob_base = getattr(parent, 'moveset_base', None)
+        if blob is not None and blob_base is not None:
+            offset = addr - blob_base
+            if offset < 0 or offset + size > len(blob):
+                raise Exception(
+                    'Structure read outside moveset blob: addr=0x%x size=0x%x blob=[0x%x, +0x%x)'
+                    % (addr, size, blob_base, len(blob)))
+            self.data = blob[offset:offset + size]
+        else:
+            self.data = self.readBytes(self.base + addr, size)
     else:
         self.data = None
     return self.data
@@ -2251,7 +2264,7 @@ class Move:
             'anim_name': self.anim_name,
             'name': self.name,
             'anim_key': self.anim_key,
-            # 'skeleton_id': self.skeleton_id,
+            'skeleton_id': self.skeleton_id,
             'vuln': self.vuln,
             # 'encrypted_vuln_key': COMMON_ENCRYPTION_KEY,
             # 'encrypted_vuln': self.encrypted_vuln,
@@ -2875,6 +2888,8 @@ class Motbin:
         initTekkenStructure(self, exporterObject, addr, size=0)
         setStructureSizes(self)
         self.folder_destination = exporterObject.folder_destination
+        self.moveset_blob = None
+        self.moveset_base = addr
 
         self.name = ''
         self.version = versionLabels[self.TekkenVersion]
@@ -2882,6 +2897,9 @@ class Motbin:
         self.extraction_path = ''
 
         try:
+            if self.TekkenVersion == 't8':
+                self.loadT8MovesetBlob()
+
             readOffsetTable(self, '')
 
             mota_start = self.offsetTable['mota_start']['offset']
@@ -2937,9 +2955,33 @@ class Motbin:
         self.parry_related = []
         self.dialogue_managers = []
 
+    def loadT8MovesetBlob(self):
+        """One MotHead peek, then one RPM of [motbin .. end of TK_Dialogue array]."""
+        addr = self.addr
+        header = self.readBytes(self.base + addr, T8_MOTBIN_HEADER_SIZE)
+        dialogues_ptr = self.bToInt(header, 0x2A0, 8)
+        dialogues_count = self.bToInt(header, 0x2A8, 8) & 0xFFFFFFFF
+        end = dialogues_ptr + dialogues_count * self.DialogueManager_size
+        if dialogues_ptr < addr or end < addr + T8_MOTBIN_HEADER_SIZE:
+            raise Exception(
+                'Invalid T8 moveset bounds: start=0x%x dialogues_ptr=0x%x count=%d end=0x%x'
+                % (addr, dialogues_ptr, dialogues_count, end))
+
+        size = end - addr
+        print("Reading moveset blob: 0x%x .. 0x%x (%d bytes, %d dialogues)..."
+              % (addr, end, size, dialogues_count))
+        self.moveset_blob = self.readBytes(self.base + addr, size)
+        self.moveset_base = addr
+        self.data = self.moveset_blob
+
     def decryptValue(self, addr):
-        enc_value = self.readInt(addr, 8)
-        enc_key = self.readInt(addr + 8, 8)
+        if self.moveset_blob is not None:
+            off = addr - self.moveset_base
+            enc_value = self.bToInt(self.moveset_blob, off, 8)
+            enc_key = self.bToInt(self.moveset_blob, off + 8, 8)
+        else:
+            enc_value = self.readInt(addr, 8)
+            enc_key = self.readInt(addr + 8, 8)
         return validateAndTransform64BitValue(enc_value, enc_key) # decryption
     
     def getCharacterNameFromBytes(self):

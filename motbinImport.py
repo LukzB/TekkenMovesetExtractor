@@ -9,7 +9,7 @@ import sys
 from copy import deepcopy
 from Utils import scanGameAddresses, getTekken8characterName
 
-importVersion = "1.0.1"
+importVersion = "1.0.2"
 
 requirement_size = 0x14
 cancel_size = 0x28
@@ -209,11 +209,11 @@ class Importer:
         pushback_extras_ptr, pushback_extras_count = p.allocatePushbackExtras()
         pushback_ptr, pushback_list_count = p.allocatePushbacks()
         reaction_list_ptr, reaction_list_count = p.allocateReactionList()
+        hit_conditions_ptr, hit_conditions_count = p.allocateHitConditions()
         extra_move_properties_ptr, extra_move_properties_count = p.allocateExtraMoveProperties()
         move_start_props_ptr, move_start_props_count = p.allocateMoveStartProperties()
         move_end_props_ptr, move_end_props_count = p.allocateMoveEndProperties()
         voiceclip_list_ptr, voiceclip_list_count = p.allocateVoiceclipIds()
-        hit_conditions_ptr, hit_conditions_count = p.allocateHitConditions()
         moves_ptr, move_count = p.allocateMoves()
         input_extradata_ptr, input_extradata_count = p.allocateInputExtradata()
         input_sequences_ptr, input_sequences_count = p.allocateInputSequences()
@@ -226,7 +226,7 @@ class Importer:
         p.allocateMota()
 
         self.writeInt(p.motbin_ptr + 0x0, 65536, 4)
-        self.writeInt(p.motbin_ptr + 0x4, m['_0x4'], 4)
+        self.writeInt(p.motbin_ptr + 0x4, m['compile_date'], 4)
         self.writeInt(p.motbin_ptr + 0x8, 0x4B4554, 4)
 
         # self.writeInt(p.motbin_ptr, character_name, 8)
@@ -364,7 +364,10 @@ def versionMatches(version):
 
 
 def align8Bytes(value):
-    return value + (8 - (value % 8))
+    remainder = value % 8
+    if remainder == 0:
+        return value
+    return value + (8 - remainder)
 
 
 def reverseBitOrder(number):
@@ -474,8 +477,9 @@ class MotbinStruct:
         allocSize = getMovesetTotalSize(motbin, folderName)
         head_ptr = self.importer.allocateMem(allocSize)
 
-        self.motbin_ptr = self.importer.allocateMem(0x2e0)
-        self.importer.writeBytes(self.motbin_ptr, bytes([0] * 0x2e0))
+        # TK_Motbin header through arc_mota_ptr (see motbin.h / T8_MOTBIN_HEADER_SIZE)
+        self.motbin_ptr = self.importer.allocateMem(0x318)
+        self.importer.writeBytes(self.motbin_ptr, bytes([0] * 0x318))
 
         self.m = motbin
         self.size = allocSize
@@ -555,10 +559,12 @@ class MotbinStruct:
         return self.writeInt(value, size)
 
     def align(self):
-        offset = (8 - (self.curr_ptr % 8))
-        if not self.isDataFittable(offset):
-            raise
-        self.curr_ptr += offset
+        remainder = self.curr_ptr % 8
+        if remainder != 0:
+            offset = 8 - remainder
+            if not self.isDataFittable(offset):
+                raise
+            self.curr_ptr += offset
         return self.curr_ptr
 
     def skip(self, offset):
@@ -1065,12 +1071,22 @@ class MotbinStruct:
         return
 
     def allocateHitBoxes(self, move, hitboxIdx):
-        hitbox = move['hitboxes'][hitboxIdx - 1]
-        self.writeInt(hitbox['first_active_frame'], 4)
-        self.writeInt(hitbox['last_active_frame'], 4)
-        self.writeInt(hitbox['location'], 4)
-        for value in hitbox['related_floats']:
-            self.writeInt(value, 4)
+        hitboxes = move.get('hitboxes')
+        if not hitboxes or hitboxIdx > len(hitboxes):
+            hitbox = {
+                'first_active_frame': 0,
+                'last_active_frame': 0,
+                'location': 0,
+                'related_floats': [0] * 9,
+            }
+        else:
+            hitbox = hitboxes[hitboxIdx - 1]
+        self.writeInt(hitbox.get('first_active_frame', 0), 4)
+        self.writeInt(hitbox.get('last_active_frame', 0), 4)
+        self.writeInt(hitbox.get('location', 0), 4)
+        floats = hitbox.get('related_floats') or ([0] * 9)
+        for i in range(9):
+            self.writeInt(floats[i] if i < len(floats) else 0, 4)
 
     def allocateMoves(self):
         self.allocateAnimations()
@@ -1096,56 +1112,61 @@ class MotbinStruct:
             # Just replicating what the game does
             rawIdx = (i % 8) - 4
 
+            # Ensure encrypted fields exist as ints (editor may omit some keys).
+            for enc_key in ('name_key', 'anim_name_key', 'vuln', 'hitlevel', 't_char_id', 'global_id'):
+                if enc_key not in move:
+                    move[enc_key] = 0
+
             self.allocateEncrypted(move, 'name_key', rawIdx) # 0x0 - 0x20
             self.allocateEncrypted(move, 'anim_name_key', rawIdx) # 0x20 - 0x40
             self.writeInt(placeholder_address, 8)  # 0x40
             self.writeInt(placeholder_address, 8)  # 0x48
-            self.writeInt(move['anim_key'], 4)  # 0x50
-            self.writeInt(0, 4)  # 0x54 skeleton_id (not exported)
+            self.writeInt(move.get('anim_key', 0), 4)  # 0x50
+            self.writeInt(move.get('skeleton_id', 0), 4)  # 0x54
             self.allocateEncrypted(move, 'vuln', rawIdx) # 0x58 - 0x78
             self.allocateEncrypted(move, 'hitlevel', rawIdx) # 0x78 - 0x98
             self.writeInt(self.getCancelFromId(move['cancel_idx']), 8)  # 0x98
-            self.writeInt(move['cancel2_addr'], 8)  # 0xA0
-            self.writeInt(move['cancel2_related'], 4)  # 0xA8
+            self.writeInt(move.get('cancel2_addr', 0), 8)  # 0xA0
+            self.writeInt(move.get('cancel2_related', 0), 4)  # 0xA8
             self.writeInt(0, 4)  # 0xAC padding
-            self.writeInt(move['cancel3_addr'], 8)  # 0xB0
-            self.writeInt(move['cancel3_related'], 4)  # 0xB8
+            self.writeInt(move.get('cancel3_addr', 0), 8)  # 0xB0
+            self.writeInt(move.get('cancel3_related', 0), 4)  # 0xB8
             self.writeInt(0, 4)  # 0xBC padding
-            self.writeInt(move['cancel4_addr'], 8)  # 0xC0
-            self.writeInt(move['cancel4_related'], 4)  # 0xC8
+            self.writeInt(move.get('cancel4_addr', 0), 8)  # 0xC0
+            self.writeInt(move.get('cancel4_related', 0), 4)  # 0xC8
             self.writeInt(move['transition'], 2)  # 0xCC
-            self.writeInt(move['end_rotation'], 2)  # 0xCE
+            self.writeInt(move.get('end_rotation', 0), 2)  # 0xCE
             self.allocateEncrypted(move, 't_char_id', rawIdx) # 0xD0 - 0xF0
             self.allocateEncrypted(move, 'global_id', rawIdx) # 0xF0 - 0x110
             self.writeInt(self.getHitConditionFromId(move['hit_condition_idx']), 8)  # 0x110
-            self.writeInt(move['damage_override'], 2)  # 0x118
+            self.writeInt(move.get('damage_override', 0), 2)  # 0x118
             self.writeInt(0, 2)  # 0x11A padding
-            self.writeInt(move['anim_max_len_adjuster'], 4)  # 0x11C
+            self.writeInt(move.get('anim_max_len_adjuster', 0), 4)  # 0x11C
             self.writeInt(move['anim_max_len'], 4)  # 0x120
 
             if self.m['version'] == "Tag2" or self.m['version'] == "Revolution":
                 move['u15'] = convertU15(move['u15'])
 
-            self.writeInt(move['airborne_start'], 4)  # 0x124
-            self.writeInt(move['airborne_end'], 4)  # 0x128
-            self.writeInt(move['ground_fall'], 4)  # 0x12c
+            self.writeInt(move.get('airborne_start', 0), 4)  # 0x124
+            self.writeInt(move.get('airborne_end', 0), 4)  # 0x128
+            self.writeInt(move.get('ground_fall', 0), 4)  # 0x12c
 
             voiceclip_addr = self.getVoiceclipFromId(move['voiceclip_idx'])
             extra_properties_addr = self.getExtraMovePropertiesFromId(
                 move['extra_properties_idx'])
             move_start_properties_addr = self.getMoveStartPropertiesFromId(
-                move['move_start_properties_idx'])
+                move.get('move_start_properties_idx', -1))
             move_end_properties_addr = self.getMoveEndPropertiesFromId(
-                move['move_end_properties_idx'])
+                move.get('move_end_properties_idx', -1))
 
             self.writeInt(voiceclip_addr, 8)  # 0x130
             self.writeInt(extra_properties_addr, 8)  # 0x138
             self.writeInt(move_start_properties_addr, 8)  # 0x140
             self.writeInt(move_end_properties_addr, 8)  # 0x148
-            self.writeInt(move['u15'], 4)  # 0x150
-            self.writeInt(move['_0x154'], 4)  # 0x154
-            self.writeInt(move['first_active_frame'], 4)  # 0x158
-            self.writeInt(move['last_active_frame'], 4)  # 0x15C
+            self.writeInt(move.get('u15', 0), 4)  # 0x150
+            self.writeInt(move.get('_0x154', 0), 4)  # 0x154
+            self.writeInt(move.get('first_active_frame', 0), 4)  # 0x158
+            self.writeInt(move.get('last_active_frame', 0), 4)  # 0x15C
             self.allocateHitBoxes(move, 1) # 0x160 - 0x190
             self.allocateHitBoxes(move, 2) # 0x190 - 0x1C0
             self.allocateHitBoxes(move, 3) # 0x1C0 - 0x1F0
@@ -1154,9 +1175,10 @@ class MotbinStruct:
             self.allocateHitBoxes(move, 6) # 0x250 - 0x280
             self.allocateHitBoxes(move, 7) # 0x280 - 0x2B0
             self.allocateHitBoxes(move, 8) # 0x2B0 - 0x2E0
-            self.writeInt(move['u16'], 2) # 0x2E0
-            self.writeInt(move['u17'], 2) # 0x2E2
-            for val in move['unk5']:
+            self.writeInt(move.get('u16', 0), 2) # 0x2E0
+            self.writeInt(move.get('u17', 0), 2) # 0x2E2
+            unk5 = move.get('unk5') or ([0] * 88)
+            for val in unk5:
                 self.writeInt(val, 4)  # 0x2E4 - 0x444
             self.writeInt(0, 4)  # 0x444 padding
 
@@ -1226,7 +1248,8 @@ class MotbinStruct:
                 self.importer.writeBytes(self.motbin_ptr + offset, offsetBytes)
 
     def updateCameraMotaStaticPointer(self, playerAddr=None):
-        if self.m['version'] != 'Tekken8':
+        # T8 MotHead mota slots differ and are unused in this importer.
+        if self.m['version'] != 'Tekken7':
             return
         if playerAddr == None:
             raise Exception(

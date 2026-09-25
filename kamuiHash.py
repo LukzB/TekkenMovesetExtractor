@@ -1,6 +1,6 @@
 """Kamui hash (Tekken 8 name_key / anim_name_key), ported from docs/hash2.h."""
 
-from __future__ import annotations
+# Compatible with Python 3.6+
 
 C1 = 0xCC9E2D51
 C2 = 0x1B873593
@@ -15,11 +15,11 @@ FMIX2 = 0xC2B2AE35
 MASK32 = 0xFFFFFFFF
 
 
-def _u32(v: int) -> int:
+def _u32(v):
     return v & MASK32
 
 
-def _rol4(value: int, count: int) -> int:
+def _rol4(value, count):
     value = _u32(value)
     count %= 32
     if count == 0:
@@ -27,7 +27,7 @@ def _rol4(value: int, count: int) -> int:
     return _u32((value << count) | (value >> (32 - count)))
 
 
-def _ror4(value: int, count: int) -> int:
+def _ror4(value, count):
     value = _u32(value)
     count %= 32
     if count == 0:
@@ -35,7 +35,7 @@ def _ror4(value: int, count: int) -> int:
     return _u32((value >> count) | (value << (32 - count)))
 
 
-def _read32(data: bytes | bytearray | memoryview, offset: int = 0) -> int:
+def _read32(data, offset=0):
     return (
         data[offset]
         | (data[offset + 1] << 8)
@@ -44,7 +44,7 @@ def _read32(data: bytes | bytearray | memoryview, offset: int = 0) -> int:
     )
 
 
-def _byteswap32(v: int) -> int:
+def _byteswap32(v):
     v = _u32(v)
     return (
         ((v >> 24) & 0x000000FF)
@@ -54,18 +54,18 @@ def _byteswap32(v: int) -> int:
     ) & MASK32
 
 
-def _mix_chunk(k: int) -> int:
+def _mix_chunk(k):
     k = _u32(k * C1)
     k = _rol4(k, 15)
     k = _u32(k * C2)
     return k
 
 
-def _hiword(v: int) -> int:
+def _hiword(v):
     return (_u32(v) >> 16) & 0xFFFF
 
 
-def _compute_kamui_hash_12_to_24(data: bytes | bytearray | memoryview, length: int) -> int:
+def _compute_kamui_hash_12_to_24(data, length):
     end = length
     mid = length >> 1
 
@@ -100,7 +100,7 @@ def _compute_kamui_hash_12_to_24(data: bytes | bytearray | memoryview, length: i
     return f ^ _hiword(f)
 
 
-def _compute_kamui_hash(data: bytes | bytearray | memoryview, length: int) -> int:
+def _compute_kamui_hash(data, length):
     if length > 24:
         k4 = _mix_chunk(_read32(data, length - 4))
         k8 = _mix_chunk(_read32(data, length - 8))
@@ -181,7 +181,7 @@ def _compute_kamui_hash(data: bytes | bytearray | memoryview, length: int) -> in
         r = _u32(FMIX2 * (f ^ (f >> 13)))
         return r ^ (r >> 16)
 
-    # Tiny input (≤ 4)
+    # Tiny input (<= 4)
     acc = 0
     xorv = 9
 
@@ -201,14 +201,14 @@ def _compute_kamui_hash(data: bytes | bytearray | memoryview, length: int) -> in
     return r ^ (r >> 16)
 
 
-def getKamuiHashDigest(s: str | bytes | bytearray, length: int | None = None) -> int:
+def getKamuiHashDigest(s, length=None):
     """Compute the Kamui hash used for Tekken 8 name_key / anim_name_key.
 
-    Matches game ``getKamuiHashDigest`` / ``ComputeKamuiStringHash``.
+    Matches game getKamuiHashDigest / ComputeKamuiStringHash.
     Returns a 32-bit unsigned digest (0 .. 0xFFFFFFFF).
     """
     if isinstance(s, str):
-        data = s.encode('ascii', errors='strict')
+        data = s.encode('ascii')
     else:
         data = bytes(s)
 
@@ -251,7 +251,7 @@ if __name__ == '__main__':
     for h, name in name_keys.items():
         names_to_hashes.setdefault(name, set()).add(int(h))
 
-    outliers = []  # key does not equal digest(name) — usually stale dict rows
+    outliers = []
     for label, samples in buckets.items():
         match = 0
         for name, expected in samples:
@@ -272,13 +272,11 @@ if __name__ == '__main__':
     for name, expected, got, label, _ in bad_rows:
         print('  [%s] %r key=%d digest=%d' % (label, name, expected, got))
 
-    # Conversion is correct if every name's digest equals at least one listed key,
-    # or (for a handful of polluted rows) we still cover all length buckets above.
     covered = sum(1 for h, name in name_keys.items() if getKamuiHashDigest(name) in names_to_hashes[name])
     print('names whose digest is present as a key: %d / %d' % (covered, len(name_keys)))
 
     if bad_rows and len(bad_rows) > 10:
-        print('Too many disagreeing rows — hash port likely wrong.')
+        print('Too many disagreeing rows - hash port likely wrong.')
         sys.exit(1)
 
     print('getKamuiHashDigest verified against name_keys.json length buckets.')
